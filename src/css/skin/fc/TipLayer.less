@@ -1,0 +1,77 @@
+/**
+ * @file ESUI.TipLayer凤巢定制版皮肤
+ * @author Chong Chen (chenchong02@baidu.com)
+ */
+
+@import './mixin';
+@import './variable';
+@import '../../fcIcon/style';
+
+.set-skin-fc-tiplayer(
+    @border-color: @skin-fc-text-color-gray-light;
+    @background-color: @skin-fc-bg-color-white;
+    @title-icon-color: @skin-fc-text-color-gray;
+) {
+    /**
+     * tipLayer的宽度设定是通过tip中通过layerWidth属性指定的，因此此处需通过
+     *     important强制将其width设置成auto
+     * tip中设置tipLayer具体代码如下(Tip.js 136行):
+     *     width: this.layerWidth || 200
+     */
+    #skin-fc-mixin > .box-shadow(0px 1px 3px @skin-fc-shadow-color);
+    width: auto !important;
+    max-width: 200px;
+    border: 1px solid @border-color;
+    border-radius: 2px;
+    background: none;
+    background-image: none;
+    background-color: @background-color;
+    padding: 10px 10px 7px;
+    // 加一层选择器战胜esui
+    .@{skin-fc-prefix}-tiplayer-title {
+        margin: 0;
+        padding: 0 0 7px;
+        line-height: 16px;
+        font-weight: bold;
+        width: auto;
+        color: @skin-fc-text-color-gray-dark;
+        &:empty {
+            padding: 0;
+        }
+    }
+    .@{skin-fc-prefix}-tiplayer-body,
+    .@{skin-fc-prefix}-tiplayer-body-panel {
+        margin: 0;
+        padding: 0;
+        font-size: 12px;
+        color: @skin-fc-text-color-gray-dark;
+        line-height: 18px;
+        word-break: break-all;
+    }
+    .@{skin-fc-prefix}-tiplayer-arrow {
+        display: none;
+    }   
+}
+.set-skin-fc-tiplayer-title-icon(
+    @icon-color
+) {
+    .@{skin-fc-prefix}-tiplayer-title {
+        .font-icon {
+            display: inline-block;
+            vertical-align: top;
+            position: relative;
+            top: -1px;
+            color: @icon-color;
+        }
+    }
+}
+.@{skin-fc-prefix}-tiplayer {
+    .set-skin-fc-tiplayer();
+}
+.@{skin-fc-prefix}-tiplayer-warn {
+    .set-skin-fc-tiplayer(
+        @border-color: @skin-fc-border-color-orange;
+        @background-color: @skin-fc-bg-color-orange
+    );
+    .set-skin-fc-tiplayer-title-icon(@skin-fc-icon-orange-color);
+}

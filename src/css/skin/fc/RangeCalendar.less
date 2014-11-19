@@ -1,0 +1,167 @@
+/**
+ * @file ESUI.RangeCalendar 凤巢定制版皮肤
+ * @author Wang Yi(wangyi25@baidu.com)
+ * @date Fri Jul 04 2014
+ */
+@import './mixin';
+@import './variable';
+@import '../../fcIcon/style';
+@import './Button';
+
+@rangecalendar-border-radius: 2px;
+
+.set-rangecalendar-shadow(@shadow-color: @skin-fc-shadow-color) {
+    #skin-fc-mixin > .box-shadow(0 1px 3px @shadow-color);
+}
+
+.set-rangecalendar-shortcut-item(
+    @left-margin: 10px,
+    @left-padding: 10px,
+    @text-color: @skin-fc-text-color-gray
+) {
+    margin-left: @left-margin;
+    padding-left: @left-padding;
+    color: @text-color;
+}
+
+.@{skin-fc-prefix}-rangecalendar {
+    #skin-fc-mixin > .border-radius(@rangecalendar-border-radius);
+    height: 30px;
+    line-height: 30px;
+    padding: 0 10px;
+    border-color: @skin-fc-shadow-color;
+    background: @skin-fc-bg-color-gray;
+    color: @skin-fc-text-color-gray-dark;
+
+    &:hover {
+        .set-rangecalendar-shadow();
+        border-color: @skin-fc-text-color-gray-light;
+    }
+
+    &-text {
+        padding: 0;
+    }
+
+    &-arrow {
+        width: auto;
+        height: auto;
+        margin: 0;
+        background: none;
+
+        &:before {
+            #skin-fc-mixin > .use-font-icon(@font-icon-caret-down);
+            position: relative;
+            top: 3px;
+            left: 5px;
+        }
+    }
+
+    &-active {
+        background: @skin-fc-bg-color-white;
+
+        &,
+        &:hover {
+            border-color: @skin-fc-text-color-blue;
+
+            .@{skin-fc-prefix}-rangecalendar-arrow:before {
+                color: @skin-fc-text-color-blue;
+            }
+        }
+    }
+
+    &-disabled,
+    &-read-only {
+        &,
+        &:hover {
+            #skin-fc-mixin > .box-shadow(none);
+            border-color: @skin-fc-shadow-color;
+            color: @skin-fc-text-color-disabled;
+            cursor: default;
+
+            .@{skin-fc-prefix}-rangecalendar-arrow:before {
+                color: @skin-fc-shadow-color;
+            }
+        }
+    }
+
+    &-layer {
+        #skin-fc-mixin > .border-radius(@rangecalendar-border-radius);
+        .set-rangecalendar-shadow();
+        padding: 10px;
+        border: 1px solid @skin-fc-text-color-gray-light;
+
+        .skin-layerClose-button {
+            display: none;
+        }
+    }
+
+    &-layer &-shortcut {
+        height: 12px;
+        line-height: 12px;
+
+        &-item {
+            .set-rangecalendar-shortcut-item();
+            border-color: @skin-fc-bg-color-gray-dark;
+            text-decoration: none;
+
+            &-first {
+                .set-rangecalendar-shortcut-item(
+                    @left-margin: 0,
+                    @left-padding: 0
+                );
+            }
+
+            &-selected {
+                .set-rangecalendar-shortcut-item(
+                    @text-color: @skin-fc-text-color-gray-dark
+                );
+                font-weight: bold;
+            }
+        }
+    }
+
+    &-layer &-label {
+        padding-top: 20px;
+        color: @skin-fc-text-color-gray-dark;
+        font-weight: bold;
+    }
+
+    &-layer &-foot {
+        padding-top: 10px;
+
+        div.@{skin-fc-prefix}-button {
+            width: 48px;
+
+            &:nth-child(1) {
+                .set-button(
+                    @background-color: @skin-fc-bg-color-blue-light;
+                    @border-color: @skin-fc-bg-color-blue-light;
+                    @text-color: @skin-fc-bg-color-white;
+                    @hover-background-color: @skin-fc-bg-color-blue;
+                    @hover-border-color: @skin-fc-bg-color-blue;
+                    @hover-text-color: @skin-fc-bg-color-white;
+                    @active-background-color: @skin-fc-bg-color-blue;
+                    @active-border-color: @skin-fc-bg-color-blue;
+                    @active-text-color: @skin-fc-bg-color-white;
+                );
+            }
+
+            &:nth-child(2) {
+                color: @skin-fc-text-color-blue-dark;
+            }
+        }
+    }
+
+    /** 验证 */
+    &-warning-message {
+        color: @skin-fc-invalid-color;
+    }
+    &-validity-invalid {
+        border: 1px solid @skin-fc-invalid-border-color;
+    }
+    &-validity-label-invalid {
+        background: none;
+        border: none;
+        color: @skin-fc-invalid-color;
+    }
+}

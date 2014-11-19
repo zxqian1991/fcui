@@ -1,0 +1,135 @@
+/**
+ * @file ESUI.CommandMenu凤巢定制版皮肤
+ * @author Feixiang Yuan(yuanfeixiang@baidu.com)
+ * @date 2014-08-24
+ */
+ @import './variable';
+ @import './mixin';
+
+.set-menu(
+    @icon: @font-icon-caret-down;
+    @color: @skin-fc-text-color-gray-dark;
+    @border-color: @skin-fc-shadow-color;
+    @background-color: @skin-fc-bg-color-gray; 
+    @icon-color: @skin-fc-text-color-gray;
+    @shadow-color: @skin-fc-shadow-color;
+    @hover-border-color: @skin-fc-bg-color-blue-light;
+    @hover-backgound-color: @skin-fc-bg-color-white;
+    @hover-icon-color: @skin-fc-bg-color-blue;
+    @active-border-color: @skin-fc-bg-color-blue-light;
+    @active-background-color: @skin-fc-bg-color-white;
+    @active-icon-color: @skin-fc-bg-color-blue;
+    @disabled-background-color: @skin-fc-bg-color-gray;
+    @disabled-border-color: @skin-fc-text-color-gray-light;
+    @disabled-icon-color: @skin-fc-text-color-disabled;
+) {
+    position: relative;
+    overflow: hidden;
+    height: 28px;
+    line-height: 28px;
+    padding: 0;
+    padding-left: 10px;
+    padding-right: 25px;
+    width: auto;
+    background: none;
+    background-image: none;
+    background-color: @background-color;
+    border: 1px solid @border-color;
+    border-radius: 2px;
+    color: @color;
+
+    &:before {
+      content: '.';
+      visibility: hidden;
+      display: inline-block;
+      width: 0;
+    }
+    &:after {
+        position: absolute;
+        right: 2px;
+        top: 0;
+        width: 16px;
+        padding: 6px 2px;
+        height: 16px;
+        line-height: 16px;
+        font-size: 16px;
+        color: @icon-color;
+        #skin-fc-mixin > .use-font-icon(@icon);
+    }
+    &:hover,
+    &:focus,
+    &:active{
+        border-color: @hover-border-color;
+        background-image: none;
+        background-color: @hover-backgound-color;
+        #skin-fc-mixin > .box-shadow(0px 1px 3px @shadow-color);
+        &:after {
+            color: @hover-icon-color;
+        }
+    }
+    
+    &-active,
+    &-active:hover,
+    &-active:focus,
+    &-active:active {
+        border-color: @active-border-color;
+        background-image: none;
+        background-color: @active-background-color;
+        #skin-fc-mixin > .box-shadow(0px 1px 3px @shadow-color);
+        &:after {
+            color: @active-icon-color;
+        }
+    }
+    &-disabled,
+    &-disabled:hover,
+    &-disabled:focus,
+    &-disabled:active {
+        cursor: not-allowed;
+        border-color: @disabled-border-color;
+        background-image: none;
+        background-color: @disabled-background-color;
+        #skin-fc-mixin > .box-shadow(0 0 0);
+        &:after {
+            color: @disabled-icon-color;
+        }
+    }
+}
+.@{skin-fc-prefix}-commandmenu {
+    .set-menu();
+}
+.@{skin-fc-prefix}-combo-commandmenu {
+    .set-menu(
+        @border-color: @skin-fc-bg-color-blue-light;
+        @background-color: @skin-fc-bg-color-blue-light;
+        @icon-color: @skin-fc-bg-color-white;
+        @hover-backgound-color: @skin-fc-bg-color-blue;
+        @hover-icon-color: @skin-fc-bg-color-white;
+        @active-background-color: @skin-fc-bg-color-white;
+        @active-icon-color: @skin-fc-bg-color-blue;
+    );
+}
+
+.@{skin-fc-prefix}-commandmenu-layer,
+.@{skin-fc-prefix}-combo-commandmenu-layer {
+    padding: 4px 0;
+    color: @skin-fc-text-color-gray-dark;
+    border: 1px solid @skin-fc-text-color-gray-light;
+    #skin-fc-mixin > .box-shadow(0px 1px 3px @skin-fc-shadow-color);
+    background: @skin-fc-bg-color-white;
+    li {
+        height: 24px;
+        line-height: 24px;
+        padding: 0 10px;
+        color: @skin-fc-text-color-gray-dark;
+        &:hover {
+            background-color: @skin-fc-bg-color-hover-blue;
+        }
+    }
+    .ui-commandmenu-node-disabled,
+    .ui-commandmenu-node-disabled:hover {
+        color: @skin-fc-text-color-disabled;
+        background-color: @skin-fc-bg-color-white;
+    }
+}
+
+
