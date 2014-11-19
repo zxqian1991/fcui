@@ -1,0 +1,3 @@
+[submodule "dep/esui"]
+	path = dep/esui
+	url = git@github.com:ecomfe/esui.git
