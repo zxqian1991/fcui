@@ -2146,6 +2146,13 @@ define(
              * @protected
              */
             defaultProperties: {
+                /**
+                 * 整个表格的最大高度，px为单位，设置为非0值会设置表格区
+                 * 的max-height css属性。当表格超高时，会出现竖向滚动条。
+                 * @property {number} [tableMaxHeight]
+                 * @default 0
+                 */
+                tableMaxHeight: 0,
                 noDataHtml: '没有数据',
                 noFollowHeadCache: false,
                 followHead: false,
@@ -2767,7 +2774,13 @@ define(
 
                 this.realWidth = getWidth(this);
                 if (this.realWidth) {
-                   this.main.style.width = this.realWidth + 'px';
+                   // this.main.style.width = this.realWidth + 'px';
+                }
+
+                if (this.maxTableHeight !== 0) {
+                    this.main.style.maxHeight = this.maxTableHeight;
+                    lib.addClasses(this.main,
+                        helper.getStateClasses(this, 'has-max-height'));
                 }
 
                 resetMainZIndex(this);

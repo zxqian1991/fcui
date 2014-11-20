@@ -1,0 +1,55 @@
+/**
+ * FCUI FcTable 皮肤，表格的基本皮肤。
+ * @author Han Bing Feng (hanbingfeng@baidu.com)
+ */
+// FCUI FcTable的DOM结构
+// div.ui-fctable
+//   table.ui-fctable-table
+//     thead.ui-fctable-thead
+//       th.ui-fctable-hcell
+//       th.ui-fctable-hcell-first
+//       th.ui-fctable-hcell-last
+//         div.ui-fctable-hcell-text
+//         div.ui-fctable-hcell-extra
+//     tbody.ui-fctable-tbody
+//       tr.ui-fctable-row
+//       tr.ui-fctable-row-even
+//       tr.ui-fctable-row-odd
+//       tr.ui-fctable-row-first
+//       tr.ui-fctable-row-last
+//         td.ui-fctable-cell
+//         td.ui-fctable-cell-first
+//         td.ui-fctable-cell-last
+//           div.ui-fctable-cell-text
+//           div.ui-fctable-cell-extra
+
+/**
+ * 设置table表头区域样式。
+ * &指代 ui-fctable
+ */
+.set-table-head() {
+
+}
+
+/**
+ * 设置table表格体区域样式。
+ * &指代 ui-fctable
+ */
+.set-table-body() {
+
+}
+
+
+
+.ui-fctable {
+    .ui-fctable {
+        &-table {
+            table-layout: auto;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .set-table-head();
+        .set-table-body();
+    }    
+}
