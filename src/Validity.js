@@ -6,5 +6,5 @@
  * @author Han Bing Feng (hanbingfeng@baidu.com)
  */
 define(function (require) {
-    return require('esui/main');
+    return require('esui/Validity');
 });

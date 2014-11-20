@@ -1,6 +1,6 @@
 {
     "name": "fcui",
-    "version": "0.0.1-alpha.1",
+    "version": "0.0.1-alpha.2",
     "contributors": [
         {
             "name": "Leo Wang",
@@ -11,9 +11,6 @@
             "email": "hanbingfeng@baidu.com"
         }
     ],
-    "dependencies": {
-        "esui": "~3.1.0-beta.3"
-    },
     "main": "main",
     "description": "fcui是基于ESUI体系的`激进版`UI库，更适合商业体系的业务项目使用",
     "homepage": "https://gitlab.com/fc-fe/fcui",
@@ -24,6 +21,8 @@
         "srcDir": "src",
         "loaderAutoConfig": "js,htm,html,tpl,vm,phtml",
         "loaderUrl": "http://s1.bdstatic.com/r/www/cache/ecom/esl/1-8-2/esl.js",
-        "dependencies": {}
+        "dependencies": {
+            "esui": "~3.1.0-beta.3"            
+        }
     }
 }
