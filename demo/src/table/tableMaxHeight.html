@@ -3,11 +3,11 @@
     <head>
         <meta charset="UTF-8" />
         <title>FcTable Basic - FCUI Demo</title>
-        <script src="../loader/esl.js"></script>
+        <script src="http://s1.bdstatic.com/r/www/cache/ecom/esl/1-8-6/esl.js"></script>
         <script>
             // derived from ESUI 3.1.0-beta.5 demo file
             require.config({
-                'baseUrl': '../../src',
+                'baseUrl': '../',
                 'paths': {},
                 'packages': [
                     {
@@ -32,12 +32,12 @@
                     },
                     {
                         'name': 'esui',
-                        'location': '../dep/esui/src',
+                        'location': '../dep/esui/3.1.0-beta.3/src',
                         'main': 'main'
                     },
                     {
                         'name': 'fcui',
-                        'location': './',
+                        'location': '../dep/fcui/current/src',
                         'main': 'main'
                     },
                     {
@@ -63,21 +63,20 @@
                 ]
             });
         </script>
-        <script src="../../dep/esui/src/customShim.js"></script>
-        <script src="../jquery-1.9.1.min.js"></script>
+        <script src="../../dep/esui/3.1.0-beta.3/src/customShim.js"></script>
+        <script src="http://libs.baidu.com/jquery/1.10.2/jquery.min.js"></script>
         <link rel="stylesheet" href="../demo.css" />
-        <link rel="stylesheet" href="../../dep/esui/src/css/main.css"/>
-        <link rel="stylesheet" href="../../src/css/main.css" />
+        <link rel="stylesheet" href="../../dep/fcui/current/src/css/main.css" />
     </head>
     <body>
-        <header>FcTable</header>
+        <header>Table</header>
         <div id="console"></div>
         <div class="container" id="container" style="margin:0 auto;">
             <h3>Basic</h3>
-            <div data-ui-type="FcTable"
+            <div data-ui-type="Table"
                 data-ui-id="myTable"
                 data-ui-skin="ui-fc"
-                data-ui-max-table-height="150px"></div>
+                data-ui-table-max-height="100"></div>
             <br/>
         </div>
         <script>
@@ -95,20 +94,11 @@
         var testFuns = {}
         require(
             [
-                'esui',
-                'esui/Dialog',
-                'esui/Panel',
-                'esui/extension/TableEdit',
-                'esui/extension/TableSubrow',
-                'esui/Tip',
-                'esui/Table',
-                'esui/Button',
-                'esui/TextBox',
-                'esui/Select',
-                'fcui/FcTable'
+                'fcui',
+                'fcui/Table'
             ],
             function (ui) {
-                var lib = require('esui/lib');
+                var lib = require('fcui/lib');
                 ui.init(document.body,{
                     properties : {
                         myTable: {
