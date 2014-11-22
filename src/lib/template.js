@@ -30,8 +30,6 @@ define(function (require) {
             'g'
         );
 
-        console.log(regex.toString());
-        console.log(regex.test(template));
         return template.replace(regex, '$1 ' + content + ' $3');
     };
 

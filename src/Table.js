@@ -16,15 +16,30 @@ define(function (require) {
 
     var engine = new etpl.Engine();
 
+    var tableTemplate = require('./Table.tpl');
+    engine.compile(tableTemplate);
+
     /**
      * @class Table
      *
      * 表格控件。派生自ESUI 3.1.0-beta.3。
      *
      * @extends Control
-     * @constructor
      */
     var proto = {};
+
+    /**
+     * FCUI 表格控件构造函数。
+     * @param  {Object} options 构建参数
+     * @property {etpl/Engine} options.templateEngine
+     *         自定义的ETPL engine。如不提供将使用默认的模板引擎。
+     * @constructor
+     */
+    proto.constructor = function (options) {
+        this.$super(arguments);
+
+        this.helper.setTemplateEngine(options.templateEngine || engine);
+    };
 
     /**
      * 默认属性值
@@ -884,16 +899,7 @@ define(function (require) {
     proto.initStructure = function() {
         this.$super(arguments);
 
-        var tableHtml = lib.format(this.tableTemplate, {
-            tableClassName: getClass(this, 'table'),
-            thClassName: getClass(this, 'thead'),
-            tbClassName: getClass(this, 'tbody'),
-            tfClassName: getClass(this, 'tfoot'),
-            tId: getId(this, 'table'),
-            thId: getId(this, 'thead'),
-            tbId: getId(this, 'tbody'),
-            tfId: getId(this, 'tfoot')
-        });
+        var tableHtml = this.helper.renderTemplate('table');
 
         this.isNeedCoverHead = false;
 
@@ -1095,7 +1101,6 @@ define(function (require) {
     };
 
     var Table = eoo.create(Control, proto);
-    Table.templateEngine = engine;
     require('./main').register(Table);
 
     return Table;

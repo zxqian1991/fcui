@@ -40,8 +40,9 @@ define(function (require) {
      * @property {string} id event handler的标识
      *
      */
+    proto.eventHandlers = {
 
-    proto.eventHandlers = {};
+    };
 
     var fControl = eoo.create(eControl, proto);
 
