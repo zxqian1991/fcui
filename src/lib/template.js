@@ -12,7 +12,7 @@ define(function (require) {
 
     /**
      * 将模板string中的某个target替换为content。
-     * 提供的content仍需要有target的开始标签。
+     * 提供的content不需要有target的开始标签。
      * @param  {string} template 原始的模板string
      * @param  {string} target 想要替换的target
      * @param  {string} content 想要替换的模板内容
@@ -20,11 +20,19 @@ define(function (require) {
      */
     exports.replaceTarget = function (template, target, content) {
         var regex = new RegExp(
-            '<!--\s+target:\s+' + target +
-            + '\s+-->([.\s\S]*?)(<!--\s+(target:.*|/target)\s+-->)',
-            'gm'
+            // 首先match 目标target的开始标签并group
+            '(<!--\\s+target:\\s+' + target + '\\s+-->)'
+            // 然后match target的内容，lazy以尽快碰到
+            // 下一个target的开始或者本target的结束
+            + '([.\\s\\S]*?)'
+            // 最后碰本target的结束，或者下一个target的开始，或者字符串尾
+            + '($|(<!--\\s+(target:.*|/target)\\s+-->))',
+            'g'
         );
-        return template.replace(regex, content + ' $3');
+
+        console.log(regex.toString());
+        console.log(regex.test(template));
+        return template.replace(regex, '$1 ' + content + ' $3');
     };
 
     return exports;
