@@ -10,9 +10,11 @@
 define(function (require) {
     var u = require('underscore');
     var eoo = require('eoo');
+    var etpl = require('etpl');
     var lib = require('./lib');
-    var helper = require('./controlHelper');
     var Control = require('./Control');
+
+    var engine = new etpl.Engine();
 
     /**
      * @class Table
@@ -281,7 +283,7 @@ define(function (require) {
      * @return {string} 控件零件的DOM id
      */
     function getId(table, name) {
-        return helper.getId(table, name);
+        return table.helper.getId(name);
     }
 
     /**
@@ -293,7 +295,7 @@ define(function (require) {
      * @return {string} 控件零件的class
      */
     function getClass(table, name) {
-        return helper.getPartClasses(table, name).join(' ');
+        return table.helper.getPartClasses(name).join(' ');
     }
 
     /**
@@ -534,14 +536,14 @@ define(function (require) {
      * @return {Array<string>} class名字的Array
      */
     proto.defaultGetHeadCellClasses = function (index) {
-        var classes = helper.getPartClasses(this, 'hcell');
+        var classes = this.helper.getPartClasses('hcell');
         if (index === 0) {
             classes = classes.concat(
-                helper.getPartClasses(this, 'hcell-first')
+                this.helper.getPartClasses('hcell-first')
             );
         } else if (index === this.realFields.length - 1) {
             classes = classes.concat(
-                helper.getPartClasses(this, 'hcell-last')
+                this.helper.getPartClasses('hcell-last')
             );
         }
 
@@ -670,15 +672,15 @@ define(function (require) {
      * @return {Array<string>} class名字的Array
      */
     proto.defaultGetRowClasses = function (data, index, length) {
-        var classes = helper.getPartClasses(this, 'row')
+        var classes = this.helper.getPartClasses('row')
             .concat(
                 index % 2 === 0
-                    ? helper.getPartClasses(this, 'row-even')
-                    : helper.getPartClasses(this, 'row-odd')
+                    ? this.helper.getPartClasses('row-even')
+                    : this.helper.getPartClasses('row-odd')
             );
         if (index === length - 1) {
             classes.push(
-                helper.getPartClasses(this, 'row-last').join(' ')
+                this.helper.getPartClasses('row-last').join(' ')
             );
         }
         return classes;
@@ -792,15 +794,15 @@ define(function (require) {
     proto.defaultGetCellClasses = function (
         data, rowIndex, columnIndex, fieldsLength, field
     ) {
-        var classes = helper.getPartClasses(this, 'cell');
+        var classes = this.helper.getPartClasses('cell');
         if (columnIndex === 0) {
             classes.push(
-                helper.getPartClasses(this, 'cell-first').join(' ')
+                this.helper.getPartClasses('cell-first').join(' ')
             );
         }
         if (columnIndex === fieldsLength - 1) {
             classes.push(
-                helper.getPartClasses(this, 'cell-last').join(' ')
+                this.helper.getPartClasses('cell-last').join(' ')
             );
         }
         return classes;
@@ -898,7 +900,7 @@ define(function (require) {
         if (this.tableMaxHeight !== 0) {
             this.main.style.maxHeight = this.tableMaxHeight + 'px';
             lib.addClasses(this.main,
-                helper.getStateClasses(this, 'has-max-height'));
+                this.helper.getStateClasses('has-max-height'));
 
             this.isNeedCoverHead = true;
         }
@@ -1083,22 +1085,17 @@ define(function (require) {
      * @override
      */
     proto.dispose = function () {
-        if (helper.isInStage(this, 'DISPOSED')) {
+        if (this.helper.isInStage('DISPOSED')) {
             return;
         }
 
-        helper.beforeDispose(this);
-        var main = this.main;
-        if (main) {
-            // 释放表头跟随的元素引用
-            this.followDoms = null;
-        }
-
-        helper.dispose(this);
-        helper.afterDispose(this);
+        this.helper.beforeDispose();
+        this.helper.dispose();
+        this.helper.afterDispose();
     };
 
     var Table = eoo.create(Control, proto);
+    Table.templateEngine = engine;
     require('./main').register(Table);
 
     return Table;
