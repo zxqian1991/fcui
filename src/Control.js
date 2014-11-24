@@ -10,6 +10,7 @@
 define(function (require) {
     var eControl = require('esui/Control');
     var eoo = require('eoo');
+    var Helper = require('./Helper');
 
     /**
      * @class Control
@@ -20,7 +21,11 @@ define(function (require) {
      * @constructor
      */
     var proto = {
+        constructor: function () {
+            this.$super(arguments);
 
+            this.helper = new Helper(this);
+        }
     };
 
     /**

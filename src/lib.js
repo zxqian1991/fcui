@@ -9,6 +9,7 @@
  */
 define(function (require) {
     var u = require('underscore');
+    var eLib = require('esui/lib');
 
     var lib = {};
 
@@ -17,6 +18,8 @@ define(function (require) {
         require('esui/lib'),
         require('./lib/template')
     );
+
+    lib.ie = eLib.ie;
 
     return lib;
 });

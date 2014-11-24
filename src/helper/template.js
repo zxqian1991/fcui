@@ -39,6 +39,26 @@ define(function (require) {
          */
         'part': function (part, nodeName) {
             return this.helper.getPartHTML(part, nodeName);
+        },
+        /**
+         * 用作etpl中的filter，调用Control上的任意function，并以其返回值作为
+         * filter的结果。
+         * 用法：
+         *     ${<methodName> | call(<arguments>)}
+         * 如：
+         *     ${renderMe | call(${some})}
+         * 将会在 Control 上调用 renderMe 函数，以 "some" 为参数。以renderMe
+         * 的返回值作为这个 etpl 标签的结果。
+         * @param  {[type]} methodName [description]
+         * @return {[type]}            [description]
+         */
+        'call': function (methodName) {
+            if (typeof this[methodName] !== 'function') {
+                throw 'Render error: [' + methodName + '] in Control '
+                    + 'is not a valid function.';
+            }
+            return this[methodName].apply(this,
+                Array.prototype.slice.call(arguments, 1));
         }
     };
 
@@ -84,14 +104,46 @@ define(function (require) {
      * @return {string}
      */
     helper.renderTemplate = function (target, data) {
-        var helper = this;
         data = data || {};
+
+        var templateData = {
+            /**
+             * 定制一个模板数据的get方法。使得：
+             * 1）若data有get方法，调用data的get
+             * 2）若data有name属性，返回name属性的值，属性支持用"."。
+             * 3）否则，直接返回name。若通过"."访问的属性任一环节找不到属性，
+             *     同样直接返回name。
+             * @param  {[type]} name [description]
+             * @return {[type]}      [description]
+             */
+            get: function (name) {
+                if (typeof data.get === 'function') {
+                    return data.get(name);
+                }
+
+                var splittedPropertyName = name.split('.');
+                var len = splittedPropertyName.length;
+                var obj = data;
+                for (var i = 0; i < len; i++) {
+                    var propertyName = splittedPropertyName[i];
+                    if (obj.hasOwnProperty(propertyName)) {
+                        obj = obj[propertyName];
+                    }
+                    else {
+                        obj = propertyName;
+                        break;
+                    }
+                }
+
+                return obj;
+            }
+        };
 
         if (!this.templateEngine) {
             throw new Error('No template engine attached to this control');
         }
 
-        return this.templateEngine.render(target, data);
+        return this.templateEngine.render(target, templateData);
     };
 
     return helper;
