@@ -27,7 +27,8 @@ define(function (require) {
         require('esui/helper/event'),
         require('esui/helper/html'),
         require('esui/helper/life'),
-        require('./helper/template')
+        require('./helper/template'),
+        require('./helper/children')
     );
 
     return Helper;

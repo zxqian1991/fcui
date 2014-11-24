@@ -30,22 +30,66 @@
         <th class="
             ${hcell | class}
             <!-- if: ${columnIndex} == 0 -->
-            ${hcell-first | class}
+                ${hcell-first | class}
             <!-- /if -->
             <!-- if: ${columnIndex} == ${fieldsLength} - 1 -->
-            ${hcell-last | class}
+                ${hcell-last | class}
             <!-- /if -->
-        " style="
-
-        ">
-            <!-- import: table-head-content -->
-        </th>
+            <!-- if: ${field.sortable} -->
+                ${hcell-sort | class}
+            <!-- /if -->
+            <!-- if: ${field.field} === ${orderBy} -->
+                <!-- if: ${order} === "asc" -->
+                <div class="${hcell-asc | class}"></div>
+                <!-- else -->
+                <div class="${hcell-desc | class}"></div>
+                <!-- /if -->
+            <!-- /if -->
+            <!-- if: ${field.tip} -->
+                ${hcell-tip | class}
+            <!-- /if -->
+            <!-- if: ${field.align} === "left" -->
+                ${hcell-align-left | class}
+            <!-- elif: ${field.align} === "right" -->
+                ${hcell-align-right | class}
+            <!-- elif: ${field.align} === "center" -->
+                ${hcell-align-center | class}
+            <!-- else -->
+                ${hcell-align-justify | class}
+            <!-- /if -->
+            <!-- if: ${field.tdClassName} -->
+                ${field.tdClassName}
+            <!-- /if -->
+        "><!-- import: table-head-content --></th>
     <!-- /for -->
 </tr>
 
 <!-- target: table-head-content -->
 <!-- // 处于表格TH内的表头单元格内容 -->
+<!-- // @param field -->
+<!-- // @param columnIndex -->
+<!-- // @param order -->
+<!-- // @param orderBy -->
+<div class="${hcell-text | class}">
 ${renderHeadTextContent | call(${field}, ${columnIndex})}
+</div>
+<div class="${hcell-extra | class}">
+    <!-- if: ${field.sortable} -->
+    <div class="${hcell-hsort | class}"></div>
+    <!-- /if -->
+    <!-- if: ${field.tip} -->
+    <div class="${hcell-htip | class}"><!-- import: table-head-tip --></div>
+    <!-- /if -->
+</div>
+
+<!-- target: table-head-tip -->
+<!-- // 表头tip内容 -->
+<!-- // @param field -->
+<!-- // @param columnIndex -->
+<div class="${htip | class}"
+    data-ui-type="Tip"
+    data-ui-content="${renderTipContent | call(${field}, ${columnIndex})}">
+</div>
 
 <!-- target: table-select-all -->
 <!-- // 处于表格TH内的多选全选内容 -->

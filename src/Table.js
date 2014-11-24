@@ -42,6 +42,60 @@ define(function (require) {
     };
 
     /**
+     * 表示一个表格field的对象。
+     * 关于列宽：与ESUI Table相比，这个Table布局实现采用
+     * 'table-layout: auto' 。
+     * 具体的：
+     * 1. 属性width将作为列的建议宽度，即，对于一个声明了width的列，
+     * 表格将先满足width指定的宽度，若表格有剩余宽度，将可能会分配
+     * 到这一列上。若表格容器宽度不够，将可能从这一列上减去宽度。
+     * 2. 属性maxWidth声明列的最大宽度，对于这样的列，首先将会在列上每一个
+     * 单元格中包裹一个div以限制表格内容的最大宽度。这个div的默认样式是
+     * overflow hidden。可以选择配合ellipse属性隐藏超长的文本。
+     * 3. 列不可以显式的设置最小宽度。当表格容器宽度不够时，浏览器自动减小列宽
+     * 到内容允许的最小宽度，即，连续的西文字母及数字不折行。中文字及单词会
+     * 折行。当空间仍不够时，表格容器出现横向滚动条。
+     *
+     * @typedef {Object} Table~field
+     * @property {Table~content} content
+     * @property {Table~content} extraContent
+     * @property {boolean} select 是否是一个选择用field
+     * @property {number} width
+     *           当前field的建议宽度。当table有空余空间时，将会加到这个field
+     *           上。当table没有空余空间时，将从这个field上减少宽度直至可能的
+     *           最小。
+     * @property {number} maxWidth 当前field的最大允许宽度
+     *           当maxWidth存在时，width被忽略。
+     * @property {boolean} breakLine 是否应用breakLine的css class，暂不支持
+     * @property {boolean} sortable 是否可排序
+     * @property {Array<Table~sortField>} sortFields 排序的字段列表，可选
+     *           如不提供，则默认按照当列的field排序
+     * @property {Function|string} tip 本列的tip内容。
+     *           如果是string，则是静态tip
+     *           如果是function，则调用来获得tip内容，参数供给和content一样
+     * @property {string} align 列的排序，可选left，right，center，justify
+     * @property {string} tdClassName 附加在本列单元格TD上的class names
+     * @property {boolean} editable 本列单元格是否可编辑
+     * @property {string} editType 若editable为true，表示编辑的类型。目前
+     *           只支持text。
+     * @property {boolean} ellipse 是否需要为表内长文本内容加上'...'。
+     */
+
+    /**
+     * 一个可排序字段的配置。
+     * 显示在排序浮层中时，将显示 name + ascText 和 name + descText。
+     * 点击排序后，sort事件中将有
+     *     1. orderBy，发生了排序的field本身，传field对象
+     *     2. order，排序顺序，asc或者desc
+     *     3. realField，下面配置的field的值
+     * @typedef {Object} Table~sortField
+     * @property {string} field 排序的字段名
+     * @property {string} name 排序字段显示出的名字
+     * @property {string} ascText 升序的后缀文字，默认为“从低到高”
+     * @property {string} descText 降序的后缀文字，默认为“从高到低”
+     */
+
+    /**
      * 默认属性值
      *
      * @type {Object}
@@ -97,7 +151,37 @@ define(function (require) {
          * @type {number}
          * @default 9
          */
-        sortWidth: 9
+        sortWidth: 9,
+        /**
+         * 给tip的etpl template。可以采用各种filter表示法。空值/空串则使用
+         * 默认值。
+         * @type {string}
+         * @default ''
+         */
+        tipTemplate: '',
+        /**
+         * 表格的数据源。
+         * @type {Array}
+         * @default []
+         */
+        datasource: [],
+        /**
+         * 表格的数据源。
+         * @type {Array<Table~field>}
+         * @default []
+         */
+        fields: [],
+        /**
+         * 按照哪个field排序，提供field名字
+         * @type {string}
+         * @default ''
+         */
+        orderBy: '',
+        /**
+         * 排序顺序
+         * @default ''
+         */
+        order: ''
     };
 
     /**
@@ -233,33 +317,6 @@ define(function (require) {
      * @param {number} columnIndex 本列序号，0起始
      * @return {string} 本行的HTML
      *         默认的getCellHtml实现会将HTML包裹在一个DIV中
-     */
-
-    /**
-     * 表示一个表格field的对象。
-     * 关于列宽：与ESUI Table相比，这个Table布局实现采用
-     * 'table-layout: auto' 。
-     * 具体的：
-     * 1. 属性width将作为列的建议宽度，即，对于一个声明了width的列，
-     * 表格将先满足width指定的宽度，若表格有剩余宽度，将可能会分配
-     * 到这一列上。若表格容器宽度不够，将可能从这一列上减去宽度。
-     * 2. 属性maxWidth声明列的最大宽度，对于这样的列，首先将会在列上每一个
-     * 单元格中包裹一个div以限制表格内容的最大宽度。这个div的默认样式是
-     * overflow hidden。可以选择配合ellipse属性隐藏超长的文本。
-     * 3. 列不可以显式的设置最小宽度。当表格容器宽度不够时，浏览器自动减小列宽
-     * 到内容允许的最小宽度，即，连续的西文字母及数字不折行。中文字及单词会
-     * 折行。当空间仍不够时，表格容器出现横向滚动条。
-     *
-     * @typedef {Object} Table~field
-     * @property {Table~content} content
-     * @property {Table~content} extraContent
-     * @property {boolean} select 是否是一个选择用field
-     * @property {number} width
-     *           当前field的建议宽度。当table有空余空间时，将会加到这个field
-     *           上。当table没有空余空间时，将从这个field上减少宽度直至可能的
-     *           最小。
-     * @property {number} maxWidth 当前field的最大允许宽度
-     *           当maxWidth存在时，width被忽略。
      */
 
     /**
@@ -412,8 +469,15 @@ define(function (require) {
 
         var html = this.helper.renderTemplate('table-head', {
             realFields: this.realFields,
-            fieldsLength: this.realFields.length
+            fieldsLength: this.realFields.length,
+            order: this.order,
+            orderBy: this.orderBy
         });
+
+        this.helper.disposeChildrenInGroup('head');
+        if (this.isNeedCoverHead) {
+            this.helper.disposeChildrenInGroup('cover-head');
+        }
 
         if (lib.ie && lib.ie <= 9) {
             this.ieSetTHead(html, false);
@@ -426,6 +490,11 @@ define(function (require) {
             if (this.isNeedCoverHead) {
                 this.getCoverHead().innerHTML = html;
             }
+        }
+
+        this.helper.initChildrenAsGroup('head', this.getHead());
+        if (this.isNeedCoverHead) {
+            this.helper.initChildrenAsGroup('cover-head', this.getCoverHead());
         }
     };
 
@@ -656,6 +725,22 @@ define(function (require) {
         }
 
         this.fire('bodyChange');
+    };
+
+    /**
+     * 绘制表格tip内容
+     * @param {Table~field} field field对象
+     * @param {number} columnIndex 列index
+     * @return {string} tip内容
+     */
+    proto.renderTipContent = function (field, columnIndex) {
+        var tip = field.tip;
+        // 计算内容html
+        if (typeof tip === 'function') {
+            return tip.call(this, field, columnIndex);
+        }
+
+        return tip;
     };
 
     /**
