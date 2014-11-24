@@ -16,7 +16,7 @@ define(function (require) {
 
     var engine = new etpl.Engine();
 
-    var tableTemplate = require('./Table.tpl');
+    var tableTemplate = require('./text!./Table.tpl.html');
     engine.compile(tableTemplate);
 
     /**
@@ -62,6 +62,12 @@ define(function (require) {
          * @default 0
          */
         zIndex: 0,
+        /**
+         * 表格外容器的宽度，可以设置为绝对宽度，也可以设置为百分比宽度
+         * @type number
+         * @default 100%
+         */
+        width: '100%',
         noDataHtml: '没有数据',
         noFollowHeadCache: false,
         followHead: false,
@@ -92,204 +98,6 @@ define(function (require) {
     proto.type = 'Table';
 
     /**
-     * 表格总的template
-     * @type {String}
-     */
-    proto.tableTemplate =
-            '<table id="${tId}" class="${tableClassName}">'
-        +       '<thead id="${thId}" class="${thClassName}"></thead>'
-        +       '<tbody id="${tbId}" class="${tbClassName}"></tbody>'
-        +       '<tfoot id="${tfId}" class="${tfClassName}"></tfoot>'
-        +   '</table>';
-
-    /**
-     * 表头吸顶等情况下，用来覆盖的表头。
-     * @type {string}
-     */
-    proto.coverTableTemplate =
-            '<table id=${tId} class="${tableClassName}">'
-        +       '<colgroup id="${cgId}" class="${cgClassName}"></colgroup>'
-        +       '<thead id="${thId}" class="${thClassName}"></thead>'
-        +   '</table>';
-
-    /**
-     * 表头TH的tempate
-     * @type {string}
-     */
-    proto.thTemplate = '<th class="${className}">${content}</th>';
-
-    /**
-     * 表头TH内容的template
-     * @type {string}
-     */
-    proto.thContentTemplate =
-        '<div class="${className}">${text}</div>${extra}';
-
-    /**
-     * 表头TH额外内容的HTML。
-     * @type {string}
-     */
-    proto.thExtraTemplate = '<div class="${className}">${sort}${tip}</div>';
-
-    /**
-     * 表格体一行的HTML。
-     * @type {string}
-     */
-    proto.rowHtmlTemplate = '<tr class="${className}">${cellsHtml}</tr>';
-
-    /**
-     * 表格体一个单元格的HTML。
-     * @type {string}
-     */
-    proto.cellHtmlTemplate = '<td class="${className}">${content}</td>';
-
-    /**
-     * 表格体单元格基本内容的HTML。
-     * @type {String}
-     */
-    proto.cellContentTemplate =
-        '<div class="${className}">${text}</div>${extra}';
-
-    /**
-     * 单元格额外内容的HTML。
-     * @type {string}
-     */
-    proto.cellExtraTemplate = '<div class="${className}">${content}</div>';
-
-    /**
-     * 表格无数据时候的HTML。
-     * @type {String}
-     */
-    proto.noDataTemplate = '<div class="${className}">${html}</div>';
-
-    /**
-     * 多选框模版
-     *
-     * @type {string}
-     */
-    proto.multiSelectTemplate =
-        '<input '
-        + 'type="checkbox" '
-        + 'id="${id}" '
-        + 'class="${className}" '
-        + 'data-index="${index}" '
-        + '${disabled} ${checked} />';
-
-    /**
-     * 多选框全选模版
-     *
-     * @private
-     */
-    proto.multiSelectAllTemplate =
-        '<input '
-        +  'type="checkbox" '
-        +  'id="${id}" '
-        +  'class="${className}" '
-        +  'data-index="${index}" '
-        +  '${disabled}/>';
-
-    /**
-     * 单选框模版
-     *
-     * @private
-     */
-    proto.singleSelectTemplate =
-        '<input '
-        +  'type="radio" '
-        +  'id="${id}" '
-        +  'name="${name}" '
-        +  'class="${className}" '
-        +  'data-index="${index}" '
-        +  '${disabled} '
-        +  '${checked} />';
-
-    /**
-     * 表示一个表格field的对象。由this.initFields方法生成
-     * @typedef {Object} FcTable~field
-     * @property {FcTable~content} content
-     * @property {FcTable~content} extraContent
-     */
-
-     /**
-     * Callback，取得会标记在表头TH元素上的classes。
-     * @callback FcTable~getHeadCellClasses
-     * @this {FcTable}
-     * @param {number} index 当前行的序号，0开始
-     * @return {Array<string>} class名字的Array
-     */
-
-    /**
-     * Callback，取得表头TH元素的内容。
-     * @callback FcTable~getHeadCellContent
-     * @this {FcTable}
-     * @param {number} index 当前行的序号，0开始
-     * @return {Array<string>} HTML片段的Array
-     *         HTML片段会拼接在一起并在前后加上TH标记。
-     */
-
-    /**
-     * Callback，取得会标记在本行TR元素上的class。
-     * @callback FcTable~getRowClasses
-     * @this {FcTable}
-     * @param {Object} data 当前行的数据
-     * @param {number} index 当前行的序号，0开始
-     * @return {Array<string>} class名字的Array
-     */
-
-    /**
-     * Callback，取得会标记在本行TR元素上的attributes。暂时没有用。
-     * @callback FcTable~getRowAttributes
-     * @param {Object} data 当前行的数据
-     * @param {number} index 当前行的序号，0开始
-     * @return {Object}
-     *         attributes的Object，以attribute名字为key，值为value。
-     */
-
-    /**
-     * Callback，取得本行的HTML。
-     * @callback FcTable~getRowInnerHtml
-     * @this {FcTable}
-     * @param {Object} data 当前行的数据
-     * @param {number} index 当前行的序号，0开始
-     * @return {Array<string>} HTML片段的Array
-     *         HTML片段会拼接在一起并在前后加上TR标记。
-     */
-
-    /**
-     * Callback，在FcTable~field中定义，返回当前单元格应显示的HTML。
-     * @callback FcTable~content
-     * @this {FcTable}
-     * @param {Object} data 本行要显示的数据
-     * @param {number} rowIndex 本行序号，0起始
-     * @param {number} columnIndex 本列序号，0起始
-     * @return {string} 本行的HTML
-     *         默认的getCellHtml实现会将HTML包裹在一个DIV中
-     */
-
-    /**
-     * Callback，取得会标记在本单元格元素上的class。
-     * @callback FcTable~getCellClasses
-     * @this {FcTable}
-     * @param {Object} data 当前行的数据
-     * @param {number} rowIndex 当前行的序号，0开始
-     * @param {number} columnIndex 当前列的序号，0开始
-     * @param {number} fieldsLength 总列数
-     * @param {FcTable~field} field 当前列的field对象
-     * @return {Array<string>} class名字的Array
-     */
-
-    /**
-     * Callback，取得本单元格的HTML。
-     * @callback FcTable~getCellHtml
-     * @this {FcTable}
-     * @param {Object} data 当前行的数据
-     * @param {number} rowIndex 当前行的序号，0开始
-     * @param {number} columnIndex 当前列的序号，0开始
-     * @param {FcTable~field} 本单元格的field对象
-     * @return {string} HTML的string。不能包含最外围的TD标签。
-     */
-
-    /**
      * 获取表格相关ID
      *
      * @private
@@ -299,18 +107,6 @@ define(function (require) {
      */
     function getId(table, name) {
         return table.helper.getId(name);
-    }
-
-    /**
-     * 获取表格相关ClassName
-     *
-     * @private
-     * @param {Table} table 表格控件类
-     * @param {string} name 控件零件名字
-     * @return {string} 控件零件的class
-     */
-    function getClass(table, name) {
-        return table.helper.getPartClasses(name).join(' ');
     }
 
     /**
@@ -336,6 +132,26 @@ define(function (require) {
     }
 
     /**
+     * 获取整个表格体
+     *
+     * @public
+     * @return {HTMLElement} 表格元素
+     */
+    proto.getTable = function () {
+        return lib.g(getId(this, 'table'));
+    },
+
+    /**
+     * 获取Cover用整个表格体
+     *
+     * @public
+     * @return {HTMLElement} 表格元素
+     */
+    proto.getCoverTable = function () {
+        return lib.g(getId(this, 'cover-table'));
+    },
+
+    /**
      * 获取列表头容器元素
      *
      * @public
@@ -346,7 +162,7 @@ define(function (require) {
     },
 
     /**
-     * 获取列表头容器元素
+     * 获取Cover用列表头容器元素
      *
      * @public
      * @return {HTMLElement} 表头元素
@@ -354,6 +170,27 @@ define(function (require) {
     proto.getCoverHead = function () {
         return lib.g(getId(this, 'cover-thead'));
     },
+
+    /**
+     * 获取列表头colgroup元素
+     *
+     * @public
+     * @return {HTMLElement} colgroup元素
+     */
+    proto.getColGroup = function () {
+        return lib.g(getId(this, 'colgroup'));
+    },
+
+    /**
+     * 获取Cover用列表colgroup元素
+     *
+     * @public
+     * @return {HTMLElement} 表头元素
+     */
+    proto.getCoverColGroup = function () {
+        return lib.g(getId(this, 'cover-colgroup'));
+    },
+
 
     /**
      * 获取列表体容器素
@@ -364,6 +201,56 @@ define(function (require) {
     proto.getBody = function () {
         return lib.g(getId(this, 'tbody'));
     };
+
+    /**
+     * Callback，在Table~field中定义，返回当前单元格应显示的文本内容的HTML。
+     * @callback Table~content
+     * @this {Table}
+     * @param {Object} data 本行要显示的数据
+     * @param {number} rowIndex 本行序号，0起始
+     * @param {number} columnIndex 本列序号，0起始
+     * @return {string} 本行的HTML
+     *         默认的getCellHtml实现会将HTML包裹在一个DIV中
+     */
+
+    /**
+     * Callback，在Table~field中定义，返回当前单元格额外显示的HTML。
+     * 默认布局将显示在文本内容的下一行。
+     * @callback Table~extraContent
+     * @this {Table}
+     * @param {Object} data 本行要显示的数据
+     * @param {number} rowIndex 本行序号，0起始
+     * @param {number} columnIndex 本列序号，0起始
+     * @return {string} 本行的HTML
+     *         默认的getCellHtml实现会将HTML包裹在一个DIV中
+     */
+
+    /**
+     * 表示一个表格field的对象。
+     * 关于列宽：与ESUI Table相比，这个Table布局实现采用
+     * 'table-layout: auto' 。
+     * 具体的：
+     * 1. 属性width将作为列的建议宽度，即，对于一个声明了width的列，
+     * 表格将先满足width指定的宽度，若表格有剩余宽度，将可能会分配
+     * 到这一列上。若表格容器宽度不够，将可能从这一列上减去宽度。
+     * 2. 属性maxWidth声明列的最大宽度，对于这样的列，首先将会在列上每一个
+     * 单元格中包裹一个div以限制表格内容的最大宽度。这个div的默认样式是
+     * overflow hidden。可以选择配合ellipse属性隐藏超长的文本。
+     * 3. 列不可以显式的设置最小宽度。当表格容器宽度不够时，浏览器自动减小列宽
+     * 到内容允许的最小宽度，即，连续的西文字母及数字不折行。中文字及单词会
+     * 折行。当空间仍不够时，表格容器出现横向滚动条。
+     *
+     * @typedef {Object} Table~field
+     * @property {Table~content} content
+     * @property {Table~content} extraContent
+     * @property {boolean} select 是否是一个选择用field
+     * @property {number} width
+     *           当前field的建议宽度。当table有空余空间时，将会加到这个field
+     *           上。当table没有空余空间时，将从这个field上减少宽度直至可能的
+     *           最小。
+     * @property {number} maxWidth 当前field的最大允许宽度
+     *           当maxWidth存在时，width被忽略。
+     */
 
     /**
      * 初始化表格的字段
@@ -392,12 +279,38 @@ define(function (require) {
             return;
         }
 
+        var me = this;
         switch (this.select.toLowerCase()) {
             case 'multi':
-                realFields.unshift(this.getMultiSelectField());
+                realFields.unshift({
+                    select: true,
+                    maxWidth: 30,
+                    title: function (item, index) {
+                        return me.helper.renderTemplate('table-select-all', {
+                            index: index,
+                            disabled: me.disabled ? 'disabled="disabled"' : ''
+                        });
+                    },
+                    content: function (item, index) {
+                        return me.helper.renderTemplate('table-select-multi', {
+                            index: index,
+                            disabled: me.disabled ? 'disabled="disabled"' : ''
+                        });
+                    }
+                });
                 break;
             case 'single':
-                realFields.unshift(this.getSingleSelectField());
+                realFields.unshift({
+                    title: '&nbsp;',
+                    select: true,
+                    maxWidth: 30,
+                    content: function (item, index) {
+                        return me.helper.renderTemplate('table-select-single', {
+                            index: index,
+                            disabled: me.disabled ? 'disabled="disabled"' : ''
+                        });
+                    }
+                });
                 break;
         }
     };
@@ -422,65 +335,68 @@ define(function (require) {
     };
 
     /**
-     * 获取第一列的多选框
-     *
-     * @protected
-     * @return {string} 多选框fields对象
+     * IE9下，用于replace整个colgroup区的regex。
+     * @type {RegExp}
      */
-    proto.getMultiSelectField = function () {
-        return {
-            select: true,
-            title: function (item, index) {
-                var data = {
-                    id: getId(this, 'select-all'),
-                    className: getClass(this, 'select-all'),
-                    disabled: this.disabled ? 'disabled="disabled"' : '',
-                    index: index
-                };
-                return lib.format(this.multiSelectAllTemplate, data);
-            },
+    var REGEX_REPLACE_COLGROUP = /(<colgroup.+?>).*?(<\/colgroup>)/;
 
-            content: function (item, index) {
-                var data = {
-                    id: getId(this, 'multi-select') + index,
-                    className: getClass(this, 'multi-select'),
-                    disabled: this.disabled ? 'disabled="disabled"' : '',
-                    index: index,
-                    checked: this.isRowSelected(this, index)
-                        ? 'checked="checked"'
-                        : ''
-                };
-                return lib.format(this.multiSelectTemplate, data);
-            }
-        };
+    /**
+     * IE9下，用于replace整个thead区的regex。
+     * @type {RegExp}
+     */
+    var REGEX_REPLACE_THEAD = /(<thead.+?>).*?(<\/thead>)/;
+
+    /**
+     * IE9下，用于replace整个tbody区的regex。
+     * @type {RegExp}
+     */
+    var REGEX_REPLACE_TBODY = /(<tbody.+?>).*?(<\/tbody>)/;
+
+    /**
+     * IE9下，用于replace整个tfoot区的regex。
+     * @type {RegExp}
+     */
+    // var REGEX_REPLACE_TFOOT = /(<tfoot.+?>).*?(<\/tfoot>)/;
+
+    /**
+     * IE9下，设置colgroup html
+     * @param {string} html 新的html
+     * @param {boolean} isCover true则为cover table设置colgroup
+     */
+    proto.ieSetColGroup = function (html, isCover) {
+        var tableEl = isCover ? this.getCoverTable() : this.getTable();
+        tableEl.outerHTML = tableEl.outerHTML.replace(REGEX_REPLACE_COLGROUP,
+            '$1' + html + '$2');
     };
 
     /**
-     * 第一列的单选框
-     *
-     * @protected
-     * @return {string} 单选框fields对象
+     * IE9下，设置thead html
+     * @param {string} html 新的html
+     * @param {boolean} isCover true则为cover table设置thead
      */
-    proto.getSingleSelectField = function () {
-        return {
-            title: '&nbsp;',
-            select: true,
-            content: function (item, index) {
-                var id =  this.getId('single-select');
-                var data = {
-                    id: id + index,
-                    name: id,
-                    className: getClass(this, 'single-select'),
-                    index: index,
-                    disabled: this.disabled ? 'disabled="disabled"' : '',
-                    checked: this.isRowSelected(this, index)
-                        ? 'checked="checked"'
-                        : ''
-                };
-                return lib.format(this.singleSelectTemplate, data);
-            }
-        };
+    proto.ieSetTHead = function (html, isCover) {
+        // IE 9 不能set thead innerHTML，换个方法
+        // set 整个table区的outerHTML。
+        var tableEl = isCover ? this.getCoverTable() : this.getTable();
+
+        tableEl.outerHTML = tableEl.outerHTML.replace(REGEX_REPLACE_THEAD,
+                '$1' + html + '$2');
     };
+
+    /**
+     * IE9下，设置tbody html
+     * @param {string} html 新的html
+     */
+    proto.ieSetTBody = function (html) {
+        var tableEl = this.getTable();
+        tableEl.outerHTML = tableEl.outerHTML.replace(REGEX_REPLACE_TBODY,
+            '$1' + html + '$2');
+    };
+
+    /**
+     * IE9下，设置tfoot html
+     */
+    proto.ieSetTFoot = function () {};
 
     /**
      * 绘制表格头。
@@ -491,96 +407,220 @@ define(function (require) {
             return;
         }
 
-        var fields = this.realFields;
-        var html = '';
-        var me = this;
-        var headBuilder = this.getHeadBuilder();
-        u.each(fields, function (field, index) {
-            html += lib.format(me.thTemplate, {
-                className: headBuilder.getHeadCellClasses.call(me, index)
-                    .join(' '),
-                content: headBuilder.getHeadCellContent.call(me, index)
-            });
+        var html = this.helper.renderTemplate('table-head', {
+            realFields: this.realFields,
+            fieldsLength: this.realFields.length
         });
-        html = '<tr>' + html + '</tr>';
-        this.getHead().innerHTML = html;
-        if (this.isNeedCoverHead) {
-            this.getCoverHead().innerHTML = html;
-        }
-    },
 
-    /**
-     * 返回表格头的builder。
-     * @protected
-     * @return {Object} headBuilder
-     * @property {FcTable~getHeadCellClasses} getHeadCellClasses
-     * @property {FcTable~getHeadCellContent} getHeadCellContent
-     */
-    proto.getHeadBuilder = function() {
-        return this.getDefaultHeadBuilder();
+        if (lib.ie && lib.ie <= 9) {
+            this.ieSetTHead(html, false);
+            if (this.isNeedCoverHead) {
+                this.ieSetTHead(html, true);
+            }
+        }
+        else {
+            this.getHead().innerHTML = html;
+            if (this.isNeedCoverHead) {
+                this.getCoverHead().innerHTML = html;
+            }
+        }
     };
 
     /**
-     * 返回默认的表格头的builder。
-     * @protected
-     * @return {Object} headBuilder
-     * @property {FcTable~getHeadCellClasses} getHeadCellClasses
-     *           this.defaultGetHeadCellClasses
-     * @property {FcTable~getHeadCellContent} getHeadCellContent
-     *           this.defaultGetHeadCellContent
+     * 根据容器宽度和field中的列宽string计算列宽。支持百分比。
+     * @param  {string | number} width 列宽值
+     * @param  {number} totalWidth 容器列宽
+     * @return {number} 列宽值
      */
-    proto.getDefaultHeadBuilder = function () {
-        if (!this._defaultHeadBuilder) {
-            this._defaultHeadBuilder = {
-                getHeadCellClasses: this.defaultGetHeadCellClasses,
-                getHeadCellContent: this.defaultGetHeadCellContent
-            };
+    function computeColumnWidth(width, totalWidth) {
+        if (width.indexOf && width.indexOf('%') > 0) {
+            // 是百分比
+            var num = parseFloat(width);
+            if (!isNaN(num)) {
+                return num / 100 * totalWidth;
+            }
+
+            return null;
+        }
+        return width;
+    }
+
+    /**
+     * 绘制表格colgroup。
+     */
+    proto.renderColGroup = function () {
+        var cols = lib.getChildren(this.getColGroup());
+        var fields = this.realFields;
+        if (cols.length === fields.length) {
+            // cols 够用了，不用重画了
+            return;
         }
 
-        return this._defaultHeadBuilder;
+        var html = this.helper.renderTemplate('table-colgroup', {
+            fields: fields,
+            fieldsLength: fields.length
+        });
+
+        if (lib.ie && lib.ie <= 9) {
+            this.ieSetColGroup(html, false);
+            if (this.isNeedCoverHead) {
+                this.ieSetColGroup(html, true);
+            }
+        }
+        else {
+            this.getColGroup().innerHTML = html;
+            if (this.isNeedCoverHead) {
+                this.getCoverColGroup.innerHTML = html;
+            }
+        }
     };
 
     /**
-     * 默认的返回表头TH元素上的classes。
-     * 默认获得-hcell。
-     * 第一个获得-hcell-first。
-     * 最后一个获得-hcell-last。
-     * @protected
-     * @see {FcTable~getHeadCellClasses}
-     * @param  {number} index 当前列号，0起始
-     * @return {Array<string>} class名字的Array
+     * 初设表格列宽。
+     * 直接将列宽信息写到table-colgroup中。待第一轮render
+     * 完成后，还会针对列的最大列宽进行第二轮调整。
+     * 此次绘制同时还会第一次设置this.columnsWidth
      */
-    proto.defaultGetHeadCellClasses = function (index) {
-        var classes = this.helper.getPartClasses('hcell');
-        if (index === 0) {
-            classes = classes.concat(
-                this.helper.getPartClasses('hcell-first')
-            );
-        } else if (index === this.realFields.length - 1) {
-            classes = classes.concat(
-                this.helper.getPartClasses('hcell-last')
-            );
-        }
+    proto.setColumnsWidth = function () {
+        var columnsWidth = this.columnsWidth = [];
+        var totalMaxWidth = 0;
+        var maxWidthColumns = this.maxWidthColumns = {};
+        var width = this.getWidth();
+        u.each(this.realFields, function (field, columnIndex) {
+            var w = null;
 
-        return classes;
+            if (typeof field.maxWidth !== 'undefined') {
+                w = computeColumnWidth(field.maxWidth, width);
+                totalMaxWidth += w;
+                maxWidthColumns[columnIndex] = w;
+            }
+
+            // 如果没有max-width，才考虑width
+            if (w == null && typeof field.width !== 'undefined') {
+                w = computeColumnWidth(field.width, width);
+            }
+
+            // 无论是maxWidth还是width，都当做width style画上去
+            columnsWidth.push(w);
+        });
+
+        this.totalMaxWidth = totalMaxWidth;
+
+        var cols = lib.getChildren(this.getColGroup());
+        u.each(cols, function (col, columnIndex) {
+            var w = columnsWidth[columnIndex];
+            if (w != null) {
+                col.style.width = w + 'px';
+            }
+        });
     };
 
     /**
-     * 默认的获得一个表头TH元素内容的方法。
+     * 获取表格所在区域宽度
+     *
      * @protected
-     * @see Table~getHeadCellContent
-     * @param {number} index 当前行的序号，0开始
-     * @return {Array<string>} HTML片段的Array
-     *         HTML片段会拼接在一起并在前后加上TH标记。
+     * @return {number}
      */
-    proto.defaultGetHeadCellContent = function (index) {
-        var field = this.realFields[index];
-        // 获得content
+    proto.getWidth = function () {
+        if (typeof this.width !== 'undefined') {
+            if (!this.width.indexOf) {
+                // this.width 不是一个string，是一个绝对数
+                return this.width;
+            }
+        }
+        var rulerDiv = document.createElement('div');
+        this.main.appendChild(rulerDiv);
+        var width = rulerDiv.offsetWidth;
+        rulerDiv.parentNode.removeChild(rulerDiv);
+
+        return width;
+    };
+
+    /**
+     * 设置具有最大列宽的列的单元格中的限宽div的宽度。
+     */
+    proto.setCellMaxWidth = function () {
+        if (this.totalMaxWidth > 0) {
+            var me = this;
+            var tbody = this.getBody();
+            var trs = lib.getChildren(tbody);
+            // 设置每一行的columnIndex列的max-width
+            u.each(trs, function (tr, rowIndex) {
+                var tds = lib.getChildren(tr);
+                u.each(me.maxWidthColumns, function (maxWidth, columnIndex) {
+                    var td = tds[columnIndex];
+                    var div = lib.dom.first(td);
+                    div.style.maxWidth = maxWidth + 'px';
+                });
+            });
+        }
+    };
+
+    /**
+     * 调整最大列宽。
+     * 当表格有富裕的空间时，加大其余没有声明max-width的列的width，
+     * 迫使max-width的列变小到恰好等于max-width
+     */
+    proto.adjustMaxColumnWidth = function () {
+        var containerWidth = this.getWidth();
+        var tableWidth = this.getTable().offsetWidth;
+        var me = this;
+        if (this.totalMaxWidth > 0) {
+            if (tableWidth <= containerWidth) {
+                var availWidth = containerWidth - this.totalMaxWidth;
+                // 要将availWidth分配到没设置maxWidth的列上
+                // 先看看其他列都设置了多少的width
+                u.each(this.columnsWidth, function (width, index) {
+                    if (me.maxWidthColumns[index] == null) {
+                        if (width != null) {
+                            availWidth -= width;
+                        }
+                    }
+                });
+                
+                if (availWidth > 0) {
+                    // 声明的列宽有剩余，平均分配到除声明了最大列宽的列之外的
+                    // 列上
+                    var fieldsLength = this.realFields.length;
+                    var avgWidth = availWidth /
+                        (fieldsLength
+                            - Object.keys(this.maxWidthColumns).length);
+
+                    u.each(this.columnsWidth, function (width, index) {
+                        if (me.maxWidthColumns[index] == null) {
+                            me.columnsWidth[index] == null ?
+                                me.columnsWidth[index] = avgWidth
+                                : me.columnsWidth[index] += avgWidth;
+                        }
+                    });
+                }
+            }
+            // else，表格自己的宽度已经超过了容器的宽度，有横滚动条了，
+            // 没什么能做的了
+        }
+
+        // 设置更新的columnsWidth到colgroup上
+        var cols = lib.getChildren(this.getColGroup());
+        u.each(cols, function (col, index) {
+            if (me.columnsWidth[index] != null) {
+                col.style.width = me.columnsWidth[index] + 'px';
+            }
+        });
+    };
+
+    /**
+     * 默认的获得一个表头TH元素文本内容的方法。会作为filter从模板中调用。
+     * @protected
+     * @param {Table~field} field 当前单元格对应的field对象
+     * @param {number} index field所对应的列index
+     * @return {string} HTML片段
+     */
+    proto.renderHeadTextContent = function (field, index) {
         var title = field.title;
         var contentHtml;
         // 计算内容html
         if (typeof title === 'function') {
-            contentHtml = title.call(this);
+            contentHtml = title.apply(this, arguments);
         }
         else {
             contentHtml = title;
@@ -588,13 +628,7 @@ define(function (require) {
         if (isNullOrEmpty(contentHtml)) {
             contentHtml = '&nbsp;';
         }
-        // 获得表头额外内容：排序和tip
-        var extra = '';
-        return lib.format(this.thContentTemplate, {
-            extra: extra,
-            text: contentHtml,
-            className: getClass(this, 'hcell-text')
-        });
+        return contentHtml;
     };
 
     /**
@@ -602,247 +636,39 @@ define(function (require) {
      * @protected
      */
     proto.renderBody = function () {
-        this.getBody().innerHTML = this.getBodyHtml();
+        var html = this.helper.renderTemplate('table-body', {
+            datasource: this.datasource || [],
+            dataLength: this.datasource.length,
+            realFields: this.realFields,
+            fieldsLength: this.realFields.length
+        });
+
+        if (lib.ie && lib.ie <= 9) {
+            // IE 9不能set tbody的innerHTML，用outerHTML
+            this.ieSetTBody(html);
+        }
+        else {
+            this.getBody().innerHTML = html;
+        }
 
         this.fire('bodyChange');
     };
 
     /**
-     * 获取表格主体的html
-     *
-     * @protected
-     * @return {string}
-     */
-    proto.getBodyHtml = function () {
-        var data = this.datasource || [];
-        var dataLen = data.length;
-        var html = [];
-
-        if (!dataLen) {
-            return lib.format(
-                this.noDataTemplate,
-                {
-                    className: getClass(this, 'body-nodata'),
-                    html: this.noDataHtml
-                }
-            );
-        }
-
-        for (var i = 0; i < dataLen; i++) {
-            var item = data[i];
-            html.push(this.getRowHtml(item, i, dataLen));
-        }
-
-        return html.join('');
-    };
-
-    /**
-     * 返回默认的rowBuilder。
-     * @protected
-     * @return {Object}
-     * @property {Function} getRowClasses
-     *           返回defaultGetRowClasses
-     * @property {Function} getRowInnerHtml
-     *           返回defaultGetRowInnerHtml
-     */
-    proto.getDefaultRowBuilder = function () {
-        if (!this._defaultRowBuilder) {
-            this._defaultRowBuilder = {
-                getRowClasses: this.defaultGetRowClasses,
-                getRowInnerHtml: this.defaultGetRowInnerHtml
-            };
-        }
-
-        return this._defaultRowBuilder;
-    };
-
-    /**
-     * 根据当前行的data和index，返回一个rowBuilder对象。
-     * 这个方法在每个行绘制前都会调用一次，若重写，不可以有重的运算。
-     * 默认情况下会返回this.getDefaultRowBuilder。
-     * @protected
-     * @param  {Array} data 当前行要绘制的数据集
-     * @param  {number} index 当前行序号，0为起始
-     * @return {Object} rowBuilder
-     * @property {FcTable~getRowClasses} rowBuilder.getRowClasses
-     * @property {FcTable~getRowInnerHtml} rowBuilder.getRowInnerHtml
-     */
-    proto.getRowBuilder = function (data, index) {
-        return this.getDefaultRowBuilder();
-    };
-
-    /**
-     * 默认的row classes。
-     * 基本行会附加 -row。
-     * 奇数行附加 -row-odd。
-     * 偶数行附加 -row-even。
-     * 最后一行附加 -row-last。
-     *
-     * @protected
-     * @see Table~getRowClasses
-     * @this Table
-     * @param {Object} data 当前行的数据
-     * @param {number} index 当前行的序号，0开始
-     * @param {number} length 目前表格的总行数
-     * @return {Array<string>} class名字的Array
-     */
-    proto.defaultGetRowClasses = function (data, index, length) {
-        var classes = this.helper.getPartClasses('row')
-            .concat(
-                index % 2 === 0
-                    ? this.helper.getPartClasses('row-even')
-                    : this.helper.getPartClasses('row-odd')
-            );
-        if (index === length - 1) {
-            classes.push(
-                this.helper.getPartClasses('row-last').join(' ')
-            );
-        }
-        return classes;
-    };
-
-    /**
-     * @see FcTable~getRowInnerHtml
-     * @param {Object} data 当前行的数据
-     * @param {number} index 当前行的序号，0开始
-     * @return {Array<string>} HTML片段的Array
-     */
-    proto.defaultGetRowInnerHtml = function (data, index) {
-        var html = [];
-        var fields = this.realFields;
-        var fieldsLength = fields.length;
-        var me = this;
-        u.each(fields, function (field, columnIndex) {
-            var cellBuilder = me.getCellBuilder(
-                data, index, columnIndex, field
-            );
-            var cellClasses = cellBuilder.getCellClasses.call(
-                me, data, index, columnIndex, fieldsLength, field
-            );
-            var cellContent = cellBuilder.getCellHtml.call(
-                me, data, index, columnIndex, field
-            );
-            html.push(
-                lib.format(me.cellHtmlTemplate, {
-                    className: cellClasses.join(' '),
-                    content: cellContent
-                })
-            );
-        });
-        return html;
-    };
-
-    /**
-     * 获取表格行的html
-     *
-     * @protected
-     * @param {Object} data 当前行的数据
-     * @param {number} index 当前行的序号
-     * @param {number} length 总行数
-     * @return {string}
-     */
-    proto.getRowHtml = function (data, index, length) {
-        // 先取得当前行的builder
-        var rowBuilder = this.getRowBuilder(data, index);
-        // 当前行的classes
-        var rowClasses = rowBuilder.getRowClasses.call(
-            this, data, index, length);
-        // 当前行的inner HTML
-        var rowInnerHtml = rowBuilder.getRowInnerHtml.call(
-            this, data, index);
-        // 拼接整行的HTML
-        return lib.format(this.rowHtmlTemplate, {
-            className: rowClasses.join(' '),
-            cellsHtml: rowInnerHtml.join('')
-        });
-    };
-
-    /**
-     * 取得cell的builder。默认返回this.getDefaultCellBuilder。
-     * @param  {Object} data 当前行的数据
-     * @param  {number} rowIndex 当前行的行号，0起始
-     * @param  {number} columnIndex 当前行的列号，0起始
-     * @param  {FcTable~field} field 当前列的field对象
-     * @return {Object} cellBuilder
-     * @property {FcTable~getCellClasses} cellBuilder.getCellClasses
-     * @property {FcTable~getCellHtml} cellBuilder.getCellHtml
-     */
-    proto.getCellBuilder = function (data, rowIndex, columnIndex, field) {
-        return this.getDefaultCellBuilder();
-    };
-
-    /**
-     * 返回默认的cell builder。
-     * @protected
-     * @return {Object}
-     * @property {Function} getCellClasses
-     *          this.defaultGetCellClasses
-     * @property {Function} getCellHtml
-     *          this.defaultGetCellHtml
-     */
-    proto.getDefaultCellBuilder = function () {
-        if (!this._defaultCellBuilder) {
-            this._defaultCellBuilder = {
-                getCellClasses: this.defaultGetCellClasses,
-                getCellHtml: this.defaultGetCellHtml
-            };
-        }
-        return this._defaultCellBuilder;
-    };
-
-    /**
-     * 默认的获取单元格class的方法。
-     * 每个单元格获得 -cell。
-     * 第一个单元格获得-cell-first。
-     * 最后一个单元格获得 -cell-last。
-     *
-     * @protected
-     * @see Table~getCellClasses
-     * @this FcTable
-     * @param {Object} data 当前行的数据
-     * @param {number} rowIndex 当前行的序号，0开始
-     * @param {number} columnIndex 当前列的序号，0开始
-     * @param {number} fieldsLength 总列数
-     * @param {FcTable~field} field 当前列的field对象
-     * @return {Array<string>} class名字的Array
-     */
-    proto.defaultGetCellClasses = function (
-        data, rowIndex, columnIndex, fieldsLength, field
-    ) {
-        var classes = this.helper.getPartClasses('cell');
-        if (columnIndex === 0) {
-            classes.push(
-                this.helper.getPartClasses('cell-first').join(' ')
-            );
-        }
-        if (columnIndex === fieldsLength - 1) {
-            classes.push(
-                this.helper.getPartClasses('cell-last').join(' ')
-            );
-        }
-        return classes;
-    };
-
-    /**
-     * 默认的获取单元格内内容的方法。
-     * 调用field.content，获得cell的文字内容，显示在
-     * div.{-cell-text}内。
+     * 默认的获取单元格内文本内容的方法。经由表格模板回调。
+     * 调用field.content，获得cell的文字内容。
      * 如果没有field.content，会尝试画出data[content]。
-     * 调用field.extraContent，获得额外的内容，显示在
-     * div.{-cell-extra}内。如果没有额外的内容，div.{-cell-extra}
-     * 不会画出来。
      *
      * @protected
-     * @see Table~getCellHtml
      * @this Table
      * @param {Object} data 当前行的数据
+     * @param {Table~field} field 本单元格的field对象
      * @param {number} rowIndex 当前行的序号，0开始
      * @param {number} columnIndex 当前列的序号，0开始
-     * @param {Table~field} field 本单元格的field对象
-     * @return {string} HTML的string。不能包含最外围的TD标签。
+     * @return {string} HTML的string。
      */
-    proto.defaultGetCellHtml = function (
-        data, rowIndex, columnIndex, field
+    proto.renderCellTextContent = function (
+        data, field, rowIndex, columnIndex
     ) {
         // 先生成基本的content
         var content = field.content;
@@ -852,26 +678,39 @@ define(function (require) {
                 ? lib.encodeHTML(data[content])
                 : data[content]
             );
-        // 再生成extra
-        var extraContent = field.extraContent;
-        var extraHtml = 'function' === typeof extraContent
-            ? extraContent.call(this, data, rowIndex, columnIndex)
-            : '';
         // content需要有一个默认值
         if (isNullOrEmpty(contentHtml)) {
             contentHtml = '&nbsp;';
         }
-        // 若没有extra，不生成extra的DIV。
-        if (!isNullOrEmpty(extraHtml)) {
-            extraHtml = lib.format(this.cellExtraTemplate, {
-                className: getClass(this, 'cell-extra'),
-                content: extraHtml
-            });
+        return contentHtml;
+    };
+
+    /*
+     * 调用field.extraContent，获得额外的内容，显示在
+     * div.{-cell-extra}内。如果没有额外的内容，div.{-cell-extra}
+     * 不会画出来。
+     * @protected
+     * @this Table
+     * @param {Object} data 当前行的数据
+     * @param {Table~field} field 本单元格的field对象
+     * @param {number} rowIndex 当前行的序号，0开始
+     * @param {number} columnIndex 当前列的序号，0开始
+     * @return {string} HTML的string。
+     */
+    proto.renderCellExtraContent = function (
+        data, field, rowIndex, columnIndex
+    ) {
+        var extraContent = field.extraContent;
+        var extraHtml = 'function' === typeof extraContent
+            ? extraContent.call(this, data, rowIndex, columnIndex)
+            : '';
+        // 若没有extra，不生成任何东西
+        if (isNullOrEmpty(extraHtml)) {
+            return '';
         }
-        return lib.format(this.cellContentTemplate, {
-            className: getClass(this, 'cell-text'),
-            text: contentHtml,
-            extra: extraHtml
+
+        return this.helper.renderTemplate('table-cell-extra', {
+            content: extraHtml
         });
     };
 
@@ -901,6 +740,19 @@ define(function (require) {
 
         var tableHtml = this.helper.renderTemplate('table');
 
+        if (typeof this.width !== 'undefined') {
+            if (this.width.indexOf && this.width.indexOf('%') > -1) {
+                // 设置了'%'形式的宽度
+                this.main.style.width = this.width;
+            }
+            else {
+                this.main.style.width = this.width + 'px';
+            }
+        }
+        else {
+            this.main.style.width = '100%';
+        }
+
         this.isNeedCoverHead = false;
 
         if (this.tableMaxHeight !== 0) {
@@ -912,14 +764,7 @@ define(function (require) {
         }
 
         if (this.isNeedCoverHead) {
-            tableHtml += lib.format(this.coverTableTemplate, {
-                tableClassName: getClass(this, 'cover-table'),
-                thClassName: getClass(this, 'cover-thead'),
-                tId: getId(this, 'cover-table'),
-                thId: getId(this, 'cover-thead'),
-                cgClassName: getClass(this, 'cover-colgroup'),
-                cgId: getId(this, 'cover-colgroup')
-            });
+            tableHtml += this.helper.renderTemplate('cover-table');
         }
 
         this.main.innerHTML = tableHtml;
@@ -951,6 +796,7 @@ define(function (require) {
      * 渲染控件
      *
      * @override
+     * @fire headchanged
      */
     proto.repaint = function (changes, changesIndex) {
         this.$super(arguments);
@@ -974,9 +820,10 @@ define(function (require) {
         }
 
         var fieldsChanged = false;
-        var colsWidthChanged = false;
+        var tHeadChanged = false;
         var tBodyChanged = false;
 
+        // 列的定义发生变化，重算fields
         if (allProperities.fields
             || allProperities.select
             || allProperities.selectMode
@@ -986,23 +833,25 @@ define(function (require) {
             fieldsChanged = true;
         }
 
+        // fields 发生变化，重画colgroup
         if (fieldsChanged) {
-            // TODO 处理宽度
-            colsWidthChanged = true;
+            this.renderColGroup();
+            this.setColumnsWidth();
         }
 
+        // fields发生变化，或者表头定义发生变化，重画表头
         if (fieldsChanged
-            || colsWidthChanged
             || allProperities.noHead
             || allProperities.order
             || allProperities.orderBy
             || allProperities.selectedIndex
         ) {
             this.renderHead();
+            tHeadChanged = true;
         }
 
+        // fields 发生变化，或者表体内容发生变化，重画表体
         if (fieldsChanged
-            || colsWidthChanged
             || allProperities.encode
             || allProperities.noDataHtml
             || allProperities.datasource
@@ -1012,23 +861,23 @@ define(function (require) {
             tBodyChanged = true;
         }
 
+        // fields 发生变化，或者tfoot内容发生变化，重画tfoot
         if (fieldsChanged
-            || colsWidthChanged
             || allProperities.foot
         ) {
             // TODO 处理foot
             tBodyChanged = true;
         }
 
+        // 表格体发生了变化，重调最大列宽
         if (tBodyChanged) {
-            if (this.isNeedCoverHead) {
-                this.syncWidth();
-            }
+            this.setCellMaxWidth();
+            this.adjustMaxColumnWidth();
         }
 
-        // this.extraRepaint = helper.createRepaint([
-        // ]);
-        // this.extraRepaint(changes, changesIndex);
+        if (tHeadChanged) {
+            this.fire('headchanged');
+        }
     };
 
     /**

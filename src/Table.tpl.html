@@ -1,0 +1,150 @@
+<!-- // Table的默认etpl 模板-->
+
+<!-- target: table -->
+<table id="${table | id}" class="${table | class}">
+    <colgroup id="${colgroup | id}"></colgroup>
+    <thead id="${thead | id}" class="${thead | class}"></thead>
+    <tbody id="${tbody | id}" class="${tbody | class}"></tbody>
+    <tfoot id="${tfoot | id}" class="${tfoot | class}"></tfoot>
+</table>
+
+<!-- target: cover-table -->
+<!-- // 表头吸顶等情况下，定位absolute，固定定位的表头 -->
+<table id="${cover-table | id}" class="${cover-table | class}">
+    <colgroup id="${cover-colgroup | id}" class="${cover-colgroup | class}"></colgroup>
+    <thead id="${cover-thead | id}" class="${cover-thead | class}"></thead>
+</table>
+
+<!-- target: table-colgroup -->
+<!-- // 表格的colgroup，用来表达列宽 -->
+<!-- // @param fields 列对象数组 -->
+<!-- // @param fieldLength 列对象数组长度 -->
+<!-- for: ${fields} as ${field} -->
+<col class="${col | class}"></col>
+<!-- /for -->
+
+<!-- target: table-head -->
+<!-- // 处于表格 thead 内的表头行 -->
+<tr>
+    <!-- for: ${realFields} as ${field}, ${columnIndex} -->
+        <th class="
+            ${hcell | class}
+            <!-- if: ${columnIndex} == 0 -->
+            ${hcell-first | class}
+            <!-- /if -->
+            <!-- if: ${columnIndex} == ${fieldsLength} - 1 -->
+            ${hcell-last | class}
+            <!-- /if -->
+        " style="
+
+        ">
+            <!-- import: table-head-content -->
+        </th>
+    <!-- /for -->
+</tr>
+
+<!-- target: table-head-content -->
+<!-- // 处于表格TH内的表头单元格内容 -->
+${renderHeadTextContent | call(${field}, ${columnIndex})}
+
+<!-- target: table-select-all -->
+<!-- // 处于表格TH内的多选全选内容 -->
+<input type="checkbox" id="${select-all | id}" class="${select-all | class}"
+    data-index="${index}" ${disabled} />
+
+<!-- target: table-select-multi -->
+<!-- // 处于表格体单元格TD内的多选内容 -->
+<input type="checkbox" id="${multi-select | id}" class="${multi-select | class}"
+    data-index="${index}" ${disabled} />
+
+<!-- target: table-select-single -->
+<!-- // 处于表格TH内的多选全选内容 -->
+
+<!-- target: table-body-ie -->
+<tbody id="${tbody | id}" class="${tbody | class}">
+    <!-- import: table-body -->
+</tbody>
+
+
+<!-- target: table-body -->
+<!-- // 处于表格tbody内的表格体的内容，将包含在 tbody 元素内 -->
+<!-- // @param datasource 数据源 -->
+<!-- // @param dataLength 数据源长度 -->
+<!-- // @param realFields 表格的fields定义 -->
+<!-- // @param fieldsLength 表格的fields长度 -->
+<!-- if: ${dataLength} == 0 -->
+    <!-- import: table-no-data -->
+<!-- else -->
+    <!-- for: ${datasource} as ${dataItem}, ${rowIndex} -->
+        <tr class="
+            ${row | class}
+            <!-- if: ${rowIndex} % 2 == 0 -->
+            ${row-even | class}
+            <!-- else -->
+            ${row-odd | class}
+            <!-- /if -->
+            <!-- if: ${rowIndex} == 0 -->
+            ${row-first | class}
+            <!-- /if -->
+            <!-- if: ${rowIndex} == ${dataLength} - 1 -->
+            ${row-last | class}
+            <!-- /if -->
+        ">
+            <!-- import: table-row-cells -->
+        </tr>
+    <!-- /for -->
+<!-- /if -->
+
+<!-- target: table-row-cells -->
+<!-- // 表格内一行的内容 -->
+<!-- // @param realFields 表格的fields定义 -->
+<!-- // @param fieldsLength 表格的fields长度 -->
+<!-- // @param rowIndex 当前行的index -->
+<!-- for: ${realFields} as ${field}, ${columnIndex} -->
+    <td class="
+        ${cell | class}
+        <!-- if: ${columnIndex} == 0 -->
+        ${cell-first | class}
+        <!-- /if -->
+        <!-- if: ${columnIndex} == ${fieldsLength} - 1 -->
+        ${cell-last | class}
+        <!-- /if -->
+    ">
+        <!-- import: table-cell-content -->
+    </td>
+<!-- /for -->
+
+<!-- target: table-cell-content -->
+<!-- // 位于表格体TD内的单元格内容 -->
+<!-- // @param rowIndex 当前行的index -->
+<!-- // @param columnIndex 当前列的index -->
+<!-- // @param dataItem 当前行的数据集 -->
+<!-- // @param field 当前列的field对象 -->
+<!-- if: ${field.maxWidth} -->
+    <div class="${cell-max-width | class}">
+<!-- /if -->
+    <div class="
+        ${cell-text | class}
+    ">
+        ${renderCellTextContent | call(${dataItem}, ${field}, ${rowIndex}, ${columnIndex})}
+    </div>
+    ${renderCellExtraContent | call(${dataItem}, ${field}, ${rowIndex}, ${columnIndex})}
+<!-- if: ${field.maxWidth} -->
+    </div>
+<!-- /if -->
+
+<!-- target: table-cell-extra -->
+<!-- // 位于表格体TD内的单元格附加内容 -->
+<div class="
+    ${cell-extra | class}
+">
+    ${content}
+</div>
+
+<!-- target: table-no-data -->
+<!-- // 表格体不含有数据时候的内容 -->
+<tr>
+    <td colspan="${fieldsLength}">
+        没有数据
+    </td>
+</tr>

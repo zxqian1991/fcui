@@ -24,6 +24,14 @@
 //           div.ui-table-cell-extra
 
 /**
+ * 设置table单元格样式
+ * &指代 ui-table-cell，ui-table-hcell
+ */
+.set-table-cell() {
+
+}
+
+/**
  * 设置table表头区域样式。
  * &指代 ui-table
  */
@@ -36,10 +44,24 @@
  * &指代 ui-table
  */
 .set-table-body() {
+    &-tbody {
+        .ui-table-row {
+            .ui-table-cell {
+                .ui-table-cell {
+                    &-max-width {
+                        overflow: hidden;
+                    }
+                }
 
+                .set-table-cell();
+            }
+        }
+    }
 }
 
 .ui-table {
+    overflow-x: scroll;
+    
     &-has-max-height {
         overflow-y: scroll;
         position: relative;

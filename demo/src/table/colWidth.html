@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <title>FcTable Basic - FCUI Demo</title>
-        <script src="../../dep/esl.js"></script>
+        <script src="../../dep/esl/src/esl.js"></script>
         <script>
             // derived from ESUI 3.1.0-beta.5 demo file
             require.config({
@@ -76,7 +76,7 @@
             <div data-ui-type="Table"
                 data-ui-id="myTable"
                 data-ui-skin="ui-fc"
-                data-ui-table-max-height="100"></div>
+                data-ui-width="60%"></div>
             <br/>
         </div>
         <script>
@@ -132,7 +132,7 @@
                                     editContent: function(item){
                                         return item.id;
                                     },
-                                    width: 100,
+                                    width: 50,
                                     content: function (item) {
                                         return item.id;
                                     }
@@ -148,11 +148,32 @@
                                     },
                                     sortable: true,
                                     resizable : true,
-                                    width: 100,
+                                    width: 70,
                                     content: function (item) {
                                         return item.name;
                                     }
                                 },
+                                {
+                                    title: '长姓名',
+                                    field: 'longName' ,
+                                    tip :'姓名',
+                                    align: 'right',
+                                    maxWidth: 200,
+                                    editable: 1,
+                                    comparer : function( a,b ){
+                                        return a.name.localeCompare( b.name );
+                                    },
+                                    sortable: true,
+                                    resizable : true,
+                                    width: 200,
+                                    content: function (item) {
+                                        var name = '';
+                                        for (var i = 0; i < 20; i++) {
+                                            name += item.name;
+                                        }
+                                        return '<div class="long-name">' + name + '</div>';
+                                    }
+                                },                                
                                 {
                                     title: '性别',
                                     field: 'sex' ,
@@ -162,7 +183,7 @@
                                     },
                                     sortable: true,
                                     resizable : true,
-                                    width: 200,
+                                    width: 50,
                                     content: function (item) {
                                         return item.sex ? '男' : '女';
                                     }
