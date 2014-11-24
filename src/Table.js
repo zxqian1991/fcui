@@ -141,18 +141,6 @@ define(function (require) {
          */
         select: '',
         /**
-         * tip元素所占的宽度，px。
-         * @type {number}
-         * @default 18
-         */
-        tipWidth: 18,
-        /**
-         * sort图标所占的宽度，px。
-         * @type {number}
-         * @default 9
-         */
-        sortWidth: 9,
-        /**
          * 给tip的etpl template。可以采用各种filter表示法。空值/空串则使用
          * 默认值。
          * @type {string}
@@ -713,7 +701,9 @@ define(function (require) {
             datasource: this.datasource || [],
             dataLength: this.datasource.length,
             realFields: this.realFields,
-            fieldsLength: this.realFields.length
+            fieldsLength: this.realFields.length,
+            order: this.order,
+            orderBy: this.orderBy
         });
 
         if (lib.ie && lib.ie <= 9) {
@@ -723,8 +713,6 @@ define(function (require) {
         else {
             this.getBody().innerHTML = html;
         }
-
-        this.fire('bodyChange');
     };
 
     /**
@@ -886,6 +874,8 @@ define(function (require) {
      *
      * @override
      * @fire headchanged
+     * @fire bodychanged
+     * @fire columnswidthchanged
      */
     proto.repaint = function (changes, changesIndex) {
         this.$super(arguments);
@@ -911,6 +901,7 @@ define(function (require) {
         var fieldsChanged = false;
         var tHeadChanged = false;
         var tBodyChanged = false;
+        var columnsWidthChanged = false;
 
         // 列的定义发生变化，重算fields
         if (allProperities.fields
@@ -926,6 +917,7 @@ define(function (require) {
         if (fieldsChanged) {
             this.renderColGroup();
             this.setColumnsWidth();
+            columnsWidthChanged = true;
         }
 
         // fields发生变化，或者表头定义发生变化，重画表头
@@ -958,8 +950,8 @@ define(function (require) {
             tBodyChanged = true;
         }
 
-        // 表格体发生了变化，重调最大列宽
-        if (tBodyChanged) {
+        // 列宽发生了变化，重调最大列宽
+        if (columnsWidthChanged) {
             this.setCellMaxWidth();
             this.adjustMaxColumnWidth();
             if (this.isNeedCoverHead) {
@@ -969,6 +961,14 @@ define(function (require) {
 
         if (tHeadChanged) {
             this.fire('headchanged');
+        }
+
+        if (tBodyChanged) {
+            this.fire('bodychanged');
+        }
+
+        if (columnsWidthChanged) {
+            this.fire('columnswidthchanged');
         }
     };
 

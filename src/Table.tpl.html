@@ -40,9 +40,9 @@
             <!-- /if -->
             <!-- if: ${field.field} === ${orderBy} -->
                 <!-- if: ${order} === "asc" -->
-                <div class="${hcell-asc | class}"></div>
+                ${hcell-asc | class}
                 <!-- else -->
-                <div class="${hcell-desc | class}"></div>
+                ${hcell-desc | class}
                 <!-- /if -->
             <!-- /if -->
             <!-- if: ${field.tip} -->
@@ -75,7 +75,7 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
 </div>
 <div class="${hcell-extra | class}">
     <!-- if: ${field.sortable} -->
-    <div class="${hcell-hsort | class}"></div>
+    <div class="${hcell-hsort | class}" data-column="${columnIndex}"></div>
     <!-- /if -->
     <!-- if: ${field.tip} -->
     <div class="${hcell-htip | class}"><!-- import: table-head-tip --></div>
@@ -116,6 +116,8 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
 <!-- // @param dataLength 数据源长度 -->
 <!-- // @param realFields 表格的fields定义 -->
 <!-- // @param fieldsLength 表格的fields长度 -->
+<!-- // @param order 当前排序方向 -->
+<!-- // @param orderBy 排序字段 -->
 <!-- if: ${dataLength} == 0 -->
     <!-- import: table-no-data -->
 <!-- else -->
@@ -133,7 +135,7 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
             <!-- if: ${rowIndex} == ${dataLength} - 1 -->
             ${row-last | class}
             <!-- /if -->
-        ">
+        " data-row="${rowIndex}">
             <!-- import: table-row-cells -->
         </tr>
     <!-- /for -->
@@ -153,9 +155,22 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
         <!-- if: ${columnIndex} == ${fieldsLength} - 1 -->
         ${cell-last | class}
         <!-- /if -->
-    ">
-        <!-- import: table-cell-content -->
-    </td>
+        <!-- if: ${field.field} === ${orderBy} -->
+            ${cell-sorted | class}
+        <!-- /if -->
+        <!-- if: ${field.align} === "left" -->
+            ${cell-align-left | class}
+        <!-- elif: ${field.align} === "right" -->
+            ${cell-align-right | class}
+        <!-- elif: ${field.align} === "center" -->
+            ${cell-align-center | class}
+        <!-- else -->
+            ${cell-align-justify | class}
+        <!-- /if -->
+        <!-- if: ${field.tdClassName} -->
+            ${field.tdClassName}
+        <!-- /if -->
+    " data-column="${columnIndex}"><!-- import: table-cell-content --></td>
 <!-- /for -->
 
 <!-- target: table-cell-content -->
@@ -171,6 +186,14 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
         ${cell-text | class}
     ">
         ${renderCellTextContent | call(${dataItem}, ${field}, ${rowIndex}, ${columnIndex})}
+        <!-- if: ${field.editable} -->
+            <div class="${cell-edit-entry | class}"
+                <!-- if: ${field.editType} -->
+                    data-edit-type="${field.editType}"
+                <!-- /if -->
+                data-row="${rowIndex}"
+                data-column="${columnIndex}"></div>
+        <!-- /if -->
     </div>
     ${renderCellExtraContent | call(${dataItem}, ${field}, ${rowIndex}, ${columnIndex})}
 <!-- if: ${field.maxWidth} -->
