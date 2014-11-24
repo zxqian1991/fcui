@@ -160,6 +160,18 @@ define(function (require) {
          */
         fields: [],
         /**
+         * 表格尾的fields配置。
+         * @type {Array<Object>} footInfo
+         * @default null
+         * @property {number} colspan colspan
+         *           foot和body、head域绘制在一个表格中。列宽自由伸展，
+         *           使用时需要保证foot域的个数和表格体一致，包括colspan
+         * @property {Function|string} content 获得表尾单元格内容
+         * @property {string} align
+         *           文字对齐方式，可以为left、right、center、justify
+         */
+        foot: null,
+        /**
          * 按照哪个field排序，提供field名字
          * @type {string}
          * @default ''
@@ -273,15 +285,24 @@ define(function (require) {
         return lib.g(getId(this, 'cover-colgroup'));
     },
 
-
     /**
-     * 获取列表体容器素
+     * 获取列表体容器元素
      *
      * @public
      * @return {HTMLElement} 表格体元素
      */
     proto.getBody = function () {
         return lib.g(getId(this, 'tbody'));
+    };
+
+    /**
+     * 获取列表尾容器元素
+     *
+     * @public
+     * @return {HTMLElement} 表格体元素
+     */
+    proto.getFoot = function () {
+        return lib.g(getId(this, 'tfoot'));
     };
 
     /**
@@ -404,7 +425,7 @@ define(function (require) {
      * IE9下，用于replace整个tfoot区的regex。
      * @type {RegExp}
      */
-    // var REGEX_REPLACE_TFOOT = /(<tfoot.+?>).*?(<\/tfoot>)/;
+    var REGEX_REPLACE_TFOOT = /(<tfoot.+?>).*?(<\/tfoot>)/;
 
     /**
      * IE9下，设置colgroup html
@@ -443,8 +464,13 @@ define(function (require) {
 
     /**
      * IE9下，设置tfoot html
+     * @param {string} html 新的html
      */
-    proto.ieSetTFoot = function () {};
+    proto.ieSetTFoot = function (html) {
+        var tableEl = this.getTable();
+        tableEl.outerHTML = tableEl.outerHTML.replace(REGEX_REPLACE_TFOOT,
+            '$1' + html + '$2');
+    };
 
     /**
      * 绘制表格头。
@@ -792,6 +818,51 @@ define(function (require) {
     };
 
     /**
+     * 绘制表尾
+     */
+    proto.renderFoot = function () {
+        if (this.foot == null) {
+            return;
+        }
+        
+        var html = this.helper.renderTemplate('table-foot', {
+            footArray: this.foot,
+            footLength: this.foot.length
+        });
+
+        if (lib.ie && lib.ie <= 9) {
+            // IE 9不能set tbody的innerHTML，用outerHTML
+            this.ieSetTFoot(html);
+        }
+        else {
+            this.getFoot().innerHTML = html;
+        }
+    };
+
+    /**
+     * 绘制表尾单元格内容
+     * @param {Object} footInfo 表尾信息Object
+     * @param {number} columnIndex 表尾列index
+     * @return {string} 表尾单元格内容
+     */
+    proto.renderFootCellContent = function (footInfo, columnIndex) {
+        // 先生成基本的content
+        var content = footInfo.content;
+        var contentHtml;
+        if (typeof content === 'function') {
+            contentHtml = content.call(this, footInfo, columnIndex);
+        }
+        else {
+            contentHtml = content;
+        }
+        // content需要有一个默认值
+        if (isNullOrEmpty(contentHtml)) {
+            contentHtml = '&nbsp;';
+        }
+        return contentHtml;
+    };
+
+    /**
      * 初始化参数
      *
      * @param {Object} options 构造函数传入的参数
@@ -946,7 +1017,7 @@ define(function (require) {
         if (fieldsChanged
             || allProperities.foot
         ) {
-            // TODO 处理foot
+            this.renderFoot();
             tBodyChanged = true;
         }
 

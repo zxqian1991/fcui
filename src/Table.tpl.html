@@ -48,7 +48,8 @@
             <!-- if: ${field.tip} -->
                 ${hcell-tip | class}
             <!-- /if -->
-            <!-- if: ${field.align} === "left" -->
+            <!-- if: !${field.align} -->
+            <!-- elif: ${field.align} === "left" -->
                 ${hcell-align-left | class}
             <!-- elif: ${field.align} === "right" -->
                 ${hcell-align-right | class}
@@ -158,7 +159,8 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
         <!-- if: ${field.field} === ${orderBy} -->
             ${cell-sorted | class}
         <!-- /if -->
-        <!-- if: ${field.align} === "left" -->
+        <!-- if: !${field.align} -->
+        <!-- elif: ${field.align} === "left" -->
             ${cell-align-left | class}
         <!-- elif: ${field.align} === "right" -->
             ${cell-align-right | class}
@@ -207,6 +209,38 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
 ">
     ${content}
 </div>
+
+<!-- target: table-foot -->
+<!-- // 绘制表尾 -->
+<!-- // @param footArray -->
+<!-- // @param footLength -->
+<tr class="${foot-row | class}">
+    <!-- for: ${footArray} as ${foot}, ${index} -->
+    <td class="
+        ${fcell | class}
+        <!-- if: ${index} == 0 -->
+        ${fcell-first | class}
+        <!-- /if -->
+        <!-- if: ${index} == ${footLength} - 1 -->
+        ${fcell-last | class}
+        <!-- /if -->
+        <!-- if: !${foot.align} -->
+        <!-- elif: ${foot.align} === "left" -->
+            ${fcell-align-left | class}
+        <!-- elif: ${foot.align} === "right" -->
+            ${fcell-align-right | class}
+        <!-- elif: ${foot.align} === "center" -->
+            ${fcell-align-center | class}
+        <!-- else -->
+            ${fcell-align-justify | class}
+        <!-- /if -->
+    " <!-- if: ${foot.colspan} -->
+        colspan="${foot.colspan}"
+    <!-- /if -->>
+        <div class="${fcell-text | class}">${renderFootCellContent | call(${foot}, ${index})}</div>
+    </td>
+    <!-- /for -->
+</tr>
 
 <!-- target: table-no-data -->
 <!-- // 表格体不含有数据时候的内容 -->
