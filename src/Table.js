@@ -68,26 +68,36 @@ define(function (require) {
          * @default 100%
          */
         width: '100%',
-        noDataHtml: '没有数据',
-        noFollowHeadCache: false,
-        followHead: false,
+        /**
+         * 表格是否支持排序
+         * @type {boolean}
+         * @default false
+         */
         sortable: false,
+        /**
+         * 是否对单元格内容进行HTML encode
+         * @type {boolean}
+         * @default false
+         */
         encode: false,
-        columnResizable: false,
-        rowWidthOffset: -1,
+        /**
+         * 支持的行选中模式。可以为 'single' 或 'multi'
+         * @type {String}
+         * @defalut ''
+         */
         select: '',
-        selectMode: 'box',
-        subrowMutex: 1,
-        subEntryOpenTip: '点击展开',
-        subEntryCloseTip: '点击收起',
-        subEntryWidth: 18,
-        breakLine: false,
-        hasTip: false,
-        hasSubrow: false,
+        /**
+         * tip元素所占的宽度，px。
+         * @type {number}
+         * @default 18
+         */
         tipWidth: 18,
-        sortWidth: 9,
-        fontSize: 13,
-        colPadding: 8
+        /**
+         * sort图标所占的宽度，px。
+         * @type {number}
+         * @default 9
+         */
+        sortWidth: 9
     };
 
     /**
@@ -319,19 +329,12 @@ define(function (require) {
      * 同步表格列的宽度到cover table上。
      */
     proto.syncWidth = function () {
-        var thead = lib.g(getId(this, 'thead'));
-        var thTrs = lib.getChildren(thead);
-        var coverThead = lib.g(getId(this, 'cover-thead'));
-        var coverThTrs = lib.getChildren(coverThead);
-        if (thTrs.length && coverThTrs.length) {
-            var ths = lib.getChildren(thTrs[0]);
-            var coverThs = lib.getChildren(coverThTrs[0]);
-            u.each(ths, function (th, index) {
-                var width = lib.getComputedStyle(th, 'width');
-                var coverTh = coverThs[index];
-                coverTh.style.width = width;
-            });
-        }
+        var cols = lib.getChildren(this.getColGroup());
+        var coverCols = lib.getChildren(this.getCoverColGroup());
+        u.each(cols, function (col, index) {
+            var width = col.style.width;
+            coverCols[index].style.width = width;
+        });
     };
 
     /**
@@ -470,7 +473,7 @@ define(function (require) {
         else {
             this.getColGroup().innerHTML = html;
             if (this.isNeedCoverHead) {
-                this.getCoverColGroup.innerHTML = html;
+                this.getCoverColGroup().innerHTML = html;
             }
         }
     };
@@ -501,7 +504,7 @@ define(function (require) {
             }
 
             // 无论是maxWidth还是width，都当做width style画上去
-            columnsWidth.push(w);
+            columnsWidth.push(Math.round(w));
         });
 
         this.totalMaxWidth = totalMaxWidth;
@@ -577,14 +580,15 @@ define(function (require) {
                         }
                     }
                 });
-                
+
                 if (availWidth > 0) {
-                    // 声明的列宽有剩余，平均分配到除声明了最大列宽的列之外的
-                    // 列上
+                    // 声明的列宽有剩余，平均分配到除声明了
+                    // 最大列宽的列之外的列上
                     var fieldsLength = this.realFields.length;
                     var avgWidth = availWidth /
                         (fieldsLength
                             - Object.keys(this.maxWidthColumns).length);
+                    avgWidth = Math.round(avgWidth);
 
                     u.each(this.columnsWidth, function (width, index) {
                         if (me.maxWidthColumns[index] == null) {
@@ -873,6 +877,9 @@ define(function (require) {
         if (tBodyChanged) {
             this.setCellMaxWidth();
             this.adjustMaxColumnWidth();
+            if (this.isNeedCoverHead) {
+                this.syncWidth();
+            }
         }
 
         if (tHeadChanged) {
