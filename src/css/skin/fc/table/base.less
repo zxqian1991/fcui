@@ -25,10 +25,47 @@
 
 /**
  * 设置table单元格样式
- * &指代 ui-table-cell，ui-table-hcell
+ * &指代 ui-table-cell，ui-table-hcell, ui-table-fcell
  */
-.set-table-cell() {
+.set-cells() {
+    &-first {
+        // 第一个单元格有左边框
+        border-left: 1px solid @skin-fc-border-color-light;
+    }
 
+    &-last {
+        // 最后一个单元格有右边框
+        border-right: 1px solid @skin-fc-border-color-light;        
+    }
+
+    &-text {
+        height: auto;
+        //  行高16px，需要一行的情况下行高39px，余23px。
+        line-height: 16px;
+        padding: 12px 5px 11px;
+        color: @skin-fc-text-color-gray-dark;
+
+        a:hover {
+            color: @skin-fc-text-color-blue;
+            text-decoration: none;
+        }
+    }
+
+    &-align-left {
+        text-align: left;
+    }
+
+    &-align-right {
+        text-align: right;
+    }
+
+    &-align-center {
+        text-align: center;
+    }
+
+    &-align-justify {
+        text-align: justify;
+    }
 }
 
 /**
@@ -36,7 +73,20 @@
  * &指代 ui-table
  */
 .set-table-head() {
+    &-thead {
+        background: @skin-fc-bg-color-gray-light;
+        border-bottom: 1px solid @skin-fc-shadow-color;
 
+        tr {
+            .ui-table-hcell {
+                .set-cells();
+                & {
+                    font-weight: bold;
+                    vertical-align: top;
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -45,15 +95,41 @@
  */
 .set-table-body() {
     &-tbody {
+        background: @skin-fc-bg-color-white;
+
         .ui-table-row {
+            border-bottom: 1px solid @skin-fc-border-color-light;
+
             .ui-table-cell {
                 .ui-table-cell {
                     &-max-width {
                         overflow: hidden;
                     }
+
+                    &-text {
+                        a {
+                            color: @skin-fc-text-color-blue-dark;
+                        }
+                    }                    
                 }
 
-                .set-table-cell();
+                .set-cells();
+            }
+        }
+    }
+}
+
+/**
+ * 设置table表格尾区域样式
+ * &指代 ui-table
+ */
+.set-table-foot() {
+    &-tfoot {
+        background: @skin-fc-bg-color-white;
+        border-bottom: 1px solid @skin-fc-border-color-light;
+        tr {
+            .ui-table-fcell {
+                .set-cells();
             }
         }
     }
@@ -65,6 +141,12 @@
     &-has-max-height {
         overflow-y: auto;
         position: relative;
+    }
+
+    &-has-vborder {
+        .ui-table-col {
+            border-right: 1px solid @skin-fc-border-color-light;
+        }
     }
 
     .ui-table {
@@ -82,7 +164,9 @@
             left: 0;
         }
 
+
         .set-table-head();
         .set-table-body();
-    }    
+        .set-table-foot();
+    }
 }

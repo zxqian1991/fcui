@@ -181,7 +181,13 @@ define(function (require) {
          * 排序顺序
          * @default ''
          */
-        order: ''
+        order: '',
+        /**
+         * 是否要有竖向的边框
+         * @type {boolean}
+         * @default false
+         */
+        hasVborder: false
     };
 
     /**
@@ -395,12 +401,15 @@ define(function (require) {
      * 同步表格列的宽度到cover table上。
      */
     proto.syncWidth = function () {
-        var cols = lib.getChildren(this.getColGroup());
+        var tr = lib.getChildren(this.getBody());
         var coverCols = lib.getChildren(this.getCoverColGroup());
-        u.each(cols, function (col, index) {
-            var width = col.style.width;
-            coverCols[index].style.width = width;
-        });
+        if (tr.length) {
+            var tds = lib.getChildren(tr[0]);
+            var me = this;
+            u.each(tds, function (td, index) {
+                coverCols[index].style.width = td.offsetWidth + 'px';
+            });
+        }
     };
 
     /**
@@ -872,6 +881,10 @@ define(function (require) {
     proto.initOptions = function (options) {
         var properties = {};
 
+        if (options.hasVborder === 'false') {
+            options.hasVborder = false;
+        }
+
         u.extend(properties, this.defaultProperties, options);
 
         this.setProperties(properties);
@@ -887,6 +900,11 @@ define(function (require) {
         this.$super(arguments);
 
         var tableHtml = this.helper.renderTemplate('table');
+
+        if (this.hasVborder) {
+            lib.addClasses(this.main,
+                this.helper.getStateClasses('has-vborder'));            
+        }
 
         if (typeof this.width !== 'undefined') {
             if (this.width.indexOf && this.width.indexOf('%') > -1) {
