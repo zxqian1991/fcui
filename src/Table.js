@@ -13,6 +13,7 @@ define(function (require) {
     var etpl = require('etpl');
     var lib = require('./lib');
     var Control = require('./Control');
+    var handlers = require('./Table.handlers');
 
     var engine = new etpl.Engine();
 
@@ -40,6 +41,8 @@ define(function (require) {
 
         this.helper.setTemplateEngine(options.templateEngine || engine);
     };
+
+    proto.eventHandlers = handlers;
 
     /**
      * 表示一个表格field的对象。
@@ -405,7 +408,6 @@ define(function (require) {
         var coverCols = lib.getChildren(this.getCoverColGroup());
         if (tr.length) {
             var tds = lib.getChildren(tr[0]);
-            var me = this;
             u.each(tds, function (td, index) {
                 coverCols[index].style.width = td.offsetWidth + 'px';
             });
@@ -833,7 +835,7 @@ define(function (require) {
         if (this.foot == null) {
             return;
         }
-        
+
         var html = this.helper.renderTemplate('table-foot', {
             footArray: this.foot,
             footLength: this.foot.length
@@ -903,7 +905,7 @@ define(function (require) {
 
         if (this.hasVborder) {
             lib.addClasses(this.main,
-                this.helper.getStateClasses('has-vborder'));            
+                this.helper.getStateClasses('has-vborder'));
         }
 
         if (typeof this.width !== 'undefined') {
