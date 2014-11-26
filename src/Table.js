@@ -108,37 +108,42 @@ define(function (require) {
         /**
          * 整个表格的最大高度，px为单位，设置为非0值会设置表格区
          * 的max-height css属性。当表格超高时，会出现竖向滚动条。
-         * 控件初始化后，这个值不可以修改。
+         * 不可通过setProperties修改
          * @property {number}
          * @default 0
          */
         tableMaxHeight: 0,
         /**
          * Table主体的z-index
+         * 不可通过setProperties修改
          * @type {Number}
          * @default 0
          */
         zIndex: 0,
         /**
          * 表格外容器的宽度，可以设置为绝对宽度，也可以设置为百分比宽度
+         * 不可通过setProperties修改
          * @type number
          * @default 100%
          */
         width: '100%',
         /**
          * 表格是否支持排序
+         * 不可通过setProperties修改
          * @type {boolean}
          * @default false
          */
         sortable: false,
         /**
          * 是否对单元格内容进行HTML encode
+         * 不可通过setProperties修改
          * @type {boolean}
          * @default false
          */
         encode: false,
         /**
          * 支持的行选中模式。可以为 'single' 或 'multi'
+         * 不可通过setProperties修改
          * @type {String}
          * @defalut ''
          */
@@ -146,10 +151,18 @@ define(function (require) {
         /**
          * 给tip的etpl template。可以采用各种filter表示法。空值/空串则使用
          * 默认值。
+         * 不可通过setProperties修改
          * @type {string}
          * @default ''
          */
         tipTemplate: '',
+        /**
+         * 是否要有竖向的边框
+         * 不可通过setProperties修改
+         * @type {boolean}
+         * @default false
+         */
+        hasVborder: false,
         /**
          * 表格的数据源。
          * @type {Array}
@@ -157,7 +170,7 @@ define(function (require) {
          */
         datasource: [],
         /**
-         * 表格的数据源。
+         * 表格的fields定义。
          * @type {Array<Table~field>}
          * @default []
          */
@@ -186,11 +199,11 @@ define(function (require) {
          */
         order: '',
         /**
-         * 是否要有竖向的边框
-         * @type {boolean}
-         * @default false
+         * 已经选择了的行。设置为-1表示全部选中。当select为multi时，是数组。
+         * 当select为single时，为单个行号。
+         * @type {Array|number}
          */
-        hasVborder: false
+        selectedRowIndex: []
     };
 
     /**
@@ -373,13 +386,15 @@ define(function (require) {
                     title: function (item, index) {
                         return me.helper.renderTemplate('table-select-all', {
                             index: index,
-                            disabled: me.disabled ? 'disabled="disabled"' : ''
+                            disabled: me.disabled ? 'disabled="disabled"' : '',
+                            checked: ''
                         });
                     },
                     content: function (item, index) {
                         return me.helper.renderTemplate('table-select-multi', {
                             index: index,
-                            disabled: me.disabled ? 'disabled="disabled"' : ''
+                            disabled: me.disabled ? 'disabled="disabled"' : '',
+                            checked: ''
                         });
                     }
                 });
@@ -392,7 +407,8 @@ define(function (require) {
                     content: function (item, index) {
                         return me.helper.renderTemplate('table-select-single', {
                             index: index,
-                            disabled: me.disabled ? 'disabled="disabled"' : ''
+                            disabled: me.disabled ? 'disabled="disabled"' : '',
+                            checked: ''
                         });
                     }
                 });
@@ -874,6 +890,75 @@ define(function (require) {
     };
 
     /**
+     * 绘制已选中行
+     * @param {boolean} isRevert 函数将去掉row上的selected class
+     *      目标row由selected提供。默认为false
+     * @param {Array|number} selected 已选行。isRevert == true时候需要
+     */
+    proto.renderSelectedRows = function (isRevert, selected) {
+        var trs = lib.getChildren(this.getBody());
+        if (typeof selected === 'undefined') {
+            selected = this.selectedRowIndex;
+        }
+        isRevert = !!isRevert;
+
+        switch (this.select.toLowerCase()) {
+            case 'multi':
+                if (selected === -1) {
+                    // 所有行都选中
+                    if (isRevert) {
+                        u.each(trs, function (tr) {
+                            lib.removeClasses(tr,
+                                this.helper.getPartClasses('row-selected'));
+                        }, this);
+                    }
+                    else {
+                        u.each(trs, function (tr) {
+                            lib.addClasses(tr,
+                                this.helper.getPartClasses('row-selected'));
+                        }, this);
+                    }
+
+                    u.each(
+                        lib.findAll(this.getBody(), '.ui-table-multi-select'),
+                        function (el) {
+                            el.checked = !isRevert;
+                        }
+                    );
+                }
+                else {
+                    if (isRevert) {
+                        u.each(selected, function (rowIndex) {
+                            lib.removeClasses(trs[rowIndex],
+                                this.helper.getPartClasses('row-selected'));
+                        }, this);
+                    }
+                    else {
+                        u.each(selected, function (rowIndex) {
+                            lib.addClasses(trs[rowIndex],
+                                this.helper.getPartClasses('row-selected'));
+                        }, this);
+                    }
+                }
+                break;
+            case 'single':
+                if (typeof selected.length === 'undefined') {
+                    if (isRevert) {
+                        lib.removeClasses(trs[selected],
+                            this.helper.getPartClasses('row-selected'));
+                    }
+                    else {
+                        lib.addClasses(trs[selected],
+                            this.helper.getPartClasses('row-selected'));
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    };
+
+    /**
      * 初始化参数
      *
      * @param {Object} options 构造函数传入的参数
@@ -995,59 +1080,54 @@ define(function (require) {
         var columnsWidthChanged = false;
 
         // 列的定义发生变化，重算fields
-        if (allProperities.fields
-            || allProperities.select
-            || allProperities.selectMode
-            || allProperities.sortable
-        ) {
+        if (allProperities.fields) {
             this.initFields();
             fieldsChanged = true;
         }
 
-        // fields 发生变化，重画colgroup
+        // fields 发生变化，重画colgroup，初设列宽，绘制表头
         if (fieldsChanged) {
             this.renderColGroup();
             this.setColumnsWidth();
             columnsWidthChanged = true;
-        }
 
-        // fields发生变化，或者表头定义发生变化，重画表头
-        if (fieldsChanged
-            || allProperities.noHead
-            || allProperities.order
-            || allProperities.orderBy
-            || allProperities.selectedIndex
-        ) {
             this.renderHead();
             tHeadChanged = true;
         }
 
         // fields 发生变化，或者表体内容发生变化，重画表体
-        if (fieldsChanged
-            || allProperities.encode
-            || allProperities.noDataHtml
-            || allProperities.datasource
-            || allProperities.selectedIndex
-        ) {
+        if (fieldsChanged || allProperities.datasource) {
             this.renderBody();
             tBodyChanged = true;
         }
 
         // fields 发生变化，或者tfoot内容发生变化，重画tfoot
-        if (fieldsChanged
-            || allProperities.foot
-        ) {
+        if (fieldsChanged || allProperities.foot) {
             this.renderFoot();
             tBodyChanged = true;
         }
 
         // 列宽发生了变化，重调最大列宽
-        if (columnsWidthChanged) {
+        if (columnsWidthChanged || tBodyChanged) {
             this.setCellMaxWidth();
             this.adjustMaxColumnWidth();
             if (this.isNeedCoverHead) {
                 this.syncWidth();
             }
+        }
+
+        if (allProperities.order || allProperities.orderBy) {
+
+        }
+
+        if (tBodyChanged || allProperities.selectedRowIndex) {
+            if (changesIndex && changesIndex.selectedRowIndex) {
+                var selectedObject = changesIndex.selectedRowIndex;
+                if (typeof selectedObject.oldValue !== 'undefined') {
+                    this.renderSelectedRows(true, selectedObject.oldValue);
+                }
+            }
+            this.renderSelectedRows();
         }
 
         if (tHeadChanged) {
@@ -1071,14 +1151,14 @@ define(function (require) {
      */
     proto.setDatasource = function(datasource) {
         this.datasource = datasource;
-        this.setSelectedIndex(this, []);
+        this.selectedRowIndex = [];
         var record = {name: 'datasource'};
-        var record2 = {name: 'selectedIndex'};
+        var record2 = {name: 'selectedRowIndex'};
 
         this.repaint([record, record2],
             {
                 datasource: record,
-                selectedIndex: record2
+                selectedRowIndex: record2
             }
         );
     };
@@ -1090,31 +1170,65 @@ define(function (require) {
      * @return {Array} 选中的项
      */
     proto.getSelectedItems = function() {
-        var selectedIndex = this.selectedIndex;
-        var result = [];
-        if (selectedIndex) {
-            var datasource = this.datasource;
-            if (datasource) {
-                for (var i = 0; i < selectedIndex.length; i++) {
-                    result.push(datasource[selectedIndex[i]]);
+        switch (this.select.toLowerCase()) {
+            case 'multi':
+                if (this.selectedRowIndex === -1) {
+                    return this.datasource;
                 }
-            }
+
+                var selectedIndex = this.selectedRowIndex;
+                var result = [];
+                if (selectedIndex) {
+                    var datasource = this.datasource;
+                    if (datasource) {
+                        for (var i = 0; i < selectedIndex.length; i++) {
+                            result.push(datasource[selectedIndex[i]]);
+                        }
+                    }
+                }
+                return result;
+            case 'single':
+                return this.datasource[this.selectedRowIndex];
+            default:
+                break;
         }
-        return result;
+        return [];
     };
 
     /**
-     * 判断某行是否选中
-     *
-     * @private
-     * @param {number} index 行号
-     * @return {boolean} 行被选中
+     * 表格选中某一行。
+     * @param  {number} index 行index
      */
-    proto.isRowSelected = function (index) {
-        if (this.selectedIndexMap) {
-            return !!this.selectedIndexMap[index];
+    proto.selectRow = function (index) {
+        switch (this.select.toLowerCase()) {
+            case 'multi':
+                this.selectedRowIndex.push(index);
+                this.renderSelectedRows();
+                break;
+            case 'single':
+                this.set('selectedRowIndex', index);
+                break;
+            default:
+                break;
         }
-        return false;
+    };
+
+    /**
+     * 表格取消选中某一行
+     * @param  {number} index 行index
+     */
+    proto.unselectRow = function (index) {
+        switch (this.select.toLowerCase()) {
+            case 'multi':
+                var selected = this.selectedRowIndex;
+                selected.slice(u.indexOf(selected, index), 1);
+                this.renderSelectedRows(true, [index]);
+                break;
+            case 'single':
+                break;
+            default:
+                break;
+        }
     };
 
     /**

@@ -59,6 +59,13 @@ define(function (require) {
             }
             return this[methodName].apply(this,
                 Array.prototype.slice.call(arguments, 1));
+        },
+        /**
+         * 用作etpl中的filter。接收所有参数并将其作为字符串拼接并返回。
+         * @return {string} 拼接字符串的结果
+         */
+        'append': function () {
+            return Array.prototype.join.call(arguments, '');
         }
     };
 

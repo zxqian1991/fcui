@@ -16,7 +16,8 @@ define(function (require) {
     u.extend(
         lib,
         require('esui/lib'),
-        require('./lib/template')
+        require('./lib/template'),
+        require('./lib/dom')
     );
 
     lib.ie = eLib.ie;

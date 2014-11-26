@@ -8,30 +8,139 @@
  * @return {Object} 表格事件处理部分
  */
 define(function (require) {
+    var lib = require('./lib');
+
     return {
+        /**
+         * 表格行的mouse-over和mouse-out
+         */
         'row-hover': {
             eventType: 'mouseover',
             cssMatch: 'ui-table-row',
             handler: function (e, el) {
+                lib.addClasses(el, this.helper.getPartClasses('row-hover'));
             }
         },
-        'select-changed': {
+        'row-out': {
+            eventType: 'mouseout',
+            cssMatch: 'ui-table-row',
+            handler: function (e, el) {
+                lib.removeClasses(el, this.helper.getPartClasses('row-hover'));
+            }
+        },
+        /**
+         * 表格尾行的mouse-over和mouse-out
+         */
+        'foot-row-hover': {
+            eventType: 'mouseover',
+            cssMatch: 'ui-table-foot-row',
+            handler: function (e, el) {
+                lib.addClasses(el,
+                    this.helper.getPartClasses('foot-row-hover'));
+            }
+        },
+        'foot-row-out': {
+            eventType: 'mouseout',
+            cssMatch: 'ui-table-foot-row',
+            handler: function (e, el) {
+                lib.removeClasses(el,
+                    this.helper.getPartClasses('foot-row-hover'));
+            }
+        },
+        /**
+         * 表格体单元格的mouse-over和mouse-out
+         */
+        'cell-hover': {
+            eventType: 'mouseover',
+            cssMatch: 'ui-table-cell',
+            handler: function (e, el) {
+                lib.addClasses(el, this.helper.getPartClasses('cell-hover'));
+            }
+        },
+        'cell-out': {
+            eventType: 'mouseout',
+            cssMatch: 'ui-table-cell',
+            handler: function (e, el) {
+                lib.removeClasses(el, this.helper.getPartClasses('cell-hover'));
+            }
+        },
+        /**
+         * 表格尾单元格的mouse-over和mouse-out
+         */
+        'fcell-hover': {
+            eventType: 'mouseover',
+            cssMatch: 'ui-table-fcell',
+            handler: function (e, el) {
+                lib.addClasses(el, this.helper.getPartClasses('fcell-hover'));
+            }
+        },
+        'fcell-out': {
+            eventType: 'mouseout',
+            cssMatch: 'ui-table-fcell',
+            handler: function (e, el) {
+                lib.removeClasses(el,
+                    this.helper.getPartClasses('fcell-hover'));
+            }
+        },
+        /**
+         * 表头单元格的mouse-over和mouse-out
+         */
+        'hcell-hover': {
+            eventType: 'mouseover',
+            cssMatch: 'ui-table-hcell',
+            handler: function (e, el) {
+                lib.addClasses(el, this.helper.getPartClasses('hcell-hover'));
+            }
+        },
+        'hcell-out': {
+            eventType: 'mouseout',
+            cssMatch: 'ui-table-hcell',
+            handler: function (e, el) {
+                lib.removeClasses(el,
+                    this.helper.getPartClasses('hcell-hover'));
+            }
+        },
+        /**
+         * 表格行单选，多选，全选事件
+         */
+        'mselect': {
             eventType: 'click',
             cssMatch: 'ui-table-multi-select',
             handler: function (e, el) {
+                var index = +lib.getAttribute(el, 'data-index');
+                if (el.checked) {
+                    this.selectRow(index);
+                }
+                else {
+                    this.unselectedRow(index);
+                }
+            }
+        },
+        'sselect': {
+            eventType: 'click',
+            cssMatch: 'ui-table-single-select',
+            handler: function (e, el) {
+                var index = +lib.getAttribute(el, 'data-index');
+                this.set('selectedRowIndex', index);
+            }
+        },
+        'allselect': {
+            eventType: 'click',
+            cssMatch: 'ui-table-select-all',
+            handler: function (e, el) {
+                this.set('selectedRowIndex',
+                    el.checked ? -1 : []);
             }
         },
         'window-resized': {
             eventType: 'resize',
             el: window,
             handler: function () {
-                console.log(arguments);
             }
         },
         'main-scroll': {
             eventType: 'scroll',
             handler: function () {
-                console.log(arguments);
             }
         }
     };

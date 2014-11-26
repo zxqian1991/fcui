@@ -99,11 +99,15 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
 
 <!-- target: table-select-multi -->
 <!-- // 处于表格体单元格TD内的多选内容 -->
-<input type="checkbox" id="${multi-select | id}" class="${multi-select | class}"
-    data-index="${index}" ${disabled} />
+<input type="checkbox" id="${multi-select | append(${index}) | id}"
+    class="${multi-select | class}" data-index="${index}" ${disabled} />
 
 <!-- target: table-select-single -->
-<!-- // 处于表格TH内的多选全选内容 -->
+<!-- // 处于表格体单元格内的多选全选内容 -->
+<input type="radio" id="${single-select | append(${index}) | id}"
+    name="${single-select | id}"
+    class="${single-select | class}" data-index="${index}"
+    ${disabled} ${checked} />
 
 <!-- target: table-body-ie -->
 <tbody id="${tbody | id}" class="${tbody | class}">

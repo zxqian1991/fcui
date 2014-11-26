@@ -100,6 +100,14 @@
         .ui-table-row {
             border-bottom: 1px solid @skin-fc-border-color-light;
 
+            &-hover {
+               background: @skin-fc-bg-color-hover-blue; 
+            }
+
+            &-selected {
+                background: @skin-fc-bg-color-selected;
+            }
+
             .ui-table-cell {
                 .ui-table-cell {
                     &-max-width {
@@ -127,7 +135,10 @@
     &-tfoot {
         background: @skin-fc-bg-color-white;
         border-bottom: 1px solid @skin-fc-border-color-light;
-        tr {
+        .ui-table-foot-row {
+            &-hover {
+                background: @skin-fc-bg-color-hover-blue;
+            }
             .ui-table-fcell {
                 .set-cells();
             }
