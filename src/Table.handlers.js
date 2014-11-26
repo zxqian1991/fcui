@@ -101,6 +101,25 @@ define(function (require) {
             }
         },
         /**
+         * 表头排序图标的mouse-over和mouse-out
+         */
+        'hsort-hover': {
+            eventType: 'mouseover',
+            cssMatch: 'ui-table-hcell-hsort',
+            handler: function (e, el) {
+                lib.addClasses(el,
+                    this.helper.getPartClasses('hcell-hsort-hover'));
+            }
+        },
+        'hsort-out': {
+            eventType: 'mouseout',
+            cssMatch: 'ui-table-hcell-hsort',
+            handler: function (e, el) {
+                lib.removeClasses(el,
+                    this.helper.getPartClasses('hcell-hsort-hover'));
+            }
+        },        
+        /**
          * 表格行单选，多选，全选事件
          */
         'mselect': {

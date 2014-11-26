@@ -75,11 +75,11 @@
 ${renderHeadTextContent | call(${field}, ${columnIndex})}
 </div>
 <div class="${hcell-extra | class}">
-    <!-- if: ${field.sortable} -->
-    <div class="${hcell-hsort | class}" data-column="${columnIndex}"></div>
-    <!-- /if -->
     <!-- if: ${field.tip} -->
     <div class="${hcell-htip | class}"><!-- import: table-head-tip --></div>
+    <!-- /if -->
+    <!-- if: ${field.sortable} -->
+    <div class="${hcell-hsort | class}" data-column="${columnIndex}"></div>
     <!-- /if -->
 </div>
 
