@@ -8,6 +8,7 @@
  * @return {Object} 表格事件处理部分
  */
 define(function (require) {
+    var u = require('underscore');
     var lib = require('./lib');
 
     return {
@@ -151,17 +152,35 @@ define(function (require) {
                     el.checked ? -1 : []);
             }
         },
+        /**
+         * 改变大小的事件
+         */
         'window-resized': {
             eventType: 'resize',
             el: window,
             enable: function () {
-                
+                return false;
             },
             handler: function () {
             }
         },
+        /**
+         * 锁表头的事件：在window上锁定表头和在表格wrapper内锁定表头
+         */
         'main-scroll': {
             eventType: 'scroll',
+            enable: function () {
+                return this.tableMaxHeight > 0;
+            },
+            handler: function (e, el) {
+                var scrollTop = el.scrollTop;
+                var cover = this.getCoverTable();
+                cover.style.top = scrollTop + 'px';
+            }
+        },
+        'window-scroll': {
+            eventType: 'scroll',
+            el: window,
             enable: function () {
                 return this.tableMaxHeight > 0;
             },

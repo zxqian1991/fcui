@@ -58,5 +58,32 @@ define(function (require) {
         return matches.call(el, query);
     };
 
+    /**
+     * 从el开始查找直到找到符合query的父元素。或直到endEl，或直到body为止。
+     * 若没有提供query，则直接返回endEl，或body。
+     * @param {HTMLElement} el 起始el
+     * @param {string} query 符合CSS 2.1的查询串
+     * @param {HTMLElement} 
+     * @return {return} 符合query的父元素
+     */
+    exports.parent = function (el, query, endEl) {
+        endEl = endEl || document.body;
+        if (typeof query === 'undefined'
+            || (query.length && query.length === 0)) {
+            // 没给query，直接退出
+            return endEl;
+        }
+        var cur = el;
+        while (cur && cur !== endEl) {
+            if (cur.nodeType === 1) {
+                if (exports.match(cur, query)) {
+                    return cur;
+                }
+            }
+            cur = cur.parentNode;
+        }
+        return endEl;
+    };
+
     return exports;
 });

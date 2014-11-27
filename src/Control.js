@@ -122,22 +122,19 @@ define(function (require) {
     proto.createHandler = function (handlersQueue) {
         return u.bind(function (event) {
             var e = e || window.event;
-            var cur = e.target;
-
-            while (cur) {
-                if (cur.nodeType === 1) {
-                    for (var i = handlersQueue.length - 1; i >= 0; i--) {
-                        var handler = handlersQueue[i];
-                        if (handler.query && lib.match(cur, handler.query)) {
-                            handler.handler.call(this, e, cur);
-                        }
-                    }
+            var main = this.main;
+            u.each(handlersQueue, function (handler) {
+                if (handler.query) {
+                    handler.handler.call(
+                        this,
+                        e,
+                        lib.parent(e.target, handler.query, main)
+                    );
                 }
-                if (cur === this.main) {
-                    break;
+                else {
+                    handler.handler.call(this, e, e.target);
                 }
-                cur = cur.parentNode;
-            }
+            }, this);
         }, this);
     };
 
