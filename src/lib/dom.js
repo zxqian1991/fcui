@@ -63,7 +63,7 @@ define(function (require) {
      * 若没有提供query，则直接返回endEl，或body。
      * @param {HTMLElement} el 起始el
      * @param {string} query 符合CSS 2.1的查询串
-     * @param {HTMLElement} 
+     * @param {HTMLElement} endEl 查询截止的element
      * @return {return} 符合query的父元素
      */
     exports.parent = function (el, query, endEl) {
@@ -83,6 +83,31 @@ define(function (require) {
             cur = cur.parentNode;
         }
         return endEl;
+    };
+
+    /**
+     * 拿取元素包括margin的高度
+     * @param {HTMLElement} elm 元素
+     * @return {number} 高度值
+     */
+    exports.getOuterHeight = function (elm) {
+        var elmHeight;
+        var elmMargin;
+
+        if (document.all) {
+            // IE
+            elmHeight = parseInt(elm.currentStyle.height, 10);
+            elmMargin = parseInt(elm.currentStyle.marginTop, 10)
+                + parseInt(elm.currentStyle.marginBottom, 10);
+        }
+        else {
+            // Mozilla
+            var cs = document.defaultView.getComputedStyle(elm, '');
+            elmHeight = parseInt(cs.getPropertyValue('height'), 10);
+            elmMargin = parseInt(cs.getPropertyValue('margin-top'), 10)
+                + parseInt(cs.getPropertyValue('margin-bottom'), 10);
+        }
+        return (elmHeight + elmMargin);
     };
 
     return exports;

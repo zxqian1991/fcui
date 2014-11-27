@@ -152,7 +152,7 @@ define(function (require) {
          * 给tip的etpl template。可以采用各种filter表示法。空值/空串则使用
          * 默认值。
          * 不可通过setProperties修改
-         * @type {string}
+         * @type {string}layer
          * @default ''
          */
         tipTemplate: '',
@@ -163,6 +163,26 @@ define(function (require) {
          * @default false
          */
         hasVborder: false,
+        /**
+         * 是否锁定表头在屏幕顶部。
+         * 不可通过setProperties修改
+         * 不可与tableMaxHeight同用。
+         * @type {boolean}
+         * @default {boolean}
+         */
+        fixHeadAtTop: false,
+        /**
+         * 给定另一个绘制在表头DOM之上的DOM。当表头锁定在屏幕顶时，将从这个
+         * 给定的DOM开始锁定。
+         * 这个给定的DOM一定必须在表头DOM之上，并且与表头DOM之间没有任何占
+         * 高度的内容。
+         * 这个给定的DOM需要保持背景非透明。否则表格内容将从这个DOM底露出来
+         * 当fixHeadAtTop为false时，这个属性无意义。
+         * 不可通过setProperties修改
+         * @type {HTMLElement}
+         * @default null
+         */
+        fixAtDom: null,
         /**
          * 表格的数据源。
          * @type {Array}
@@ -256,6 +276,14 @@ define(function (require) {
     proto.getTable = function () {
         return lib.g(getId(this, 'table'));
     },
+
+    /**
+     * 表头锁定顶部时，拿cover table的wrapper div
+     * @return {HTMLElement} wrapper元素
+     */
+    proto.getCoverTableWrapper = function () {
+        return lib.g(getId(this, 'cover-table-wrapper'));
+    };
 
     /**
      * 获取Cover用整个表格体
@@ -427,6 +455,10 @@ define(function (require) {
             u.each(tds, function (td, index) {
                 coverCols[index].style.width = td.offsetWidth + 'px';
             });
+        }
+        if (this.fixHeadAtTop) {
+            this.getCoverTableWrapper().style.width =
+                this.getTable().offsetWidth + 'px';
         }
     };
 
@@ -986,8 +1018,6 @@ define(function (require) {
     proto.initStructure = function() {
         this.$super(arguments);
 
-        var tableHtml = this.helper.renderTemplate('table');
-
         if (this.hasVborder) {
             lib.addClasses(this.main,
                 this.helper.getStateClasses('has-vborder'));
@@ -1016,13 +1046,52 @@ define(function (require) {
             this.isNeedCoverHead = true;
         }
 
-        if (this.isNeedCoverHead) {
-            tableHtml += this.helper.renderTemplate('cover-table');
+        if (this.fixHeadAtTop) {
+            this.isNeedCoverHead = true;
         }
+
+        var tableHtml = '';
+        if (this.isNeedCoverHead) {
+            tableHtml += this.helper.renderTemplate('cover-table', {
+                fixHeadAtTop: this.fixHeadAtTop
+            });
+        }
+
+        tableHtml += this.helper.renderTemplate('table');
 
         this.main.innerHTML = tableHtml;
 
         this.setZIndex();
+
+        if (this.fixHeadAtTop) {
+            this.initFixHead();
+        }
+    };
+
+    /**
+     * 处理锁表头相关
+     */
+    proto.initFixHead = function () {
+        lib.addClasses(this.main,
+            this.helper.getStateClasses('fix-head'));
+        this.refreshFixTop();
+    };
+
+    /**
+     * 
+     */
+    proto.refreshFixTop = function () {
+        if (this.fixAtDom) {
+            var position = this.fixAtDom.style.position;
+            this.fixAtDom.style.position = 'inherit';
+            this.fixHeight = lib.getOuterHeight(this.fixAtDom);
+            this.fixTop = lib.getOffset(this.fixAtDom).top;
+            this.fixAtDom.style.position = position;
+        }
+        else {
+            this.fixHeight = 0;
+            this.fixTop = lib.getOffset(this.getTable()).top;
+        }
     };
 
     /**

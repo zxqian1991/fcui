@@ -169,16 +169,36 @@
             width: 100%;
         }
 
-        &-cover-table {
+        .set-table-head();
+        .set-table-body();
+        .set-table-foot();
+    }
+
+    &-has-max-height {
+        .ui-table-cover-table {
             table-layout: fixed;
             position: absolute;
             top: 0;
             left: 0;
         }
+    }
 
+    &-fix-head {
+        .ui-table-cover-table {
+            &-wrapper {
+                position: absolute;
+                display: none;
+            }
 
-        .set-table-head();
-        .set-table-body();
-        .set-table-foot();
+            &-fixing {
+                display: block;
+            }
+        }
+    }
+
+    &-head-fixing {
+        .ui-table-cover-table {
+            display: table;
+        }
     }
 }

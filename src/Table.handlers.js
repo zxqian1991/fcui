@@ -8,7 +8,6 @@
  * @return {Object} 表格事件处理部分
  */
 define(function (require) {
-    var u = require('underscore');
     var lib = require('./lib');
 
     return {
@@ -182,9 +181,46 @@ define(function (require) {
             eventType: 'scroll',
             el: window,
             enable: function () {
-                return this.tableMaxHeight > 0;
+                return this.fixHeadAtTop;
             },
-            handler: function () {
+            handler: function (e, el) {
+                var pageScrollTop = lib.page.getScrollTop();
+                var wrapper = this.getCoverTableWrapper();
+
+                if (this.fixTop < pageScrollTop) {
+                    if (!this._headFixing) {
+                        this._headFixing = true;
+                        lib.addClasses(
+                            wrapper,
+                            this.helper.getStateClasses('cover-table-fixing')
+                        );
+                        if (this.fixAtDom) {
+                            this.fixAtDom.style.position = 'absolute';
+                        }
+                        wrapper.style.left =
+                            lib.getOffset(this.getTable()).left + 'px';
+                    }
+                    if (this.fixAtDom) {
+                        this.fixAtDom.style.top = pageScrollTop + 'px';
+                        wrapper.style.top =
+                            (pageScrollTop + this.fixHeight) + 'px';
+                    }
+                    else {
+                        wrapper.style.top = pageScrollTop + 'px';
+                    }
+                }
+                else {
+                    if (this._headFixing) {
+                        this._headFixing = false;
+                        lib.removeClasses(
+                            wrapper,
+                            this.helper.getStateClasses('cover-table-fixing')
+                        );
+                        if (this.fixAtDom) {
+                            this.fixAtDom.style.position = 'inherit';
+                        }
+                    }
+                }
             }
         }
     };

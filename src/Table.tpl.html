@@ -10,10 +10,19 @@
 
 <!-- target: cover-table -->
 <!-- // 表头吸顶等情况下，定位absolute，固定定位的表头 -->
-<table id="${cover-table | id}" class="${table | class} ${cover-table | class}">
+<!-- if: ${fixHeadAtTop} -->
+<div id="${cover-table-wrapper | id}" class="${cover-table-wrapper | class}">
+<!-- /if -->
+<table id="${cover-table | id}"
+    class="${table | class} ${cover-table | class}"
+    style="z-index: ${getCoverZIndex | call};"
+    >
     <colgroup id="${cover-colgroup | id}""></colgroup>
     <thead id="${cover-thead | id}" class="${thead | class} ${cover-thead | class}"></thead>
 </table>
+<!-- if: ${fixHeadAtTop} -->
+</div>
+<!-- /if -->
 
 <!-- target: table-colgroup -->
 <!-- // 表格的colgroup，用来表达列宽 -->
