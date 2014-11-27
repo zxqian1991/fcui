@@ -1221,7 +1221,7 @@ define(function (require) {
         switch (this.select.toLowerCase()) {
             case 'multi':
                 var selected = this.selectedRowIndex;
-                selected.slice(u.indexOf(selected, index), 1);
+                selected.splice(u.indexOf(selected, index), 1);
                 this.renderSelectedRows(true, [index]);
                 break;
             case 'single':

@@ -115,35 +115,6 @@ define(function (require) {
     };
 
     /**
-     * 根据单个className的元素匹配函数
-     * @param  {HTMLElement}  el HTML元素
-     * @param  {string}  className 一个css名字
-     * @return {boolean} 是否match
-     */
-    var rclass = /[\t\r\n]/g;
-    function isCssMatch(el, className) {
-        var cssClass = ' ' + className + ' ';
-        var elClassName = ' ' + el.className + ' ';
-        return  elClassName.replace(rclass, ' ').indexOf(cssClass) >= 0;
-    }
-
-    /**
-     * 根据形如<attr>="<value>" 的string判断el是否匹配attrMatch
-     * @param  {HTMLElement} el HTML元素
-     * @param  {string} attrMatch attr匹配
-     * @return {boolean} 是否匹配
-     */
-    function isAttrMatch(el, attrMatch) {
-        var splitted = attrMatch.split('=');
-        var value = lib.getAttribute(el, splitted[0]);
-        if (value != null) {
-            return value === '"' + splitted[1] + '"';
-        }
-
-        return false;
-    }
-
-    /**
      * 创建一个delegate handler，在this.main上监听处理eventType。
      * @param {Array<Control~eventHandler>} handlersQueue handler数组
      * @return {Function} delegate handler
@@ -152,23 +123,14 @@ define(function (require) {
         return u.bind(function (event) {
             var e = e || window.event;
             var cur = e.target;
+
             while (cur) {
                 if (cur.nodeType === 1) {
                     for (var i = handlersQueue.length - 1; i >= 0; i--) {
                         var handler = handlersQueue[i];
-                        if (handler.cssMatch) {
-                            if (!isCssMatch(cur, handler.cssMatch)) {
-                                continue;
-                            }
+                        if (handler.query && lib.match(cur, handler.query)) {
+                            handler.handler.call(this, e, cur);
                         }
-
-                        if (handler.attrMatch) {
-                            if (!isAttrMatch(cur, handler.attrMatch)) {
-                                continue;
-                            }
-                        }
-
-                        handler.handler.call(this, e, cur);
                     }
                 }
                 if (cur === this.main) {
@@ -195,11 +157,8 @@ define(function (require) {
      *           为true
      * @property {string} eventType event类型，为Element.addEventListener所能
      *           所能接收的type
-     * @property {string} cssMatch 一个css名字。
-     *           符合此名字的元素将作为event target
-     * @property {string} attrMatch 形如 <attr>="value" 的string，用以
-     *           匹配元素的属性值。若cssMatch和attrMatch同时存在，将以
-     *           AND 的关系同时使用
+     * @property {string} query 一个CSS 2.1的query，用于确定event target。
+     *           第一个满足此query的将作为event target。
      * @property {Function} handler 事件handler。以Control为this。以event，
      *           符合matcher的element为参数。
      */

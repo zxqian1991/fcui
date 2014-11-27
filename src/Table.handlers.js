@@ -16,14 +16,14 @@ define(function (require) {
          */
         'row-hover': {
             eventType: 'mouseover',
-            cssMatch: 'ui-table-row',
+            query: '.ui-table-row',
             handler: function (e, el) {
                 lib.addClasses(el, this.helper.getPartClasses('row-hover'));
             }
         },
         'row-out': {
             eventType: 'mouseout',
-            cssMatch: 'ui-table-row',
+            query: '.ui-table-row',
             handler: function (e, el) {
                 lib.removeClasses(el, this.helper.getPartClasses('row-hover'));
             }
@@ -33,7 +33,7 @@ define(function (require) {
          */
         'foot-row-hover': {
             eventType: 'mouseover',
-            cssMatch: 'ui-table-foot-row',
+            query: '.ui-table-foot-row',
             handler: function (e, el) {
                 lib.addClasses(el,
                     this.helper.getPartClasses('foot-row-hover'));
@@ -41,7 +41,7 @@ define(function (require) {
         },
         'foot-row-out': {
             eventType: 'mouseout',
-            cssMatch: 'ui-table-foot-row',
+            query: '.ui-table-foot-row',
             handler: function (e, el) {
                 lib.removeClasses(el,
                     this.helper.getPartClasses('foot-row-hover'));
@@ -52,14 +52,14 @@ define(function (require) {
          */
         'cell-hover': {
             eventType: 'mouseover',
-            cssMatch: 'ui-table-cell',
+            query: '.ui-table-cell',
             handler: function (e, el) {
                 lib.addClasses(el, this.helper.getPartClasses('cell-hover'));
             }
         },
         'cell-out': {
             eventType: 'mouseout',
-            cssMatch: 'ui-table-cell',
+            query: '.ui-table-cell',
             handler: function (e, el) {
                 lib.removeClasses(el, this.helper.getPartClasses('cell-hover'));
             }
@@ -69,14 +69,14 @@ define(function (require) {
          */
         'fcell-hover': {
             eventType: 'mouseover',
-            cssMatch: 'ui-table-fcell',
+            query: '.ui-table-fcell',
             handler: function (e, el) {
                 lib.addClasses(el, this.helper.getPartClasses('fcell-hover'));
             }
         },
         'fcell-out': {
             eventType: 'mouseout',
-            cssMatch: 'ui-table-fcell',
+            query: '.ui-table-fcell',
             handler: function (e, el) {
                 lib.removeClasses(el,
                     this.helper.getPartClasses('fcell-hover'));
@@ -87,14 +87,14 @@ define(function (require) {
          */
         'hcell-hover': {
             eventType: 'mouseover',
-            cssMatch: 'ui-table-hcell',
+            query: '.ui-table-hcell',
             handler: function (e, el) {
                 lib.addClasses(el, this.helper.getPartClasses('hcell-hover'));
             }
         },
         'hcell-out': {
             eventType: 'mouseout',
-            cssMatch: 'ui-table-hcell',
+            query: '.ui-table-hcell',
             handler: function (e, el) {
                 lib.removeClasses(el,
                     this.helper.getPartClasses('hcell-hover'));
@@ -105,7 +105,7 @@ define(function (require) {
          */
         'hsort-hover': {
             eventType: 'mouseover',
-            cssMatch: 'ui-table-hcell-hsort',
+            query: '.ui-table-hcell-hsort',
             handler: function (e, el) {
                 lib.addClasses(el,
                     this.helper.getPartClasses('hcell-hsort-hover'));
@@ -113,31 +113,31 @@ define(function (require) {
         },
         'hsort-out': {
             eventType: 'mouseout',
-            cssMatch: 'ui-table-hcell-hsort',
+            query: '.ui-table-hcell-hsort',
             handler: function (e, el) {
                 lib.removeClasses(el,
                     this.helper.getPartClasses('hcell-hsort-hover'));
             }
-        },        
+        },
         /**
          * 表格行单选，多选，全选事件
          */
         'mselect': {
             eventType: 'click',
-            cssMatch: 'ui-table-multi-select',
+            query: '.ui-table-multi-select',
             handler: function (e, el) {
                 var index = +lib.getAttribute(el, 'data-index');
                 if (el.checked) {
                     this.selectRow(index);
                 }
                 else {
-                    this.unselectedRow(index);
+                    this.unselectRow(index);
                 }
             }
         },
         'sselect': {
             eventType: 'click',
-            cssMatch: 'ui-table-single-select',
+            query: '.ui-table-single-select',
             handler: function (e, el) {
                 var index = +lib.getAttribute(el, 'data-index');
                 this.set('selectedRowIndex', index);
@@ -145,7 +145,7 @@ define(function (require) {
         },
         'allselect': {
             eventType: 'click',
-            cssMatch: 'ui-table-select-all',
+            query: '.ui-table-select-all',
             handler: function (e, el) {
                 this.set('selectedRowIndex',
                     el.checked ? -1 : []);
@@ -154,11 +154,17 @@ define(function (require) {
         'window-resized': {
             eventType: 'resize',
             el: window,
+            enable: function () {
+                
+            },
             handler: function () {
             }
         },
         'main-scroll': {
             eventType: 'scroll',
+            enable: function () {
+                return this.tableMaxHeight > 0;
+            },
             handler: function () {
             }
         }

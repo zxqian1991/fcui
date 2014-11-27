@@ -43,8 +43,20 @@ define(function (require) {
      * @return {boolean} 是否match
      */
     exports.match = function (el, query) {
+        var matches = // 兼容各个浏览器。额。。
+            // w3c标准
+            el.matches
+            // Chrome, Opera 15+, Safari
+            || el.webkitMatchesSelector
+            // Mozilla
+            || el.mozMatchesSelector
+            // IE9+
+            || el.msMatchesSelector
+            // Opera
+            || el.oMatchesSelector;
 
-    }
+        return matches.call(el, query);
+    };
 
     return exports;
 });
