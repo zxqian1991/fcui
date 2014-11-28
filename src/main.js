@@ -6,5 +6,11 @@
  * @author Han Bing Feng (hanbingfeng@baidu.com)
  */
 define(function (require) {
-    return require('esui/main');
+    var main = require('esui/main');
+
+    main.esuiVersion = main.version;
+
+    main.version = '0.0.1-alpha.3';
+
+    return main;
 });
