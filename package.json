@@ -11,6 +11,10 @@
             "email": "hanbingfeng@baidu.com"
         }
     ],
+    "dependencies": {
+        "esui": "~3.1.0-beta.3",
+        "fc-core": "~0.0.1-alpha.2"
+    },
     "main": "main",
     "description": "fcui是基于ESUI体系的`激进版`UI库，更适合商业体系的业务项目使用",
     "homepage": "https://gitlab.com/fc-fe/fcui",
@@ -22,7 +26,13 @@
         "loaderAutoConfig": "js,htm,html,tpl,vm,phtml",
         "loaderUrl": "http://s1.bdstatic.com/r/www/cache/ecom/esl/1-8-2/esl.js",
         "dependencies": {
-            "esui": "~3.1.0-beta.3"            
+            "esui": "~3.1.0-beta.3",
+            "eoo": "~0.1.1",
+            "etpl": "~3.0.0",
+            "fc-core": "~0.0.1-alpha.2",
+            "mini-event": "~1.0.2",
+            "moment": "~2.7.0",
+            "underscore": "~1.6.0"
         }
     }
 }
