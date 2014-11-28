@@ -129,9 +129,11 @@ define(function (require) {
                 var index = +lib.getAttribute(el, 'data-index');
                 if (el.checked) {
                     this.selectRow(index);
+                    this.fire('rowselected', {selectedIndex: index});
                 }
                 else {
                     this.unselectRow(index);
+                    this.fire('rowunselected', {selectedIndex: index});
                 }
             }
         },
@@ -141,6 +143,7 @@ define(function (require) {
             handler: function (e, el) {
                 var index = +lib.getAttribute(el, 'data-index');
                 this.set('selectedRowIndex', index);
+                this.fire('rowselected', {selectedIndex: index});
             }
         },
         'allselect': {
@@ -149,6 +152,9 @@ define(function (require) {
             handler: function (e, el) {
                 this.set('selectedRowIndex',
                     el.checked ? -1 : []);
+                this.fire(
+                    el.checked ? 'rowallselected' : 'rowallunselected'
+                );
             }
         },
         /**
@@ -179,7 +185,7 @@ define(function (require) {
         },
         'window-scroll': {
             eventType: 'scroll',
-            el: window,
+            el: document,
             enable: function () {
                 return this.fixHeadAtTop;
             },

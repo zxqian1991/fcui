@@ -1,0 +1,25 @@
+/**
+ * FCUI 带锁定列的Table
+ * @author Han Bing Feng (hanbingfeng@baidu.com)
+ */
+.ui-tablewithlockcolumn {
+    padding-bottom: 1px;
+    .clear-float();
+
+    .ui-tablewithlockcolumn {
+        &-left {
+            float: left;
+        }
+
+        &-right {
+            float: left;
+            .ui-table-table {
+                .ui-table-hcell-first,
+                .ui-table-cell-first,
+                .ui-table-fcell-first {
+                    border-left: none;
+                }
+            }
+        }
+    }
+}

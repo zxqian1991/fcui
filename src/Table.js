@@ -184,6 +184,20 @@ define(function (require) {
          */
         fixAtDom: null,
         /**
+         * 是否是锁定列表格子控件中的右边控件
+         * 不可通过setProperties修改
+         * @type {boolean}
+         * @default false
+         */
+        isLockedLeft: false,
+        /**
+         * 是否是锁定列表格子控件中的右边控件
+         * 不可通过setProperties修改
+         * @type {boolean}
+         * @default false
+         */
+        isLockedRight: false,
+        /**
          * 表格的数据源。
          * @type {Array}
          * @default []
@@ -356,6 +370,15 @@ define(function (require) {
     };
 
     /**
+     * 取得某一行的TR元素
+     * @param {number} index 行号
+     * @return {HTMLElement} TR元素
+     */
+    proto.getRow = function (index) {
+        return lib.getChildren(this.getBody())[index];
+    };
+
+    /**
      * Callback，在Table~field中定义，返回当前单元格应显示的文本内容的HTML。
      * @callback Table~content
      * @this {Table}
@@ -406,7 +429,8 @@ define(function (require) {
         }
 
         var me = this;
-        switch (this.select.toLowerCase()) {
+        switch (!this.isLockedRight && this.select.toLowerCase()) {
+            // 如果表是锁定表的右子控件，不要画select fields
             case 'multi':
                 realFields.unshift({
                     select: true,
@@ -673,12 +697,7 @@ define(function (require) {
                 return this.width;
             }
         }
-        var rulerDiv = document.createElement('div');
-        this.main.appendChild(rulerDiv);
-        var width = rulerDiv.offsetWidth;
-        rulerDiv.parentNode.removeChild(rulerDiv);
-
-        return width;
+        return lib.measureWidth(this.main);
     };
 
     /**
@@ -1078,7 +1097,8 @@ define(function (require) {
     };
 
     /**
-     * 
+     * 根据fixAtDom的高度，刷新this.fixHeight。
+     * 当fixAtDom有变化时，需要主动调用
      */
     proto.refreshFixTop = function () {
         if (this.fixAtDom) {
@@ -1267,9 +1287,12 @@ define(function (require) {
     /**
      * 表格选中某一行。
      * @param  {number} index 行index
+     * @param {string} select 强制以某种select状态执行选择。当Table作为锁定列
+     *        表的子控件时有用
      */
-    proto.selectRow = function (index) {
-        switch (this.select.toLowerCase()) {
+    proto.selectRow = function (index, select) {
+        select = select || this.select;
+        switch (select.toLowerCase()) {
             case 'multi':
                 this.selectedRowIndex.push(index);
                 this.renderSelectedRows();
@@ -1285,9 +1308,12 @@ define(function (require) {
     /**
      * 表格取消选中某一行
      * @param  {number} index 行index
+     * @param {string} select 强制以某种select状态执行选择。当Table作为锁定列
+     *        表的子控件时有用
      */
-    proto.unselectRow = function (index) {
-        switch (this.select.toLowerCase()) {
+    proto.unselectRow = function (index, select) {
+        select = select || this.select;
+        switch (select.toLowerCase()) {
             case 'multi':
                 var selected = this.selectedRowIndex;
                 selected.splice(u.indexOf(selected, index), 1);

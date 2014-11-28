@@ -125,11 +125,10 @@ define(function (require) {
             var main = this.main;
             u.each(handlersQueue, function (handler) {
                 if (handler.query) {
-                    handler.handler.call(
-                        this,
-                        e,
-                        lib.parent(e.target, handler.query, main)
-                    );
+                    var el = lib.parent(e.target, handler.query, main);
+                    if (el) {
+                        handler.handler.call(this, e, el);
+                    }
                 }
                 else {
                     handler.handler.call(this, e, e.target);

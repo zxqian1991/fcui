@@ -60,11 +60,12 @@ define(function (require) {
 
     /**
      * 从el开始查找直到找到符合query的父元素。或直到endEl，或直到body为止。
-     * 若没有提供query，则直接返回endEl，或body。
+     * 若query没提供，则直接返回endEl，或body。
+     * 若没有找到匹配的，则返回null。
      * @param {HTMLElement} el 起始el
      * @param {string} query 符合CSS 2.1的查询串
      * @param {HTMLElement} endEl 查询截止的element
-     * @return {return} 符合query的父元素
+     * @return {HTMLElement} 符合query的父元素
      */
     exports.parent = function (el, query, endEl) {
         endEl = endEl || document.body;
@@ -82,7 +83,7 @@ define(function (require) {
             }
             cur = cur.parentNode;
         }
-        return endEl;
+        return null;
     };
 
     /**
@@ -108,6 +109,20 @@ define(function (require) {
                 + parseInt(cs.getPropertyValue('margin-bottom'), 10);
         }
         return (elmHeight + elmMargin);
+    };
+
+    /**
+     * 量取元素的宽度
+     * @param  {HTMLElement} el 被量的元素
+     * @return {number} 长度值
+     */
+    exports.measureWidth = function (el) {
+        var rulerDiv = document.createElement('div');
+        el.appendChild(rulerDiv);
+        var width = rulerDiv.offsetWidth;
+        rulerDiv.parentNode.removeChild(rulerDiv);
+
+        return width;
     };
 
     return exports;
