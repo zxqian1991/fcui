@@ -32,7 +32,8 @@
             "fc-core": "~0.0.1-alpha.2",
             "mini-event": "~1.0.2",
             "moment": "~2.7.0",
-            "underscore": "~1.6.0"
+            "underscore": "~1.6.0",
+            "promise": "~1.0.0"
         }
     }
 }
