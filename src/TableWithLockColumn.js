@@ -90,18 +90,31 @@ define(function (require) {
         });
 
         var properties = {};
+        var foot = this.extendedProperties.foot;
 
         properties[id + 'Left'] = u.extend({}, this.extendedProperties, {
             fields: this.extendedProperties.fields.slice(0, this.lockAtColumn),
             isLockedLeft: true,
             width: this.lockedAreaWidth,
-            childName: 'left'
+            childName: 'left',
+            foot: foot ?
+                (this.select ?
+                    foot.slice(0, this.lockAtColumn + 1)
+                    : foot.slice(0, this.lockAtColumn)
+                )
+                : null
         });
 
         properties[id + 'Right'] = u.extend({}, this.extendedProperties, {
             fields: this.extendedProperties.fields.slice(this.lockAtColumn),
             isLockedRight: true,
-            childName: 'right'
+            childName: 'right',
+            foot: foot ?
+                (this.select ?
+                    foot.slice(this.lockAtColumn + 1)
+                    : foot.slice(this.lockAtColumn)
+                )
+                : null
         });
 
         this.helper.initChildren(this.main, {
@@ -194,6 +207,13 @@ define(function (require) {
         u.each(ltrs, function (tr, index) {
             syncRow(tr, rtrs[index]);
         });
+        // 同步foot
+        if (this.foot) {
+            syncRow(
+                lib.dom.first(left.getFoot()),
+                lib.dom.first(right.getFoot())
+            );
+        }
     };
 
     /**

@@ -56,7 +56,7 @@ define(function (require) {
         }
         var enable = handler.enable;
         if (typeof enable === 'function') {
-            enable = enable.call(this);
+            enable = !!enable.call(this);
         }
         if (handler && (typeof enable === 'undefined' || isForce || enable)) {
             var el = handler.el || this.main;

@@ -102,7 +102,18 @@
                 var lib = require('fcui/lib');
                 ui.init(document.body,{
                     properties : {
-                        myTable: {                            
+                        myTable: {
+                            foot: [{
+                                content: function (foot, index) {
+                                    return '表尾' + index
+                                }
+                            }, {
+                                content: '别的什么',
+                                align: 'left'
+                            }, {
+                                content: '横跨',
+                                colspan: 2
+                            }],                            
                             datasource: data,
                             sortable: true,
                             columnResizable: true,
