@@ -770,6 +770,9 @@ define(function (require) {
             realOrderBy: realOrderBy
         };
         this.setProperties(props);
+        if (isNullOrEmpty(props.realOrderBy)) {
+            delete props.realOrderBy;
+        }
         this.fire('sort', props);
     };
 
