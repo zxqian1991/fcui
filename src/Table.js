@@ -11,6 +11,10 @@ define(function (require) {
     var u = require('underscore');
     var eoo = require('eoo');
     var etpl = require('etpl');
+
+    require('./TipLayer');
+
+    var ui = require('./main');
     var lib = require('./lib');
     var Control = require('./Control');
     var handlers = require('./Table.handlers');
@@ -76,6 +80,9 @@ define(function (require) {
      * @property {Function|string} tip 本列的tip内容。
      *           如果是string，则是静态tip
      *           如果是function，则调用来获得tip内容，参数供给和content一样
+     * @property {Object} tipOptions 本列的tip内容，用于复杂tip的配置
+     *           与field.tip二选一。属性tip优先。
+     *           如存在，则使用这一组options初始化该列的tip。
      * @property {string} align 列的排序，可选left，right，center，justify
      * @property {string} tdClassName 附加在本列单元格TD上的class names
      * @property {boolean} editable 本列单元格是否可编辑
@@ -90,7 +97,7 @@ define(function (require) {
      * 点击排序后，sort事件中将有
      *     1. orderBy，发生了排序的field本身，传field对象
      *     2. order，排序顺序，asc或者desc
-     *     3. realField，下面配置的field的值
+     *     3. realOrderBy，下面配置的field的值
      * @typedef {Object} Table~sortField
      * @property {string} field 排序的字段名
      * @property {string} name 排序字段显示出的名字
@@ -148,14 +155,6 @@ define(function (require) {
          * @defalut ''
          */
         select: '',
-        /**
-         * 给tip的etpl template。可以采用各种filter表示法。空值/空串则使用
-         * 默认值。
-         * 不可通过setProperties修改
-         * @type {string}layer
-         * @default ''
-         */
-        tipTemplate: '',
         /**
          * 是否要有竖向的边框
          * 不可通过setProperties修改
@@ -425,6 +424,7 @@ define(function (require) {
         this.realFields = realFields;
 
         if (!this.select) {
+            this.fieldsMap = indexFields(this.realFields);
             return;
         }
 
@@ -466,7 +466,24 @@ define(function (require) {
                 });
                 break;
         }
+
+        this.fieldsMap = indexFields(this.realFields);
     };
+
+    /**
+     * 返回fields的索引，以field.field为key，field序号为value
+     * @param {Array} fields fields
+     * @return {Object} field索引
+     */
+    function indexFields(fields) {
+        var obj = {};
+        u.each(fields, function (field, index) {
+            if (field.field) {
+                obj[field.field] = index;
+            }
+        });
+        return obj;
+    }
 
     /**
      * 同步表格列的宽度到cover table上。
@@ -589,9 +606,169 @@ define(function (require) {
             }
         }
 
-        this.helper.initChildrenAsGroup('head', this.getHead());
+        this.helper.initChildrenAsGroup('head', this.getHead(),
+            this.getTipOptions());
         if (this.isNeedCoverHead) {
             this.helper.initChildrenAsGroup('cover-head', this.getCoverHead());
+        }
+        if (this.sortable) {
+            this.initSort();
+        }
+    };
+
+    /**
+     * 初始化排序
+     */
+    proto.initSort = function () {
+        var head = this.isNeedCoverHead ? this.getCoverHead() : this.getHead();
+        var hsorts = lib.findAll(head, '.ui-table-hcell-hsort');
+        u.each(hsorts, function (el) {
+            var columnIndex = +lib.getAttribute(el, 'data-column');
+            var field = this.realFields[columnIndex];
+            var me = this;
+            var tipLayer = ui.create('TipLayer', {
+                parent: this,
+                id: this.getSortLayerId(field),
+                content: this.helper.renderTemplate('table-sort', {
+                    sortField: field.sortField || '',
+                    field: field,
+                    index: columnIndex
+                }),
+                layerClasses: this.helper.getPartClasses('sort-layer'),
+                eventHandlers: {
+                    click: {
+                        eventType: 'click',
+                        query: '.ui-table-sort-item-wrapper',
+                        handler: function (e, el) {
+                            this.fire('close');
+                            this.hide();
+
+                            var order = lib.getAttribute(el, 'data-order');
+                            var field = lib.getAttribute(el, 'data-order-by');
+                            var realField = lib.getAttribute(el,
+                                'data-real-order-by');
+                            me.doSort(order, field, realField);
+                        }
+                    }
+                }
+            });
+            tipLayer.appendTo(document.body);
+            tipLayer.render();
+            tipLayer.attachTo({
+                targetDOM: el,
+                showMode: 'over',
+                delayTime: 500,
+                positionOpt: lib.DockPosition.TOP_BOTTOM_RIGHT_RIGHT
+            });
+        }, this);
+    };
+
+    /**
+     * 重绘排序
+     * @param {Object} changesIndex 给repaint的changesIndex，其中
+     *        order，orderBy，realOrderBy至少一项不是空的
+     */
+    proto.renderSort = function (changesIndex) {
+        if (changesIndex == null) {
+            return;
+        }
+
+        var columnIndex;
+        var head = this.isNeedCoverHead ? this.getCoverHead() : this.getHead();
+        var sorted;
+        if (typeof changesIndex.orderBy !== 'undefined') {
+            var change = changesIndex.orderBy;
+            if (!isNullOrEmpty(change.oldValue)) {
+                columnIndex = this.fieldsMap[change.oldValue];
+                // 去掉原来表头的排序样式
+                sorted = lib.getChildren(lib.dom.first(head))[columnIndex];
+                this.helper.removePartClasses('hcell-asc', sorted);
+                this.helper.removePartClasses('hcell-desc', sorted);
+                // 去掉原来表体的-cell-sorted class
+                sorted = lib.findAll(this.getBody(), '.ui-table-cell-sorted');
+                u.each(sorted, function (el, index) {
+                    this.helper.removePartClasses('cell-sorted', el);
+                }, this);
+            }
+            columnIndex = this.fieldsMap[change.newValue];
+            sorted = lib.getChildren(lib.dom.first(head))[columnIndex];
+            this.helper.addPartClasses('hcell-' + this.order, sorted);
+            // 给表体对应的cell加上-cell-sorted class
+            sorted = lib.findAll(this.getBody(),
+                '.ui-table-cell:nth-child(' + (columnIndex + 1) + ')'
+            );
+            u.each(sorted, function (el, index) {
+                this.helper.addPartClasses('cell-sorted', el);
+            }, this);
+        }
+
+        if (typeof changesIndex.order !== 'undefined') {
+            var change = changesIndex.order;
+            var columnIndex = this.fieldsMap[this.orderBy];
+            if (!isNullOrEmpty(change.oldValue)) {
+                // 去掉原来表头的排序样式
+                sorted = lib.getChildren(lib.dom.first(head))[columnIndex];
+                this.helper.removePartClasses(
+                    'hcell-' + change.oldValue, sorted
+                );
+            }
+            sorted = lib.getChildren(lib.dom.first(head))[columnIndex];
+            this.helper.addPartClasses(
+                'hcell-' + change.newValue, sorted
+            );
+        }
+    };
+
+    /**
+     * 执行排序动作
+     * @param {string} order 排序方向
+     * @param {string} orderBy 排序的字段名称
+     * @param {string} realOrderBy 当配置了多字段排序时，真正的排序字段
+     * @fires {Event} sort
+     * @property {string} sort.order 排序方向
+     * @property {string} sort.orderBy 发生排序的字段名称
+     * @proeprty {string} sort.realOrderBy 当配置了多字段排序时，真正的排序字段
+     */
+    proto.doSort = function (order, orderBy, realOrderBy) {
+        var props = {
+            order: order,
+            orderBy: orderBy
+        };
+        if (!isNullOrEmpty(realOrderBy)) {
+            props.realOrderBy = realOrderBy;
+        }
+        this.setProperties(props);
+        this.fire('sort', props);
+    };
+
+    /**
+     * 取得每一列tip的id。
+     * @param {Table~field} field 列对象
+     * @return {string} id
+     */
+    proto.getTipId = function (field) {
+        return this.id + '-' + field.field + '-htip';
+    };
+
+    /**
+     * 取得每一列排序浮层的id。
+     * @param {Object} field 列对象
+     * @return {string} id
+     */
+    proto.getSortLayerId = function (field) {
+        return this.id + '-' + field.field + '-hsort';
+    };
+
+    proto.getTipOptions = function () {
+        var obj = {};
+        u.each(this.realFields, function (field) {
+            if (field.tipOptions) {
+                obj[this.getTipId(field)] = field.tipOptions;
+            }
+        }, this);
+        if (Object.keys(obj)
+            .length > 0) {
+            return {properties: obj};
         }
     };
 
@@ -1205,8 +1382,10 @@ define(function (require) {
             }
         }
 
-        if (allProperities.order || allProperities.orderBy) {
-
+        if (allProperities.order
+            || allProperities.orderBy
+            || allProperities.realOrderBy) {
+            this.renderSort(changesIndex);
         }
 
         if (tBodyChanged || allProperities.selectedRowIndex) {

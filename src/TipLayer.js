@@ -253,6 +253,10 @@ define(function (require) {
                 document.body.appendChild(main);
             }
 
+            if (this.layerClasses) {
+                lib.addClasses(main, this.layerClasses);
+            }
+
             // 设置样式
             this.main.style.left = '-10000px';
 
@@ -267,7 +271,6 @@ define(function (require) {
                 createBF(this, 'foot', this.roles.foot);
             }
 
-
             if (this.arrow) {
                 var arrow = document.createElement('div');
                 // 初始化箭头
@@ -277,8 +280,6 @@ define(function (require) {
                 this.main.appendChild(arrow);
             }
         },
-
-
 
         /**
          * 重新渲染视图

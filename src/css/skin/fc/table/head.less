@@ -44,14 +44,6 @@
                 }
             }
 
-            &-asc, &-desc {
-                .ui-table-hcell-extra {
-                    .ui-table-hcell-hsort {
-                        color: @skin-fc-text-color-blue;
-                    }
-                }
-            }
-
             .ui-table-hcell-extra {
                 position: absolute;
                 top: 12px;
@@ -66,6 +58,28 @@
 
                 .ui-table-hcell-hsort-hover {
                     color: @skin-fc-text-color-blue;
+                }
+            }
+
+            &-asc {
+                .ui-table-hcell-extra {
+                    .ui-table-hcell-hsort {
+                        .set-sort(
+                            @color: @skin-fc-text-color-blue;
+                            @icon: @font-icon-arrow-up;
+                        );
+                    }
+                }
+            }
+
+            &-desc {
+                .ui-table-hcell-extra {
+                    .ui-table-hcell-hsort {
+                        .set-sort(
+                            @color: @skin-fc-text-color-blue;
+                            @icon: @font-icon-arrow-down;
+                        );
+                    }
                 }
             }
         }

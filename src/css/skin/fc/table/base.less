@@ -75,6 +75,7 @@
 .set-table-head() {
     &-thead {
         background: @skin-fc-bg-color-gray-light;
+        border-top: 2px solid @skin-fc-shadow-color;        
         border-bottom: 1px solid @skin-fc-shadow-color;
 
         tr {
@@ -122,6 +123,10 @@
                 }
 
                 .set-cells();
+
+                &-sorted {
+                    background: @skin-fc-bg-color-selected;
+                }
             }
         }
     }

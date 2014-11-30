@@ -54,7 +54,7 @@
                 ${hcell-desc | class}
                 <!-- /if -->
             <!-- /if -->
-            <!-- if: ${field.tip} -->
+            <!-- if: ${field.tip} || ${field.tipOptions} -->
                 ${hcell-tip | class}
             <!-- /if -->
             <!-- if: !${field.align} -->
@@ -84,7 +84,7 @@
 ${renderHeadTextContent | call(${field}, ${columnIndex})}
 </div>
 <div class="${hcell-extra | class}">
-    <!-- if: ${field.tip} -->
+    <!-- if: ${field.tip} || ${field.tipOptions} -->
     <div class="${hcell-htip | class}"><!-- import: table-head-tip --></div>
     <!-- /if -->
     <!-- if: ${field.sortable} -->
@@ -98,8 +98,42 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
 <!-- // @param columnIndex -->
 <div class="${htip | class}"
     data-ui-type="Tip"
+    data-ui-id="${getTipId | call(${field})}"
+<!-- if: ${field.tip} -->
     data-ui-content="${renderTipContent | call(${field}, ${columnIndex})}">
+<!-- /if -->
 </div>
+
+<!-- target: table-sort -->
+<!-- // @param sortField -->
+<!-- // @param field -->
+<!-- // @param order -->
+<!-- // @param orderBy -->
+<!-- if: ${sortField} && ${sortField.length} -->
+sortfield: ${sortField}
+<!-- else -->
+<div class="${sort-item-wrapper | class}" data-order="asc" data-order-by="${field.field}">
+    <a class="
+    ${sort-item | class}
+    <!-- if: ${field.field} === ${order} && ${orderBy} === "asc" -->
+    ${sort-item-selected | class}
+    <!-- /if --> 
+    ">由低到高
+    <span class="${sort-icon-asc | class}"></span>
+    </a>
+</div>
+<div class="${sort-item-wrapper | class}" data-order="desc" data-order-by="${field.field}">
+    <a class="
+    ${sort-item | class}
+    <!-- if: ${field.field} === ${order} && ${orderBy} === "desc" -->
+    ${sort-item-selected | class}
+    <!-- /if -->     
+    ">由高到低
+    <span class="${sort-icon-desc | class}"></span>
+    </a>
+</div>
+<!-- /if -->
+
 
 <!-- target: table-select-all -->
 <!-- // 处于表格TH内的多选全选内容 -->
