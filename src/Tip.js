@@ -88,7 +88,12 @@ define(
                  *
                  * 信息浮层的位置。
                  */
-                positionOpt: lib.DockPosition.BOTTOM_TOP_LEFT_RIGHT
+                positionOpt: lib.DockPosition.BOTTOM_TOP_LEFT_RIGHT,
+                /**
+                 * 作为提示的icon类型。可选为"?", "!", "i"三种
+                 * @property {string} iconType
+                 */
+                iconType: '?'
             };
 
             if (options.arrow === 'false') {
@@ -125,6 +130,20 @@ define(
         proto.initStructure = function () {
             var main = document.createElement('div');
             document.body.appendChild(main);
+            switch (this.iconType) {
+                case '?':
+                    this.helper.addPartClasses('question');
+                    break;
+                case '!':
+                    this.helper.addPartClasses('warn');
+                    break;
+                case 'i':
+                    this.helper.addPartClasses('info');
+                    break;
+                default:
+                    break;
+
+            }
             var tipLayer = ui.create(
                 'TipLayer',
                 {
