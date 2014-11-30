@@ -27,10 +27,6 @@
                         text-decoration: none;                
                     }
 
-                    &-with-border {
-                        border-top: 1px solid @skin-fc-text-color-gray-light;
-                    }
-
                     &-selected {
                         background: @skin-fc-bg-color-selected;
                     }
@@ -43,6 +39,10 @@
                         .set-layer-sort-icon(@font-icon-arrow-down)
                     }
                 }
+
+                &-with-border {
+                    border-bottom: 1px solid @skin-fc-text-color-gray-light;
+                }                
             }
         }
     }

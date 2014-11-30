@@ -428,6 +428,15 @@ define(function (require) {
             return;
         }
 
+        u.each(realFields, function (field) {
+            if (field.sortField) {
+                u.each(field.sortField, function (sfield) {
+                    sfield.ascText = sfield.ascText || '由低到高';
+                    sfield.descText = sfield.descText || '由高到低';
+                });
+            }
+        });
+
         var me = this;
         switch (!this.isLockedRight && this.select.toLowerCase()) {
             // 如果表是锁定表的右子控件，不要画select fields
@@ -734,11 +743,13 @@ define(function (require) {
     proto.getSortLayerContent = function (columnIndex) {
         var field = this.realFields[columnIndex];
         return this.helper.renderTemplate('table-sort', {
-            sortField: field.sortField || '',
+            sortField: field.sortField || [],
+            sortFieldLength: field.sortField ? field.sortField.length : 0,
             field: field,
             index: columnIndex,
             order: this.order,
-            orderBy: this.orderBy
+            orderBy: this.orderBy,
+            realOrderBy: this.realOrderBy
         });
     };
 
@@ -755,11 +766,9 @@ define(function (require) {
     proto.doSort = function (order, orderBy, realOrderBy) {
         var props = {
             order: order,
-            orderBy: orderBy
+            orderBy: orderBy,
+            realOrderBy: realOrderBy
         };
-        if (!isNullOrEmpty(realOrderBy)) {
-            props.realOrderBy = realOrderBy;
-        }
         this.setProperties(props);
         this.fire('sort', props);
     };

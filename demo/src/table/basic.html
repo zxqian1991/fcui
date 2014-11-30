@@ -150,6 +150,15 @@
                                     tip :'姓名',
                                     align: 'right',
                                     editable: 1,
+                                    sortField: [{
+                                        field: 'nameex',
+                                        name: '姓',
+                                        ascText: '由少到多',
+                                        descText: '由多到少'
+                                    }, {
+                                        field: 'nameexx',
+                                        name: '名'
+                                    }],
                                     comparer : function( a,b ){
                                         return a.name.localeCompare( b.name );
                                     },

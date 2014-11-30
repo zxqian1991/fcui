@@ -106,11 +106,40 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
 
 <!-- target: table-sort -->
 <!-- // @param sortField -->
+<!-- // @param sortFieldLength -->
 <!-- // @param field -->
 <!-- // @param order -->
 <!-- // @param orderBy -->
-<!-- if: ${sortField} && ${sortField.length} -->
-sortfield: ${sortField}
+<!-- // @param realOrderBy -->
+<!-- if: ${sortFieldLength} -->
+<!-- for: ${sortField} as ${sfield}, ${index} -->
+<div class="${sort-item-wrapper | class}"
+    data-order="asc" data-order-by="${field.field}" data-real-order-by="${sfield.field}">
+    <a class="
+    ${sort-item | class}
+    <!-- if: ${sfield.field} === ${realOrderBy} && ${order} === "asc" -->
+    ${sort-item-selected | class}
+    <!-- /if --> 
+    ">${sfield.name}${sfield.ascText}
+    <span class="${sort-icon-asc | class}"></span>
+    </a>
+</div>
+<div class="
+    ${sort-item-wrapper | class}
+    <!-- if: ${index} !== ${sortFieldLength} - 1 -->
+    ${sort-item-wrapper-with-border | class}
+    <!-- /if -->
+    " data-order="desc" data-order-by="${field.field}" data-real-order-by="${sfield.field}">
+    <a class="
+    ${sort-item | class}
+    <!-- if: ${sfield.field} === ${realOrderBy} && ${order} === "desc" -->
+    ${sort-item-selected | class}
+    <!-- /if -->
+    ">${sfield.name}${sfield.descText}
+    <span class="${sort-icon-desc | class}"></span>
+    </a>
+</div>
+<!-- /for -->
 <!-- else -->
 <div class="${sort-item-wrapper | class}" data-order="asc" data-order-by="${field.field}">
     <a class="
