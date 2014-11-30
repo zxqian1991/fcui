@@ -627,13 +627,8 @@ define(function (require) {
             var field = this.realFields[columnIndex];
             var me = this;
             var tipLayer = ui.create('TipLayer', {
-                parent: this,
                 id: this.getSortLayerId(field),
-                content: this.helper.renderTemplate('table-sort', {
-                    sortField: field.sortField || '',
-                    field: field,
-                    index: columnIndex
-                }),
+                content: this.getSortLayerContent(columnIndex),
                 layerClasses: this.helper.getPartClasses('sort-layer'),
                 eventHandlers: {
                     click: {
@@ -654,6 +649,7 @@ define(function (require) {
             });
             tipLayer.appendTo(document.body);
             tipLayer.render();
+            this.addChild(tipLayer, tipLayer.id);
             tipLayer.attachTo({
                 targetDOM: el,
                 showMode: 'over',
@@ -676,6 +672,8 @@ define(function (require) {
         var columnIndex;
         var head = this.isNeedCoverHead ? this.getCoverHead() : this.getHead();
         var sorted;
+        var layer;
+        var field;
         if (typeof changesIndex.orderBy !== 'undefined') {
             var change = changesIndex.orderBy;
             if (!isNullOrEmpty(change.oldValue)) {
@@ -689,6 +687,10 @@ define(function (require) {
                 u.each(sorted, function (el, index) {
                     this.helper.removePartClasses('cell-sorted', el);
                 }, this);
+                // 重绘排序浮层的内容
+                field = this.realFields[columnIndex];
+                layer = this.getChild(this.getSortLayerId(field));
+                layer.setContent(this.getSortLayerContent(columnIndex));
             }
             columnIndex = this.fieldsMap[change.newValue];
             sorted = lib.getChildren(lib.dom.first(head))[columnIndex];
@@ -703,8 +705,8 @@ define(function (require) {
         }
 
         if (typeof changesIndex.order !== 'undefined') {
-            var change = changesIndex.order;
-            var columnIndex = this.fieldsMap[this.orderBy];
+            change = changesIndex.order;
+            columnIndex = this.fieldsMap[this.orderBy];
             if (!isNullOrEmpty(change.oldValue)) {
                 // 去掉原来表头的排序样式
                 sorted = lib.getChildren(lib.dom.first(head))[columnIndex];
@@ -717,6 +719,27 @@ define(function (require) {
                 'hcell-' + change.newValue, sorted
             );
         }
+
+        columnIndex = this.fieldsMap[this.orderBy];
+        field = this.realFields[columnIndex];
+        layer = this.getChild(this.getSortLayerId(field));
+        layer.setContent(this.getSortLayerContent(columnIndex));
+    };
+
+    /**
+     * 取得排序浮层的内容
+     * @param {number} columnIndex 列号，从0开始
+     * @return {string} 排序浮层HTML
+     */
+    proto.getSortLayerContent = function (columnIndex) {
+        var field = this.realFields[columnIndex];
+        return this.helper.renderTemplate('table-sort', {
+            sortField: field.sortField || '',
+            field: field,
+            index: columnIndex,
+            order: this.order,
+            orderBy: this.orderBy
+        });
     };
 
     /**
