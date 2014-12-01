@@ -12,7 +12,6 @@
 //     div.ui-table-hcell-text
 //     div.ui-table-hcell-extra
 //       div.ui-table-hcell-hsort
-//       div.ui-table-hcell-hsort-hover
 //       div.ui-table-hcell-htip
 
 // 表头排序样式
@@ -54,10 +53,10 @@
 
                 .ui-table-hcell-hsort {
                     .set-sort();
-                }
-
-                .ui-table-hcell-hsort-hover {
-                    color: @skin-fc-text-color-blue;
+                    &:hover {
+                        cursor: pointer;
+                        color: @skin-fc-text-color-blue;
+                    }
                 }
             }
 
