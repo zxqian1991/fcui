@@ -86,8 +86,8 @@ define(function (require) {
      * @property {string} align 列的排序，可选left，right，center，justify
      * @property {string} tdClassName 附加在本列单元格TD上的class names
      * @property {boolean} editable 本列单元格是否可编辑
-     * @property {string} editType 若editable为true，表示编辑的类型。目前
-     *           只支持text。
+     * @property {string} editType 若editable为true，表示编辑的类型。若不提供
+     *           则默认为text
      * @property {boolean} ellipse 是否需要为表内长文本内容加上'...'。
      */
 
@@ -196,6 +196,13 @@ define(function (require) {
          * @default false
          */
         isLockedRight: false,
+        /**
+         * 表格编辑的handler
+         * @type {Object}
+         * @property {string} handler.id handler所处理的editType
+         * @property {Function} handler方法
+         */
+        editHandlers: {},
         /**
          * 表格的数据源。
          * @type {Array}

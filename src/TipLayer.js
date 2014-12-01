@@ -366,7 +366,10 @@ define(function (require) {
                     'targetDOM', 'targetControl',
                     'showMode', 'positionOpt', 'delayTime'
                 ],
-                paint: function (tipLayer, targetDOM, targetControl, showMode, positionOpt, delayTime) {
+                paint: function (
+                    tipLayer, targetDOM, targetControl, showMode,
+                    positionOpt, delayTime
+                ) {
                     var options = {
                         targetDOM: targetDOM,
                         targetControl: targetControl,

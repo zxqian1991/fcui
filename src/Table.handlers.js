@@ -158,6 +158,28 @@ define(function (require) {
             }
         },
         /**
+         * 表内编辑事件
+         */
+        'edit': {
+            eventType: 'click',
+            query: '.ui-table-cell-edit-entry',
+            handler: function (e, el) {
+                var editType = lib.getAttribute(el, 'data-edit-type');
+                editType = editType || 'text';
+                var rowIndex = +lib.getAttribute(el, 'data-row');
+                var columnIndex = +lib.getAttribute(el, 'data-column');
+                this.fire('editstarted', {
+                    rowIndex: rowIndex,
+                    columnIndex: columnIndex
+                });
+                if (this.editHandlers[editType]) {
+                    this.editHandlers[editType].call(
+                        this, rowIndex, columnIndex, el
+                    );
+                }
+            }
+        },
+        /**
          * 改变大小的事件
          */
         'window-resized': {

@@ -245,6 +245,9 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
         <!-- else -->
             ${cell-align-justify | class}
         <!-- /if -->
+        <!-- if: ${field.editable} === true -->
+            ${cell-editable | class}
+        <!-- /if -->
         <!-- if: ${field.tdClassName} -->
             ${field.tdClassName}
         <!-- /if -->
