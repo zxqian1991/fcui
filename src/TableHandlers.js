@@ -62,7 +62,8 @@ define(function (require) {
                 var columnIndex = +lib.getAttribute(el, 'data-column');
                 this.fire('editstarted', {
                     rowIndex: rowIndex,
-                    columnIndex: columnIndex
+                    columnIndex: columnIndex,
+                    editType: editType
                 });
                 if (this.editHandlers[editType]) {
                     this.editHandlers[editType].call(
