@@ -13,11 +13,14 @@ define(function (require) {
     var etpl = require('etpl');
 
     require('./TipLayer');
+    require('./Panel');
+    require('./Button');
+    require('./TextBox');
 
     var ui = require('./main');
     var lib = require('./lib');
     var Control = require('./Control');
-    var handlers = require('./Table.handlers');
+    var handlers = require('./TableHandlers');
 
     var engine = new etpl.Engine();
 
@@ -197,12 +200,14 @@ define(function (require) {
          */
         isLockedRight: false,
         /**
-         * 表格编辑的handler
+         * 表格编辑的handler，默认支持text类型的
          * @type {Object}
          * @property {string} handler.id handler所处理的editType
          * @property {Function} handler方法
          */
-        editHandlers: {},
+        editHandlers: {
+            text: textEditHandler
+        },
         /**
          * 表格的数据源。
          * @type {Array}
@@ -286,6 +291,41 @@ define(function (require) {
     function isNullOrEmpty(obj) {
         return !hasValue(obj) || !obj.toString().length;
     }
+
+    /**
+     * 文本表格内编辑的处理
+     * @this Table
+     * @param {number} rowIndex 发生编辑的行号
+     * @param {number} columnIndex 发生编辑的列号
+     * @param {HTMLElement} el 发生了点击事件的元素
+     */
+    function textEditHandler(rowIndex, columnIndex, el) {
+        var field = this.realFields[columnIndex];
+        var editor = this.createInlineEditor(
+            'text', rowIndex, columnIndex, el
+        );
+        this.fire('startedit', {
+            field: field,
+            rowIndex: rowIndex,
+            columnIndex: columnIndex
+        });
+        editor.show();
+    }
+
+    /**
+     * 拿取part所属的ui group名字
+     * @param {string} part ui部件
+     * @return {string} group名字
+     */
+    proto.getGroupName = function (part) {
+        return this.id + part;
+    };
+
+    var guid = 1;
+
+    proto.getChildControlId = function () {
+        return this.id + '-' + (guid++);
+    };
 
     /**
      * 获取整个表格体
@@ -1472,6 +1512,110 @@ define(function (require) {
             }
         );
     };
+
+    /**
+     * 创建一个表格的行内编辑器。
+     * 这个方法创建的行内编辑器会覆盖在发生了编辑的TD之上。编辑器的内容
+     * 为表格模板'table-edit-${type}'。模板内有确定和取消按钮，分别有
+     * childName 'okButton' 和 'cancelButton'
+     * 这个行内编辑器会注册为table的子控件，
+     * 名字为inlineEditor-${type}-${rowIndex}-${columnIndex}
+     * 若之前已经存在该子控件，将不会再创建它。
+     * 返回创建了的编辑器
+     * @param {string} type edit type
+     * @param {number} rowIndex 行号
+     * @param {number} columnIndex 行号
+     * @param {HTMLElement} el 发生编辑的entry元素
+     * @fires {Event} saveedit 编辑生效，之后会关闭编辑浮层，可被阻止
+     * @property {Control} saveedit.editor 发生编辑的editor控件
+     * @property {string} saveedit.value 从编辑控件中拿的值
+     * @property {number} rowIndex 行号
+     * @property {number} columnIndex 列号
+     * @fires {Event} canceledit 编辑取消，之后会关闭编辑浮层，可被阻止
+     * @property {Control} saveedit.editor 发生编辑的editor控件
+     * @property {string} saveedit.value 从编辑控件中拿的值
+     * @property {number} rowIndex 行号
+     * @property {number} columnIndex 列号
+     * @return {Control} 行内编辑器
+     */
+    proto.createInlineEditor = function (type, rowIndex, columnIndex, el) {
+        var childName = 'inlineEditor-' + type + '-' + rowIndex
+            + '-' + columnIndex;
+        var editor = this.getChild(childName);
+        if (!editor) {
+            editor = ui.create('Panel', {
+                parent: this,
+                group: this.getGroupName('body'),
+                show: function () {
+                    this.setStyle('display', 'block');
+                },
+                hide: function () {
+                    this.setStyle('display', 'none');
+                },
+                content: this.helper.renderTemplate('table-edit-' + type)
+            });
+            this.addChild(editor, childName);
+            this.helper.addPartClasses('inline-editor', editor.main);
+            this.helper.addPartClasses('inline-editor-' + type, editor.main);
+            // z-index，大过cover的
+            editor.setStyle('z-index', this.zIndex + 2);
+            // 挪到body下面
+            document.body.appendChild(editor.main);
+            editor.render();
+            var me = this;
+            var field = this.realFields[columnIndex];
+            editor.getChild('okButton').on('click', function () {
+                var eventArgs = me.fire('saveedit',
+                    getEditEventProps(me, editor, rowIndex, columnIndex));
+                if (!eventArgs.isDefaultPrevented()) {
+                    editor.hide();
+                }
+            });
+            editor.getChild('cancelButton').on('click', function () {
+                var eventArgs = me.fire('savecancel',
+                    getEditEventProps(me, editor, rowIndex, columnIndex));
+                if (!eventArgs.isDefaultPrevented()) {
+                    editor.hide();
+                }
+            });
+            var inputControl = editor.getChild('inputControl');
+            if (inputControl) {
+                var data = this.datasource[rowIndex];
+                var content = field.editContent;
+                var value = 'function' === typeof content
+                    ? content.call(this, data, rowIndex, columnIndex)
+                    : data[field.field];
+                inputControl.setValue(value);
+            }
+        }
+        // 定位editor到TD
+        lib.dock(lib.parent(el, '.ui-table-cell'), editor.main,
+            lib.DockPosition.TOP_TOP_LEFT_LEFT);
+
+        return editor;
+    };
+
+    /**
+     * 取得编辑事件的参数
+     * @param {Table} table table
+     * @param {Control} editor 编辑器控件
+     * @param {number} rowIndex 行号
+     * @param {number} columnIndex 行号
+     * @return {Object} props
+     */
+    function getEditEventProps(table, editor, rowIndex, columnIndex) {
+        var props = {
+            field: table.realFields[columnIndex],
+            editor: editor,
+            rowIndex: rowIndex,
+            columnIndex: columnIndex
+        };
+        var inputControl = editor.getChild('inputControl');
+        if (inputControl) {
+            props.value = inputControl.getValue();
+        }
+        return props;
+    }
 
      /**
      * 获取Table的选中数据项

@@ -163,7 +163,6 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
 </div>
 <!-- /if -->
 
-
 <!-- target: table-select-all -->
 <!-- // 处于表格TH内的多选全选内容 -->
 <input type="checkbox" id="${select-all | id}" class="${select-all | class}"
@@ -185,7 +184,6 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
 <tbody id="${tbody | id}" class="${tbody | class}">
     <!-- import: table-body -->
 </tbody>
-
 
 <!-- target: table-body -->
 <!-- // 处于表格tbody内的表格体的内容，将包含在 tbody 元素内 -->
@@ -288,6 +286,26 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
 ">
     ${content}
 </div>
+
+<!-- target: table-edit-master -->
+<div class="${edit-control-wrapper | class}">
+    <!-- block: inputControls --><!-- /block -->
+</div>
+<div class="${edit-buttons-wrapper | class}">
+    <span data-ui-type="Button"
+        data-ui-skin="ui-fc-important"
+        data-ui-child-name="okButton"
+        class="${edit-ok-button | class}">确定</span>
+    <span data-ui-type="Button"
+        data-ui-child-name="cancelButton"
+        class="${edit-cancel-button | class}">取消</span>
+</div>
+
+<!-- target: table-edit-text(master = table-edit-master) -->
+<!-- block: inputControls -->
+<input data-ui-type="TextBox" data-ui-child-name="inputControl" />
+<label data-ui-type="Validity" data-ui-child-name="inputControlValid"></label>
+<!-- /block -->
 
 <!-- target: table-foot -->
 <!-- // 绘制表尾 -->
