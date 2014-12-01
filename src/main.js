@@ -55,7 +55,7 @@ define(function (require) {
 
     main.attachExtension('FcUiSkin', {});
 
-    main.version = '0.0.1-alpha.3';
+    main.version = '0.0.2-alpha.1';
 
     return main;
 });
