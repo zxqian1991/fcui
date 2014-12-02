@@ -6,6 +6,8 @@
  * @file 命令菜单控件
  * @author Feixiang Yuan(yuanfeixiang@baidu.com)
  * @date 2014-12-01
+ * 已合并扩展：
+ *      FcCommandMenu支持单条选项启用/禁用
  */
 define(
     function (require) {
@@ -31,6 +33,13 @@ define(
             }
 
             if (target === e.currentTarget) {
+                return;
+            }  
+            // 当前选项是置灰的，不处理
+            if (lib.hasClass(
+                    target, this.helper.getPartClasses('node-disabled')[0]
+                )
+            ) {
                 return;
             }
 
@@ -80,6 +89,7 @@ define(
             var html = '';
 
             for (var i = 0; i < this.control.datasource.length; i++) {
+                var dataItem =  this.control.datasource[i];
                 var classes = this.control.helper.getPartClasses('node');
                 if (i === this.control.activeIndex) {
                     classes.push.apply(
@@ -87,7 +97,12 @@ define(
                         this.control.helper.getPartClasses('node-active')
                     );
                 }
-
+                if (dataItem.disabled) {
+                    classes.push.apply(
+                        classes,
+                        this.control.helper.getPartClasses('node-disabled')
+                    );
+                }
                 html += '<li data-index="' + i + '"'
                     + ' class="' + classes.join(' ') + '">';
 
@@ -162,6 +177,55 @@ define(
                 u.bind(this.layer.toggle, this.layer)
             );
         };
+
+        /**
+         * 根据value的值禁用单条的item
+         *
+         * @param {string} value item的值
+         */
+        CommandMenu.prototype.disableItemByValue = function (value) {
+            lib.addClasses(
+                getNodeByValue.call(this, value), 
+                this.helper.getPartClasses('node-disabled')
+            );
+        };
+
+        /**
+         * 根据value的值激活单条item
+         *
+         * @param {string} value  item的值
+         */
+        CommandMenu.prototype.enableItemByValue = function (value) {
+            lib.removeClasses(
+                getNodeByValue.call(this, value), 
+                this.helper.getPartClasses('node-disabled')
+            );
+        };
+
+        /**
+         * 根据value值在datasource里面找出dataIndex
+         * @param {string} value 值
+         * @return {number} 下标
+         */
+        function getDataIndexByValue(value) {
+            for (var i = 0, dataItem; dataItem = this.datasource[i]; i++) {
+                if (value === dataItem.value) {
+                    return i;
+                }
+            }
+        };
+
+        /**
+         * 根据value的值，获取浮层中的node节点
+         * @param {string} value 值
+         * @return {element} 值为value 的节点
+         */
+        function getNodeByValue(value) {
+            var index = getDataIndexByValue.call(this, value);
+            return lib.find(
+                this.layer.getElement(), 'li[data-index="' + index + '"]'
+            );
+        }
 
         var paint = require('./painters');
         /**
