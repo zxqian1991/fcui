@@ -7,7 +7,8 @@
  * @author Feixiang Yuan(yuanfeixiang@baidu.com)
  * @date 2014-12-01
  * 已合并扩展：
- *      FcCommandMenu支持单条选项启用/禁用
+ *      FcCommandMenu 支持单条选项启用/禁用
+ *      FcCommandMenuHoverToggle hover时显示浮层
  */
 define(
     function (require) {
@@ -81,7 +82,6 @@ define(
         CommandMenuLayer.prototype.dock = {
             top: 'bottom',
             left: 'left',
-            right: 'right',
             spaceDetection: 'vertical'
         };
 
@@ -125,9 +125,12 @@ define(
          *
          * @extends {Control}
          * @constructor
+         * @param {Object} options
+         * @param {string} options.mode 何时显示下拉 click/hover
          */
-        function CommandMenu() {
+        function CommandMenu(options) {
             Control.apply(this, arguments);
+            this.mode = options.mode || 'click';
             this.layer = new CommandMenuLayer(this);
         }
 
@@ -171,11 +174,26 @@ define(
          * @override
          */
         CommandMenu.prototype.initStructure = function () {
-            this.helper.addDOMEvent(
-                this.main, 
-                'click', 
-                u.bind(this.layer.toggle, this.layer)
-            );
+            var helper = this.helper;
+            switch (this.mode) {
+                case 'click': 
+                    helper.addDOMEvent(
+                        this.main, 
+                        'click', 
+                        u.bind(this.layer.toggle, this.layer)
+                    );
+                    break;
+                case 'over': 
+                    Layer.delayHover(
+                        [ this.main, this.layer.getElement() ], 
+                        40, 
+                        u.bind(this.layer.show, this.layer),
+                        u.bind(this.layer.hide, this.layer)
+                    );
+                    break;
+                default: 
+                    break;
+            }
         };
 
         /**
