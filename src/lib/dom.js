@@ -270,10 +270,10 @@ define(function (require) {
      *     不足时翻转el。默认为true
      */
     exports.dock = function (anchor, el, position, options) {
-        options = u.extend({}, options, {
+        options = u.extend({}, {
             flipStrategy: exports.defaultFlipStrategy,
             detectSpace: true
-        });
+        }, options);
 
         // 获取锚元素的属性
         var anchorOffset = libDom.getOffset(anchor);
@@ -322,7 +322,7 @@ define(function (require) {
                     break;
                 case 4:
                     position = flip(elementWidth, elementHeight,
-                        rightSpaceWithAnchor, bottomSpaceWithAnchor, 
+                        rightSpaceWithAnchor, bottomSpaceWithAnchor,
                         position, strategy);
                     break;
                 case 5:
@@ -430,7 +430,7 @@ define(function (require) {
             case 10:
                 el.style.top = (anchorOffset.top + anchorOffset.height
                     - elementHeight) + 'px';
-                el.style.left = (anchorOffset.left - elementWidth) + 'px';
+                el.style.left = anchorOffset.left + 'px';
                 break;
             case 11:
                 el.style.top = (anchorOffset.top + anchorOffset.height) + 'px';
