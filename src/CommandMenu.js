@@ -6,6 +6,9 @@
  * @file 命令菜单控件
  * @author Feixiang Yuan(yuanfeixiang@baidu.com)
  * @date 2014-12-01
+ * 已合并扩展：
+ *      FcCommandMenu 支持单条选项启用/禁用
+ *      FcCommandMenuHoverToggle hover时显示浮层
  */
 define(
     function (require) {
@@ -31,6 +34,13 @@ define(
             }
 
             if (target === e.currentTarget) {
+                return;
+            }  
+            // 当前选项是置灰的，不处理
+            if (lib.hasClass(
+                    target, this.helper.getPartClasses('node-disabled')[0]
+                )
+            ) {
                 return;
             }
 
@@ -72,7 +82,6 @@ define(
         CommandMenuLayer.prototype.dock = {
             top: 'bottom',
             left: 'left',
-            right: 'right',
             spaceDetection: 'vertical'
         };
 
@@ -80,6 +89,7 @@ define(
             var html = '';
 
             for (var i = 0; i < this.control.datasource.length; i++) {
+                var dataItem =  this.control.datasource[i];
                 var classes = this.control.helper.getPartClasses('node');
                 if (i === this.control.activeIndex) {
                     classes.push.apply(
@@ -87,7 +97,12 @@ define(
                         this.control.helper.getPartClasses('node-active')
                     );
                 }
-
+                if (dataItem.disabled) {
+                    classes.push.apply(
+                        classes,
+                        this.control.helper.getPartClasses('node-disabled')
+                    );
+                }
                 html += '<li data-index="' + i + '"'
                     + ' class="' + classes.join(' ') + '">';
 
@@ -110,9 +125,12 @@ define(
          *
          * @extends {Control}
          * @constructor
+         * @param {Object} options
+         * @param {string} options.mode 何时显示下拉 click/hover
          */
-        function CommandMenu() {
+        function CommandMenu(options) {
             Control.apply(this, arguments);
+            this.mode = options.mode || 'click';
             this.layer = new CommandMenuLayer(this);
         }
 
@@ -156,12 +174,76 @@ define(
          * @override
          */
         CommandMenu.prototype.initStructure = function () {
-            this.helper.addDOMEvent(
-                this.main, 
-                'click', 
-                u.bind(this.layer.toggle, this.layer)
+            var helper = this.helper;
+            switch (this.mode) {
+                case 'click': 
+                    helper.addDOMEvent(
+                        this.main, 
+                        'click', 
+                        u.bind(this.layer.toggle, this.layer)
+                    );
+                    break;
+                case 'over': 
+                    Layer.delayHover(
+                        [ this.main, this.layer.getElement() ], 
+                        40, 
+                        u.bind(this.layer.show, this.layer),
+                        u.bind(this.layer.hide, this.layer)
+                    );
+                    break;
+                default: 
+                    break;
+            }
+        };
+
+        /**
+         * 根据value的值禁用单条的item
+         *
+         * @param {string} value item的值
+         */
+        CommandMenu.prototype.disableItemByValue = function (value) {
+            lib.addClasses(
+                getNodeByValue.call(this, value), 
+                this.helper.getPartClasses('node-disabled')
             );
         };
+
+        /**
+         * 根据value的值激活单条item
+         *
+         * @param {string} value  item的值
+         */
+        CommandMenu.prototype.enableItemByValue = function (value) {
+            lib.removeClasses(
+                getNodeByValue.call(this, value), 
+                this.helper.getPartClasses('node-disabled')
+            );
+        };
+
+        /**
+         * 根据value值在datasource里面找出dataIndex
+         * @param {string} value 值
+         * @return {number} 下标
+         */
+        function getDataIndexByValue(value) {
+            for (var i = 0, dataItem; dataItem = this.datasource[i]; i++) {
+                if (value === dataItem.value) {
+                    return i;
+                }
+            }
+        };
+
+        /**
+         * 根据value的值，获取浮层中的node节点
+         * @param {string} value 值
+         * @return {element} 值为value 的节点
+         */
+        function getNodeByValue(value) {
+            var index = getDataIndexByValue.call(this, value);
+            return lib.find(
+                this.layer.getElement(), 'li[data-index="' + index + '"]'
+            );
+        }
 
         var paint = require('./painters');
         /**
