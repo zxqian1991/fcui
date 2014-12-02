@@ -200,6 +200,13 @@ define(function (require) {
          */
         isLockedRight: false,
         /**
+         * 表格体是否含有任何ESUI控件。如果有的话Table将每次刷新表格体时
+         * 初始化所有控件
+         * @type {boolean}
+         * @default false
+         */
+        bodyHasControls: false,
+        /**
          * 表格编辑的handler，默认支持text类型的
          * @type {Object}
          * @property {string} handler.id handler所处理的editType
@@ -644,8 +651,10 @@ define(function (require) {
             orderBy: this.orderBy
         });
 
-        this.helper.disposeChildrenInGroup('head');
+        // getGroup 遇到空会新建一个空的，所以不怕空
+        this.viewContext.getGroup(this.getGroupName('head')).disposeGroup();
         if (this.isNeedCoverHead) {
+            this.viewContext.getGroup(this.getGroupName('head')).disposeGroup();
             this.helper.disposeChildrenInGroup('cover-head');
         }
 
@@ -662,10 +671,12 @@ define(function (require) {
             }
         }
 
-        this.helper.initChildrenAsGroup('head', this.getHead(),
-            this.getTipOptions());
+        var options = this.getTipOptions();
+        options.group = this.getGroupName('head');
+        this.helper.initChildren(this.getHead(), options);
         if (this.isNeedCoverHead) {
-            this.helper.initChildrenAsGroup('cover-head', this.getCoverHead());
+            options.group = this.getGroupName('coverhead');
+            this.helper.initChildren(this.getCoverHead(), options);
         }
         if (this.sortable) {
             this.initSort();
@@ -848,8 +859,7 @@ define(function (require) {
                 obj[this.getTipId(field)] = field.tipOptions;
             }
         }, this);
-        if (Object.keys(obj)
-            .length > 0) {
+        if (Object.keys(obj).length > 0) {
             return {properties: obj};
         }
     };
@@ -1069,12 +1079,22 @@ define(function (require) {
             orderBy: this.orderBy
         });
 
+        if (this.bodyHasControls) {
+            this.viewContext.getGroup(this.getGroupName('body')).disposeGroup();
+        }
+
         if (lib.ie && lib.ie <= 9) {
             // IE 9不能set tbody的innerHTML，用outerHTML
             this.ieSetTBody(html);
         }
         else {
             this.getBody().innerHTML = html;
+        }
+
+        if (this.bodyHasControls) {
+            this.helper.initChildren(this.getBody(), {
+                group: this.getGroupName('body')
+            });
         }
     };
 

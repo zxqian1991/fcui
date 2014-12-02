@@ -70,12 +70,17 @@ define(function (require) {
 
     /**
      * 从容器DOM元素批量初始化内部的控件渲染
-     *
+     * 派生自ESUI 3.1.0-beta.3。
+     * 做了如下改动
+     * 1. options里加了group参数。指定的话，本次init的所有元素将放入指定的
+     *    group中。
      * @param {HTMLElement} [wrap=document.body] 容器DOM元素，默认
      * @param {Object} [options] init参数
      * @param {Object} [options.viewContext] 视图环境
      * @param {Object} [options.properties] 属性集合，通过id映射
      * @param {Object} [options.valueReplacer] 属性值替换函数
+     * @param {Object} [options.parent] 初始化的元素共有的父元素
+     * @param {Object} [options.group] 初始化的元素共有的组
      * @return {Control[]} 初始化的控件对象集合
      */
     /* eslint-disable fecs-max-statements */
@@ -261,6 +266,9 @@ define(function (require) {
                 // 以便`properties`、`valueReplacer`之类的能保留
                 controlOptions.renderOptions = options;
                 controlOptions.main = element;
+                if (typeof options.group !== 'undefined') {
+                    controlOptions.group = options.group;
+                }
 
                 // 创建控件
                 var control = main.create(type, controlOptions);
