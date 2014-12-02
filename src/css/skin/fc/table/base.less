@@ -76,7 +76,7 @@
 .set-table-head() {
     &-thead {
         background: @skin-fc-bg-color-gray-light;
-        border-top: 2px solid @skin-fc-shadow-color;        
+        border-top: 2px solid @skin-fc-shadow-color;
         border-bottom: 1px solid @skin-fc-shadow-color;
 
         tr {
@@ -140,7 +140,7 @@
 .set-table-foot() {
     &-tfoot {
         background: @skin-fc-bg-color-white;
-        border-bottom: 1px solid @skin-fc-border-color-light;
+        border-bottom: 2px solid @skin-fc-shadow-color;
         .ui-table-foot-row {
             &:hover {
                 background: @skin-fc-bg-color-hover-blue;
@@ -164,6 +164,18 @@
     &-has-vborder {
         .ui-table-col {
             border-right: 1px solid @skin-fc-border-color-light;
+        }
+    }
+
+    &-no-foot {
+        .ui-table-tbody {
+            border-bottom: 2px solid @skin-fc-shadow-color;
+        }
+    }
+
+    &-no-head {
+        .ui-table-tbody {
+            border-top: 2px solid @skin-fc-shadow-color;
         }
     }
 

@@ -22,11 +22,6 @@ define(function (require) {
     var Control = require('./Control');
     var handlers = require('./TableHandlers');
 
-    var engine = new etpl.Engine();
-
-    var tableTemplate = require('./text!./Table.tpl.html');
-    engine.compile(tableTemplate);
-
     /**
      * @class Table
      *
@@ -46,7 +41,18 @@ define(function (require) {
     proto.constructor = function (options) {
         this.$super(arguments);
 
-        this.helper.setTemplateEngine(options.templateEngine || engine);
+        var engine;
+        if (options.templateEngine) {
+            engine = options.templateEngine;
+        }
+        else {
+            engine = new etpl.Engine();
+
+            var tableTemplate = require('./text!./Table.tpl.html');
+            engine.compile(tableTemplate);
+        }
+
+        this.helper.setTemplateEngine(engine);
     };
 
     proto.eventHandlers = handlers;
@@ -206,6 +212,12 @@ define(function (require) {
          * @default false
          */
         bodyHasControls: false,
+        /**
+         * 不画表头部分
+         * @type {boolean}
+         * @default false
+         */
+        noHead: false,
         /**
          * 表格编辑的handler，默认支持text类型的
          * @type {Object}
@@ -671,7 +683,7 @@ define(function (require) {
             }
         }
 
-        var options = this.getTipOptions();
+        var options = this.getTipOptions() || {};
         options.group = this.getGroupName('head');
         this.helper.initChildren(this.getHead(), options);
         if (this.isNeedCoverHead) {
@@ -1356,6 +1368,14 @@ define(function (require) {
         }
 
         tableHtml += this.helper.renderTemplate('table');
+
+        if (this.noHead) {
+            this.helper.addPartClasses('no-head');
+        }
+
+        if (this.foot == null) {
+            this.helper.addPartClasses('no-foot');
+        }
 
         this.main.innerHTML = tableHtml;
 
