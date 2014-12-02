@@ -363,7 +363,6 @@ define(
                     mouseoutTimeout = null;
                 }, delay);
             };
-            var clearTimeoutAll = function () {};
             for (var i in elements) {
                 var ele = elements[i];
                 lib.on(
