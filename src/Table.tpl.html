@@ -38,12 +38,6 @@
     <!-- for: ${realFields} as ${field}, ${columnIndex} -->
         <th class="
             ${hcell | class}
-            <!-- if: ${columnIndex} == 0 -->
-                ${hcell-first | class}
-            <!-- /if -->
-            <!-- if: ${columnIndex} == ${fieldsLength} - 1 -->
-                ${hcell-last | class}
-            <!-- /if -->
             <!-- if: ${field.sortable} -->
                 ${hcell-sort | class}
             <!-- /if -->
@@ -197,20 +191,7 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
     <!-- import: table-no-data -->
 <!-- else -->
     <!-- for: ${datasource} as ${dataItem}, ${rowIndex} -->
-        <tr class="
-            ${row | class}
-            <!-- if: ${rowIndex} % 2 == 0 -->
-            ${row-even | class}
-            <!-- else -->
-            ${row-odd | class}
-            <!-- /if -->
-            <!-- if: ${rowIndex} == 0 -->
-            ${row-first | class}
-            <!-- /if -->
-            <!-- if: ${rowIndex} == ${dataLength} - 1 -->
-            ${row-last | class}
-            <!-- /if -->
-        " data-row="${rowIndex}">
+        <tr class="${row | class}" data-row="${rowIndex}">
             <!-- import: table-row-cells -->
         </tr>
     <!-- /for -->
@@ -222,14 +203,7 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
 <!-- // @param fieldsLength 表格的fields长度 -->
 <!-- // @param rowIndex 当前行的index -->
 <!-- for: ${realFields} as ${field}, ${columnIndex} -->
-    <td class="
-        ${cell | class}
-        <!-- if: ${columnIndex} == 0 -->
-        ${cell-first | class}
-        <!-- /if -->
-        <!-- if: ${columnIndex} == ${fieldsLength} - 1 -->
-        ${cell-last | class}
-        <!-- /if -->
+    <td class="${cell | class}
         <!-- if: ${field.field} === ${orderBy} -->
             ${cell-sorted | class}
         <!-- /if -->
@@ -315,12 +289,6 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
     <!-- for: ${footArray} as ${foot}, ${index} -->
     <td class="
         ${fcell | class}
-        <!-- if: ${index} == 0 -->
-        ${fcell-first | class}
-        <!-- /if -->
-        <!-- if: ${index} == ${footLength} - 1 -->
-        ${fcell-last | class}
-        <!-- /if -->
         <!-- if: !${foot.align} -->
         <!-- elif: ${foot.align} === "left" -->
             ${fcell-align-left | class}

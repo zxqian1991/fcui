@@ -7,19 +7,11 @@
 //   table.ui-table-table
 //     thead.ui-table-thead
 //       th.ui-table-hcell
-//       th.ui-table-hcell-first
-//       th.ui-table-hcell-last
 //         div.ui-table-hcell-text
 //         div.ui-table-hcell-extra
 //     tbody.ui-table-tbody
 //       tr.ui-table-row
-//       tr.ui-table-row-even
-//       tr.ui-table-row-odd
-//       tr.ui-table-row-first
-//       tr.ui-table-row-last
 //         td.ui-table-cell
-//         td.ui-table-cell-first
-//         td.ui-table-cell-last
 //           div.ui-table-cell-text
 //           div.ui-table-cell-extra
 
@@ -29,12 +21,12 @@
  */
 .set-cells() {
     padding: 0;
-    &-first {
+    &:first-child {
         // 第一个单元格有左边框
         border-left: 1px solid @skin-fc-border-color-light;
     }
 
-    &-last {
+    &:last-child {
         // 最后一个单元格有右边框
         border-right: 1px solid @skin-fc-border-color-light;        
     }
