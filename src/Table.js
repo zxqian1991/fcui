@@ -579,28 +579,35 @@ define(function (require) {
     };
 
     /**
-     * IE9下，用于replace整个colgroup区的regex。
-     * @type {RegExp}
+     * 将一组TR或col的html 包装到thead、tfoot或者tbody中。
+     * @param {string} wrapper colgroup、thead、tfoot或者tbody
+     * @param {string} html 表示行或col的一组html
+     * @return {HTMLElement} 包装好的一个HTML元素，可以加入到table结构中
      */
-    var REGEX_REPLACE_COLGROUP = /(<colgroup.+?>).*?(<\/colgroup>)/;
-
-    /**
-     * IE9下，用于replace整个thead区的regex。
-     * @type {RegExp}
-     */
-    var REGEX_REPLACE_THEAD = /(<thead.+?>).*?(<\/thead>)/;
-
-    /**
-     * IE9下，用于replace整个tbody区的regex。
-     * @type {RegExp}
-     */
-    var REGEX_REPLACE_TBODY = /(<tbody.+?>).*?(<\/tbody>)/;
-
-    /**
-     * IE9下，用于replace整个tfoot区的regex。
-     * @type {RegExp}
-     */
-    var REGEX_REPLACE_TFOOT = /(<tfoot.+?>).*?(<\/tfoot>)/;
+    function wrapTableHtml(wrapper, html) {
+        var frag = document.createDocumentFragment();
+        var div = document.createElement('div');
+        div.innerHTML = ''
+            + '<table>'
+            + '<' + wrapper + '>'
+            + html
+            + '</' + wrapper + '>'
+            + '</table>';
+        frag.appendChild(div);
+        var fragTable = div.firstChild;
+        switch (wrapper) {
+            case 'thead':
+                return fragTable.tHead;
+            case 'tbody':
+                return fragTable.tBodies[0];
+            case 'tfoot':
+                return fragTable.tFoot;
+            case 'colgroup':
+                return fragTable.firstChild;
+            default:
+                return null;
+        }
+    }
 
     /**
      * IE9下，设置colgroup html
@@ -609,8 +616,11 @@ define(function (require) {
      */
     proto.ieSetColGroup = function (html, isCover) {
         var tableEl = isCover ? this.getCoverTable() : this.getTable();
-        tableEl.outerHTML = tableEl.outerHTML.replace(REGEX_REPLACE_COLGROUP,
-            '$1' + html + '$2');
+        tableEl.removeChild(tableEl.firstChild);
+        var colgroup = wrapTableHtml('colgroup', html);
+        this.helper.addPartClasses('colgroup', colgroup);
+        colgroup.id = this.helper.getId('colgroup');
+        tableEl.insertBefore(colgroup, tableEl.firstChild);
     };
 
     /**
@@ -619,12 +629,12 @@ define(function (require) {
      * @param {boolean} isCover true则为cover table设置thead
      */
     proto.ieSetTHead = function (html, isCover) {
-        // IE 9 不能set thead innerHTML，换个方法
-        // set 整个table区的outerHTML。
         var tableEl = isCover ? this.getCoverTable() : this.getTable();
-
-        tableEl.outerHTML = tableEl.outerHTML.replace(REGEX_REPLACE_THEAD,
-                '$1' + html + '$2');
+        tableEl.deleteTHead();
+        var thead = wrapTableHtml('thead', html);
+        this.helper.addPartClasses('thead', thead);
+        thead.id = this.helper.getId('thead');
+        tableEl.insertBefore(thead, tableEl.tBodies[0]);
     };
 
     /**
@@ -633,8 +643,11 @@ define(function (require) {
      */
     proto.ieSetTBody = function (html) {
         var tableEl = this.getTable();
-        tableEl.outerHTML = tableEl.outerHTML.replace(REGEX_REPLACE_TBODY,
-            '$1' + html + '$2');
+        tableEl.removeChild(tableEl.tBodies[0]);
+        var tbody = wrapTableHtml('tbody', html);
+        this.helper.addPartClasses('tbody', tbody);
+        tbody.id = this.helper.getId('tbody');
+        tableEl.insertBefore(tbody, tableEl.tHead.nextElementSibling);
     };
 
     /**
@@ -643,8 +656,59 @@ define(function (require) {
      */
     proto.ieSetTFoot = function (html) {
         var tableEl = this.getTable();
-        tableEl.outerHTML = tableEl.outerHTML.replace(REGEX_REPLACE_TFOOT,
-            '$1' + html + '$2');
+        tableEl.deleteTFoot();
+        var tfoot = wrapTableHtml('tfoot', html);
+        this.helper.addPartClasses('tfoot', tfoot);
+        tfoot.id = this.helper.getId('tfoot');
+        tableEl.appendChild(tfoot);
+    };
+
+    /**
+     * dispose掉所有表格头部的子控件
+     */
+    proto.disposeHeadChildren = function () {
+        // getGroup 遇到空会新建一个空的，所以不怕空
+        this.viewContext.getGroup(this.getGroupName('head')).disposeGroup();
+        if (this.isNeedCoverHead) {
+            this.viewContext.getGroup(this.getGroupName('head')).disposeGroup();
+            this.helper.disposeChildrenInGroup('cover-head');
+        }
+    };
+
+    /**
+     * dispose掉所有表格体的子控件
+     */
+    proto.disposeBodyChildren = function () {
+        if (this.bodyHasControls) {
+            this.viewContext.getGroup(this.getGroupName('body')).disposeGroup();
+        }
+    };
+
+    /**
+     * 初始化所有的表格头部子控件
+     */
+    proto.initHeadChildren = function () {
+        var options = this.getTipOptions() || {};
+        options.group = this.getGroupName('head');
+        this.helper.initChildren(this.getHead(), options);
+        if (this.isNeedCoverHead) {
+            options.group = this.getGroupName('coverhead');
+            this.helper.initChildren(this.getCoverHead(), options);
+        }
+        if (this.sortable) {
+            this.initSort();
+        }
+    };
+
+    /**
+     * 初始化所有的表格体子控件
+     */
+    proto.initBodyChildren = function () {
+        if (this.bodyHasControls) {
+            this.helper.initChildren(this.getBody(), {
+                group: this.getGroupName('body')
+            });
+        }
     };
 
     /**
@@ -663,12 +727,7 @@ define(function (require) {
             orderBy: this.orderBy
         });
 
-        // getGroup 遇到空会新建一个空的，所以不怕空
-        this.viewContext.getGroup(this.getGroupName('head')).disposeGroup();
-        if (this.isNeedCoverHead) {
-            this.viewContext.getGroup(this.getGroupName('head')).disposeGroup();
-            this.helper.disposeChildrenInGroup('cover-head');
-        }
+        this.disposeHeadChildren();
 
         if (lib.ie && lib.ie <= 9) {
             this.ieSetTHead(html, false);
@@ -683,16 +742,7 @@ define(function (require) {
             }
         }
 
-        var options = this.getTipOptions() || {};
-        options.group = this.getGroupName('head');
-        this.helper.initChildren(this.getHead(), options);
-        if (this.isNeedCoverHead) {
-            options.group = this.getGroupName('coverhead');
-            this.helper.initChildren(this.getCoverHead(), options);
-        }
-        if (this.sortable) {
-            this.initSort();
-        }
+        this.initHeadChildren();
     };
 
     /**
@@ -1091,9 +1141,7 @@ define(function (require) {
             orderBy: this.orderBy
         });
 
-        if (this.bodyHasControls) {
-            this.viewContext.getGroup(this.getGroupName('body')).disposeGroup();
-        }
+        this.disposeBodyChildren();
 
         if (lib.ie && lib.ie <= 9) {
             // IE 9不能set tbody的innerHTML，用outerHTML
@@ -1103,11 +1151,7 @@ define(function (require) {
             this.getBody().innerHTML = html;
         }
 
-        if (this.bodyHasControls) {
-            this.helper.initChildren(this.getBody(), {
-                group: this.getGroupName('body')
-            });
-        }
+        this.initBodyChildren();
     };
 
     /**

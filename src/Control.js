@@ -121,17 +121,17 @@ define(function (require) {
      */
     proto.createHandler = function (handlersQueue) {
         return u.bind(function (event) {
-            var e = e || window.event;
+            event = event || window.event;
             var main = this.main;
             u.each(handlersQueue, function (handler) {
                 if (handler.query) {
-                    var el = lib.parent(e.target, handler.query, main);
+                    var el = lib.parent(event.target, handler.query, main);
                     if (el) {
-                        handler.handler.call(this, e, el);
+                        handler.handler.call(this, event, el);
                     }
                 }
                 else {
-                    handler.handler.call(this, e, e.target);
+                    handler.handler.call(this, event, event.target);
                 }
             }, this);
         }, this);
