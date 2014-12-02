@@ -300,6 +300,97 @@ define(
         };
 
         /**
+         * 判断目标元素是否是元素(集合)的子元素
+         *
+         * @param {Array.<Object>} elements dom元素集合
+         * @param {Object} target dom 元素
+         * @return {boolean}
+         */
+        function isInElements(elements, target) {
+            for (var e = target; !!e; e = e.parentNode) {
+                for (var i in elements) {
+                    if (e === elements[i]) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /**
+         * 共享的延时hover事件
+         *  注意考虑摧毁时是否有必要使用Layer.delayHoverDispose摧毁事件
+         *
+         * @param {Array.<Object>} elements dom元素集合
+         * @param {number} delay 延时
+         * @param {function(Event)} mouseEnterCallback
+         * @param {function(Event)} mouseLeaveCallback
+         */
+        Layer.delayHover = 
+            function (elements, delay, mouseEnterCallback, mouseLeaveCallback) {
+            var mouseoverTimeout = null;
+            var mouseoutTimeout = null;
+            var hovering = false;
+            var mouseoverHandler = function (event) {
+                if (isInElements(elements, event.fromElement)) {
+                    return;
+                }
+                if (mouseoutTimeout) {
+                    clearTimeout(mouseoutTimeout);
+                    mouseoutTimeout = null;
+                }
+                // 防止mouseEnter多次发生
+                if (hovering) {
+                    return;
+                }
+                mouseoverTimeout = setTimeout(function () {
+                    hovering = true;
+                    mouseEnterCallback(event);
+                    mouseoverTimeout = null;
+                }, delay);
+            };
+            var mouseoutHandler = function (event) {
+                if (isInElements(elements, event.toElement)) {
+                    return;
+                }
+                if (mouseoverTimeout) {
+                    clearTimeout(mouseoverTimeout);
+                    mouseoverTimeout = null;
+                }
+                mouseoutTimeout = setTimeout(function () {
+                    hovering = false;
+                    mouseLeaveCallback(event);
+                    mouseoutTimeout = null;
+                }, delay);
+            };
+            var clearTimeoutAll = function () {};
+            for (var i in elements) {
+                var ele = elements[i];
+                lib.on(
+                    ele, 'mouseover', mouseoverHandler
+                );
+                lib.on(
+                    ele, 'mouseout', mouseoutHandler
+                );
+            }
+        };
+
+        /**
+         * 摧毁事件
+         * TODO(yuanfeixiang) 现在将移除所有的mouseover/mouseout事件 
+         *      改为按需移除事件监听
+         *
+         * @param {Array.<Object>} elements dom元素集合
+         */
+        Layer.delayHoverDispose = function (elements) {
+            for (var i in elements) {
+                var ele = elements[i];
+                lib.un(ele, 'mouseover');
+                lib.un(ele, 'mouseout');
+            }
+        };
+
+        /**
          * 让当前层靠住一个指定的元素
          *
          * @param {HTMLElement} element 目标层元素
@@ -351,7 +442,6 @@ define(
             // 
             // 这两种情况下，要计算出宽和高来，且覆盖掉提供的宽高
             var config = lib.clone(options);
-
             // 如果要靠住某一边，且要检测剩余空间，则那个边空间不够，就要移到另一边
             if (config.spaceDetection === 'vertical'
                 || config.spaceDetection === 'both') {
