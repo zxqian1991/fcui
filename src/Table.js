@@ -616,7 +616,7 @@ define(function (require) {
      */
     proto.ieSetColGroup = function (html, isCover) {
         var tableEl = isCover ? this.getCoverTable() : this.getTable();
-        tableEl.removeChild(tableEl.firstChild);
+        tableEl.removeChild(tableEl.getElementsByTagName('colgroup')[0]);
         var colgroup = wrapTableHtml('colgroup', html);
         this.helper.addPartClasses('colgroup', colgroup);
         colgroup.id = this.helper.getId('colgroup');

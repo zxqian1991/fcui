@@ -67,16 +67,16 @@
  */
 .set-table-head() {
     &-thead {
-        background: @skin-fc-bg-color-gray-light;
         border-top: 2px solid @skin-fc-shadow-color;
         border-bottom: 1px solid @skin-fc-shadow-color;
 
         tr {
             .ui-table-hcell {
                 .set-cells();
-                & {
-                    font-weight: bold;
-                    vertical-align: top;
+                font-weight: bold;
+                vertical-align: top;
+                &-wrapper {
+                    background: @skin-fc-bg-color-gray-light;
                 }
             }
         }
@@ -155,6 +155,9 @@
 
     &-has-vborder {
         .ui-table-col {
+            border-right: 1px solid @skin-fc-border-color-light;
+        }
+        .ui-table-hcell {
             border-right: 1px solid @skin-fc-border-color-light;
         }
     }

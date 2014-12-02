@@ -74,6 +74,9 @@
 <!-- // @param columnIndex -->
 <!-- // @param order -->
 <!-- // @param orderBy -->
+<!-- // 最外面的wrapper本来不需要的，因为IE9 thead的background有bug，不得不 -->
+<!-- // 加一个wrapper专门来放background -->
+<div class="${hcell-wrapper | class}">
 <div class="${hcell-text | class}">
 ${renderHeadTextContent | call(${field}, ${columnIndex})}
 </div>
@@ -84,6 +87,7 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
     <!-- if: ${field.sortable} -->
     <div class="${hcell-hsort | class}" data-column="${columnIndex}"></div>
     <!-- /if -->
+</div>
 </div>
 
 <!-- target: table-head-tip -->
