@@ -50,7 +50,6 @@
         background: @skin-fc-bg-color-gray;
         border: 1px solid @skin-fc-text-color-gray-light;
         padding: 10px;
-        .clear-float();
 
         .ui-table-edit-control-wrapper {
             .fl();
@@ -64,6 +63,11 @@
                 height: 24px;
                 line-height: 24px;
             }
+        }
+
+        .ui-table-edit-validities-wrapper {
+            clear: both;
+            padding-top: 5px;
         }
 
         &-text {

@@ -153,8 +153,12 @@
                                     title: '姓名',
                                     field: 'name' ,
                                     tip :'姓名',
-                                    align: 'right',
+                                    align: 'left',
                                     editable: true,
+                                    editRules: {
+                                        required: true,
+                                        requiredErrorMessage: '姓名不是你想空，想空就能空'
+                                    },
                                     sortField: [{
                                         field: 'nameex',
                                         name: '姓',

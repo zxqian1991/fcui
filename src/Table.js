@@ -17,6 +17,13 @@ define(function (require) {
     require('./Button');
     require('./TextBox');
 
+    // 行内编辑验证规则
+    require('esui/validator/MaxLengthRule');
+    require('esui/validator/MaxRule');
+    require('esui/validator/MinRule');
+    require('esui/validator/RequiredRule');
+    require('esui/validator/PatternRule');
+
     var ui = require('./main');
     var lib = require('./lib');
     var Control = require('./Control');
@@ -97,6 +104,7 @@ define(function (require) {
      * @property {boolean} editable 本列单元格是否可编辑
      * @property {string} editType 若editable为true，表示编辑的类型。若不提供
      *           则默认为text
+     * @property {Array} editRules 若可编辑，提供验证规则。基于ESUI验证
      * @property {boolean} ellipse 是否需要为表内长文本内容加上'...'。
      */
 
@@ -267,7 +275,7 @@ define(function (require) {
          * 当select为single时，为单个行号。
          * @type {Array|number}
          */
-        selectedRowIndex: []
+        selectedIndex: []
     };
 
     /**
@@ -1284,7 +1292,7 @@ define(function (require) {
     proto.renderSelectedRows = function (isRevert, selected) {
         var trs = lib.getChildren(this.getBody());
         if (typeof selected === 'undefined') {
-            selected = this.selectedRowIndex;
+            selected = this.selectedIndex;
         }
         isRevert = !!isRevert;
 
@@ -1554,9 +1562,9 @@ define(function (require) {
             this.renderSort(changesIndex);
         }
 
-        if (tBodyChanged || allProperities.selectedRowIndex) {
-            if (changesIndex && changesIndex.selectedRowIndex) {
-                var selectedObject = changesIndex.selectedRowIndex;
+        if (tBodyChanged || allProperities.selectedIndex) {
+            if (changesIndex && changesIndex.selectedIndex) {
+                var selectedObject = changesIndex.selectedIndex;
                 if (typeof selectedObject.oldValue !== 'undefined') {
                     this.renderSelectedRows(true, selectedObject.oldValue);
                 }
@@ -1585,14 +1593,14 @@ define(function (require) {
      */
     proto.setDatasource = function(datasource) {
         this.datasource = datasource;
-        this.selectedRowIndex = [];
+        this.selectedIndex = [];
         var record = {name: 'datasource'};
-        var record2 = {name: 'selectedRowIndex'};
+        var record2 = {name: 'selectedIndex'};
 
         this.repaint([record, record2],
             {
                 datasource: record,
-                selectedRowIndex: record2
+                selectedIndex: record2
             }
         );
     };
@@ -1649,10 +1657,13 @@ define(function (require) {
             var me = this;
             var field = this.realFields[columnIndex];
             editor.getChild('okButton').on('click', function () {
-                var eventArgs = me.fire('saveedit',
-                    getEditEventProps(me, editor, rowIndex, columnIndex));
-                if (!eventArgs.isDefaultPrevented()) {
-                    editor.hide();
+                var inputControl = editor.getChild('inputControl');
+                if (inputControl.validate()) {
+                    var eventArgs = me.fire('saveedit',
+                        getEditEventProps(me, editor, rowIndex, columnIndex));
+                    if (!eventArgs.isDefaultPrevented()) {
+                        editor.hide();
+                    }
                 }
             });
             editor.getChild('cancelButton').on('click', function () {
@@ -1670,6 +1681,17 @@ define(function (require) {
                     ? content.call(this, data, rowIndex, columnIndex)
                     : data[field.field];
                 inputControl.setValue(value);
+                // 关联验证器
+                var valid = editor.getChild('inputControlValid');
+                if (valid) {
+                    inputControl.validityLabel = valid.id;
+                }
+                // 设置验证规则
+                if (field.editRules) {
+                    u.each(field.editRules, function (rule, name) {
+                        inputControl[name] = rule;
+                    });
+                }
             }
         }
         // 定位editor到TD
@@ -1710,11 +1732,11 @@ define(function (require) {
     proto.getSelectedItems = function() {
         switch (this.select.toLowerCase()) {
             case 'multi':
-                if (this.selectedRowIndex === -1) {
+                if (this.selectedIndex === -1) {
                     return this.datasource;
                 }
 
-                var selectedIndex = this.selectedRowIndex;
+                var selectedIndex = this.selectedIndex;
                 var result = [];
                 if (selectedIndex) {
                     var datasource = this.datasource;
@@ -1726,7 +1748,7 @@ define(function (require) {
                 }
                 return result;
             case 'single':
-                return this.datasource[this.selectedRowIndex];
+                return this.datasource[this.selectedIndex];
             default:
                 break;
         }
@@ -1743,11 +1765,11 @@ define(function (require) {
         select = select || this.select;
         switch (select.toLowerCase()) {
             case 'multi':
-                this.selectedRowIndex.push(index);
+                this.selectedIndex.push(index);
                 this.renderSelectedRows();
                 break;
             case 'single':
-                this.set('selectedRowIndex', index);
+                this.set('selectedIndex', index);
                 break;
             default:
                 break;
@@ -1764,7 +1786,7 @@ define(function (require) {
         select = select || this.select;
         switch (select.toLowerCase()) {
             case 'multi':
-                var selected = this.selectedRowIndex;
+                var selected = this.selectedIndex;
                 selected.splice(u.indexOf(selected, index), 1);
                 this.renderSelectedRows(true, [index]);
                 break;
@@ -1772,6 +1794,54 @@ define(function (require) {
                 break;
             default:
                 break;
+        }
+    };
+
+    /**
+     * 设置单元格的文本区内容
+     * @param {string} html 文本区内容
+     * @param {number} row 行号
+     * @param {number} col 列号
+     */
+    proto.setCellText = function (html, row, col) {
+        var tds = lib.getChildren(this.getRow(row));
+        var td = tds[col];
+        if (td) {
+            var el = lib.find(td, '.ui-table-cell-text');
+            if (el) {
+                el.innerHTML = html;
+            }
+        }
+    };
+
+    /**
+     * 用提供的数据data更新row
+     * @param {number} row 行号
+     * @param {Object} data 要更新的数据
+     */
+    proto.updateRowAt = function (row, data) {
+        var html = this.helper.renderTemplate('table-row-cells', {
+            realFields: this.realFields,
+            fieldsLength: this.realFields.length,
+            rowIndex: row,
+            dataItem: data
+        });
+        if (lib.ie && lib.ie <= 9) {
+            var tbody = wrapTableHtml('tbody', '<tr>' + html + '</tr>');
+            var rowNode = tbody.rows[0];
+            var inTableRow = this.getRow(row);
+            rowNode.className = inTableRow.className;
+            this.getBody().removeChild(inTableRow);
+            inTableRow = this.getRow(row);
+            if (inTableRow) {
+                this.getBody().insertBefore(rowNode, this.getRow(row));
+            }
+            else {
+                this.getBody().appendChild(rowNode);
+            }
+        }
+        else {
+            this.getRow(row).innerHTML = html;
         }
     };
 

@@ -17,12 +17,6 @@
         padding-right: 0;
         line-height: 38px;
         height: 38px;
-
-        // 让container中的button都能垂直居中
-        .ui-button {
-            vertical-align: middle;
-            margin-right: 10px;
-        }
     }
 
     &-important-buttons {
@@ -36,6 +30,15 @@
 
     &-uncommon-buttons {
         .fl(right);
+    }
+
+    &-important-buttons,
+    &-common-buttons,
+    &-uncommon-buttons {
+        & > .ui-ctrl {
+            vertical-align: middle;
+            margin-right: 10px;
+        }
     }
 
     .ui-pager {

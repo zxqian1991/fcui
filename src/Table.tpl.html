@@ -206,6 +206,7 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
 <!-- // @param realFields 表格的fields定义 -->
 <!-- // @param fieldsLength 表格的fields长度 -->
 <!-- // @param rowIndex 当前行的index -->
+<!-- // @param dataItem 当前行的数据项 -->
 <!-- for: ${realFields} as ${field}, ${columnIndex} -->
     <td class="${cell | class}
         <!-- if: ${field.field} === ${orderBy} -->
@@ -278,10 +279,15 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
         data-ui-child-name="cancelButton"
         class="${edit-cancel-button | class}">取消</span>
 </div>
+<div class="${edit-validities-wrapper | class}">
+<!-- block: validities --><!-- /block -->
+</div>
 
 <!-- target: table-edit-text(master = table-edit-master) -->
 <!-- block: inputControls -->
 <input data-ui-type="TextBox" data-ui-child-name="inputControl" />
+<!-- /block -->
+<!-- block: validities -->
 <label data-ui-type="Validity" data-ui-child-name="inputControlValid"></label>
 <!-- /block -->
 
