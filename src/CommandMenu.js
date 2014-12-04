@@ -9,6 +9,7 @@
  * 已合并扩展：
  *      FcCommandMenu 支持单条选项启用/禁用
  *      FcCommandMenuHoverToggle hover时显示浮层
+ *      FcCommandButton
  */
 define(
     function (require) {
@@ -35,7 +36,7 @@ define(
 
             if (target === e.currentTarget) {
                 return;
-            }  
+            }
             // 当前选项是置灰的，不处理
             if (lib.hasClass(
                     target, this.helper.getPartClasses('node-disabled')[0]
@@ -61,7 +62,7 @@ define(
              * @param {number} index 选中项在{@CommandMenu#datasource}中的的索引
              * @member CommandMenu
              */
-            this.fire('select', { item: item, index: index });
+            this.fire('select', {item: item, index: index});
         }
 
         /**
@@ -125,11 +126,14 @@ define(
          *
          * @extends {Control}
          * @constructor
-         * @param {Object} options
+         * @param {Object} options 选项
          * @param {string} options.mode 何时显示下拉 click/hover
+         * @param {boolean} options.isCommandButton 是否是CommandButton模式
          */
         function CommandMenu(options) {
             Control.apply(this, arguments);
+            this.isCommandButton = options.isCommandButton === 'true'
+                || options.isCommandButton === true;
             this.mode = options.mode || 'click';
             this.layer = new CommandMenuLayer(this);
         }
@@ -175,26 +179,108 @@ define(
          */
         CommandMenu.prototype.initStructure = function () {
             var helper = this.helper;
-            switch (this.mode) {
-                case 'click': 
-                    helper.addDOMEvent(
-                        this.main, 
-                        'click', 
-                        u.bind(this.layer.toggle, this.layer)
-                    );
-                    break;
-                case 'over': 
-                    Layer.delayHover(
-                        [ this.main, this.layer.getElement() ], 
-                        40, 
-                        u.bind(this.layer.show, this.layer),
-                        u.bind(this.layer.hide, this.layer)
-                    );
-                    break;
-                default: 
-                    break;
+            // 增加disabled状态
+            if (this.disabled) {
+                this.helper.addStateClasses('disabled');
+            }
+            if (this.isCommandButton) {
+                this.initCommandButton();
+            } else {
+                switch (this.mode) {
+                    case 'click':
+                        helper.addDOMEvent(
+                            this.main,
+                            'click',
+                            u.bind(this.layer.toggle, this.layer)
+                        );
+                        break;
+                    case 'over':
+                        Layer.delayHover(
+                            [this.main, this.layer.getElement()],
+                            40,
+                            u.bind(this.layer.show, this.layer),
+                            u.bind(this.layer.hide, this.layer)
+                        );
+                        break;
+                    default:
+                        break;
+                }
             }
         };
+
+        /**
+         * 初始化commandButton
+         */
+        CommandMenu.prototype.initCommandButton = function () {
+            // this 是commandMenu
+            var control = this;
+            control.main.innerHTML = getButtonTpl(control);
+            lib.addClasses(
+                control.main,
+                control.helper.getPartClasses('button')
+            );
+            // 如果控件可用，绑定事件
+            if (!control.disabled) {
+                var mainButton = control.helper.getPart('mainButton');
+                var dropButton = control.helper.getPart('dropButton');
+                // 点击主区域，fire出事件
+                control.helper.addDOMEvent(
+                    mainButton,
+                    'click',
+                    u.bind(mainButtonClickHandler, control)
+                );
+                // 点击下拉区域，toggle layer
+                control.helper.addDOMEvent(
+                    dropButton,
+                    'click',
+                    u.bind(dropButtonClickHandler, control)
+                );
+            }
+        };
+
+        /**
+         * 点击主区域事件处理
+         */
+        function mainButtonClickHandler() {
+            // this 是commandMenu
+            this.layer.hide();
+            this.fire('mainbuttonclick');
+        }
+
+        /**
+         * 点击下拉区域事件处理
+         */
+        function dropButtonClickHandler() {
+            // this 是commandMenu
+            this.layer.toggle();
+        }
+
+        /**
+         * 获得主控件模板
+         *
+         * @param {Object} control 主控件
+         * @return {string} html
+         */
+        function getButtonTpl(control) {
+            var tpl = [
+                '<div id="${mainButtonId}" class="${mainButtonClass}">',
+                '${displayText}',
+                '</div>',
+                '<div id="${dropButtonId}" class="${dropButtonClass}"></div>'
+            ].join('');
+
+            var data = {
+                displayText: control.displayText,
+                mainButtonId: control.helper.getId('mainButton'),
+                mainButtonClass: control.helper.getPartClasses('mainButton')
+                    .join(' '),
+                dropButtonId: control.helper.getId('dropButton'),
+                dropButtonClass: control.helper.getPartClasses('dropButton')
+                    .join(' ')
+            };
+
+            return lib.format(tpl, data);
+        }
 
         /**
          * 根据value的值禁用单条的item
@@ -203,7 +289,7 @@ define(
          */
         CommandMenu.prototype.disableItemByValue = function (value) {
             lib.addClasses(
-                getNodeByValue.call(this, value), 
+                getNodeByValue.call(this, value),
                 this.helper.getPartClasses('node-disabled')
             );
         };
@@ -215,7 +301,7 @@ define(
          */
         CommandMenu.prototype.enableItemByValue = function (value) {
             lib.removeClasses(
-                getNodeByValue.call(this, value), 
+                getNodeByValue.call(this, value),
                 this.helper.getPartClasses('node-disabled')
             );
         };
@@ -231,7 +317,7 @@ define(
                     return i;
                 }
             }
-        };
+        }
 
         /**
          * 根据value的值，获取浮层中的node节点
@@ -244,6 +330,8 @@ define(
                 this.layer.getElement(), 'li[data-index="' + index + '"]'
             );
         }
+
+        var COMMAND_MENU_WIDTH = 44;
 
         var paint = require('./painters');
         /**
@@ -261,6 +349,21 @@ define(
              * 宽度
              */
             paint.style('width'),
+            /**
+             * @property {number} width
+             *
+             * 宽度
+             */
+            {
+                name: 'width',
+                paint: function (menu) {
+                    menu.main.style.width = menu.width;
+                    if (menu.isCommandButton) {
+                        lib.find(menu.main, '.ui-commandmenu-mainButton')
+                            .style.width = menu.width - COMMAND_MENU_WIDTH;
+                    }
+                }
+            },
             /**
              * @property {number} height
              *
@@ -283,7 +386,17 @@ define(
              *
              * 显示在可点击元素上的文本，会自动进行HTML转义
              */
-            paint.text('displayText'),
+            {
+                name: 'displayText',
+                paint: function (menu) {
+                    if (menu.isCommandButton) {
+                        lib.find(menu.main, '.ui-commandmenu-mainButton')
+                            .innerHTML = menu.displayText;
+                    } else {
+                        menu.main.innerHTML = menu.displayText;
+                    }
+                }
+            },
             {
                 name: ['disabled', 'hidden', 'readOnly'],
                 paint: function (menu, disabled, hidden, readOnly) {
@@ -303,7 +416,7 @@ define(
             if (this.helper.isInStage('DISPOSED')) {
                 return;
             }
-                
+
             if (this.layer) {
                 this.layer.dispose();
                 this.layer = null;

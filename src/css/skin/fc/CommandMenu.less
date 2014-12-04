@@ -132,4 +132,102 @@
     }
 }
 
+.resetFcCommandButton() {
+    border: 0!important;
+    background-color: transparent!important;
+    box-shadow: none!important;
+    overflow: visible!important;
+    position: relative;
+    padding: 0!important;
+}
+.@{skin-fc-prefix}-commandmenu-button {
+    .resetFcCommandButton();
+    &:hover {
+        .resetFcCommandButton();
+    }
+    &:after {
+        content: ''!important;
+        width: 0!important;
+        padding: 0!important;
+        height: 0!important;
+    }
+    .@{skin-fc-prefix}-commandmenu-mainButton {
+        display: inline-block;
+        overflow: hidden;
+        height: 28px;
+        line-height: 28px;
+        padding: 0 10px;
+        width: auto;
+        background-image: none;
+        background-color: @skin-fc-text-color-blue-light;
+        border: 1px solid @skin-fc-text-color-blue-light;
+        border-radius: 2px 0 0 2px;
+        color: @skin-fc-bg-color-white;
+        &:hover {
+            background-color: @skin-fc-text-color-blue;
+        }
+    }
 
+    .@{skin-fc-prefix}-commandmenu-dropButton {
+        display: inline-block;
+        overflow: visible;
+        width: 20px;
+        height: 28px;
+        background-color: @skin-fc-text-color-blue-light;
+        border: 1px solid @skin-fc-text-color-blue-light;
+        border-left: 1px solid #589EFF;
+        border-radius: 0 2px 2px 0;
+        &:hover {
+            background-color: @skin-fc-text-color-blue;
+        }
+        &:after {
+            position: absolute;
+            right: 0;
+            width: 16px;
+            padding: 6px 2px;
+            height: 16px;
+            line-height: 16px;
+            color: @skin-fc-bg-color-white;
+            display: inline-block;
+            font-family: 'fcIcon';
+            speak: none;
+            font-size: 16px;
+            font-style: normal;
+            font-weight: normal;
+            line-height: 1;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            content: "\e61e";
+        }
+    }
+}
+
+.@{skin-fc-prefix}-commandmenu-active {
+    .@{skin-fc-prefix}-commandmenu-dropButton,
+    .@{skin-fc-prefix}-commandmenu-dropButton:hover
+    {
+        background-color: @skin-fc-bg-color-white;
+        &:after {
+           color: @skin-fc-text-color-blue;
+        }
+    }
+}
+
+.@{skin-fc-prefix}-commandmenu-disabled {
+    .@{skin-fc-prefix}-commandmenu-mainButton,
+    .@{skin-fc-prefix}-commandmenu-mainButton:hover,
+    .@{skin-fc-prefix}-commandmenu-dropButton,
+    .@{skin-fc-prefix}-commandmenu-dropButton:hover
+    {
+        color: @skin-fc-text-color-disabled;
+        background-color: @skin-fc-bg-color-gray-light;
+        border-color: @skin-fc-text-color-gray-light;
+        cursor: not-allowed;
+        &:after {
+            color: @skin-fc-text-color-disabled;
+        }
+    }
+    .@{skin-fc-prefix}-commandmenu-dropButton {
+        border-left: none;
+    }
+}
