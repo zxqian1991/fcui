@@ -303,7 +303,7 @@ define(function (require) {
 
     main.attachExtension('FcUiSkin', {});
 
-    main.version = '0.0.2-alpha.7';
+    main.version = '0.0.2-alpha.8';
 
     return main;
 });
