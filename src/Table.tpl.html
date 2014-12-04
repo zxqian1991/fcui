@@ -195,7 +195,7 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
 <!-- if: ${dataLength} == 0 -->
     <!-- import: table-no-data -->
 <!-- else -->
-    <!-- if: typeof ${summary} === "object" -->
+    <!-- if: ${summary} != null -->
         <tr class="${row | class} ${row-summary | class}">
             <!-- for: ${realFields} as ${field}, ${columnIndex} -->
                 <td class="${cell | class}
