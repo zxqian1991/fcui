@@ -326,8 +326,9 @@ define(
          * @param {function(Event)} mouseEnterCallback
          * @param {function(Event)} mouseLeaveCallback
          */
-        Layer.delayHover = 
-            function (elements, delay, mouseEnterCallback, mouseLeaveCallback) {
+        Layer.delayHover = function (
+            elements, delay, mouseEnterCallback, mouseLeaveCallback
+        ) {
             var mouseoverTimeout = null;
             var mouseoutTimeout = null;
             var hovering = false;
@@ -365,12 +366,8 @@ define(
             };
             for (var i in elements) {
                 var ele = elements[i];
-                lib.on(
-                    ele, 'mouseover', mouseoverHandler
-                );
-                lib.on(
-                    ele, 'mouseout', mouseoutHandler
-                );
+                lib.on(ele, 'mouseover', mouseoverHandler);
+                lib.on(ele, 'mouseout', mouseoutHandler);
             }
         };
 

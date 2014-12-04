@@ -118,6 +118,31 @@
                     }
                     menu.disableItemByValue(item.value);
                 });
+
+                var menu2 = ui.create('CommandMenu', {
+                    datasource: [
+                        { 
+                            text: '修改创意文字', 
+                            value: 'modIdeaCharacters',
+                            disabled: true
+                        },
+                        { 
+                            text: '修改默认URL', 
+                            value: 'modURL',
+                            disabled: false
+                        }
+                    ],
+                    displayText: 'hello',
+                    isCommandButton: true
+                });
+                menu2.appendTo(document.body);
+                menu2.render();
+                menu2.on('select', function(event) {
+                    console.log(event);
+                });
+                menu2.on('mainbuttonclick', function() {
+                    console.log('mainbuttonclick');
+                });
             }
         )
         </script>
