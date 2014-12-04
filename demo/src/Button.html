@@ -3,10 +3,14 @@
     <head>
         <meta charset="UTF-8" />
         <title>Button - FCUI Demo</title>
-        <script src="http://s1.bdstatic.com/r/www/cache/ecom/esl/1-8-6/esl.js"></script>
+        <script src="./esl.js"></script>
+        <script src="./jquery.min.js"></script>
+        <script src="../../dep/esui/3.1.0-beta.3/src/customShim.js"></script>
+        <link rel="stylesheet" href="./demo.css" />
+        <link rel="stylesheet" href="../../src/css/main.css" />
         <script>
             require.config({
-                'baseUrl': '../src',
+                'baseUrl': '../../src',
                 'paths': {},
                 'packages': [
                     {
@@ -36,7 +40,7 @@
                     },
                     {
                         'name': 'fcui',
-                        'location': '../dep/fcui/current/src',
+                        'location': './',
                         'main': 'main'
                     },
                     {
@@ -46,7 +50,7 @@
                     },
                     {
                         'name': 'fc-core',
-                        'location': '../dep/fc-core/0.0.1-alpha.3/src',
+                        'location': '../dep/fc-core/0.0.1-alpha.4/src',
                         'main': 'main'
                     },
                     {
@@ -57,10 +61,6 @@
                 ]
             });
         </script>
-        <script src="../dep/esui/3.1.0-beta.3/src/customShim.js"></script>
-        <script src="http://libs.baidu.com/jquery/1.10.2/jquery.min.js"></script>
-        <link rel="stylesheet" href="demo.css" />
-        <link rel="stylesheet" href="../dep/fcui/current/src/css/main.css" />
     </head>
     <body>
         <header>Button</header>
