@@ -249,7 +249,7 @@ define(function (require) {
         fields: [],
         /**
          * 表格尾的fields配置。
-         * @type {Array<Object>} footInfo
+         * @type {Array<Object>}
          * @default null
          * @property {number} colspan colspan
          *           foot和body、head域绘制在一个表格中。列宽自由伸展，
@@ -259,6 +259,14 @@ define(function (require) {
          *           文字对齐方式，可以为left、right、center、justify
          */
         foot: null,
+        /**
+         * 表格汇总行的配置。
+         * @type {Object}
+         * @default null
+         * @property {String} <id> field name作为id
+         * @property {Function|string} content 获得汇总行单元格内容
+         */
+        summary: null,
         /**
          * 按照哪个field排序，提供field名字
          * @type {string}
@@ -448,6 +456,10 @@ define(function (require) {
      * @return {HTMLElement} TR元素
      */
     proto.getRow = function (index) {
+        if (this.summary) {
+            // 如果有汇总行，index要+1
+            index++;
+        }
         return lib.getChildren(this.getBody())[index];
     };
 
@@ -1141,6 +1153,7 @@ define(function (require) {
      */
     proto.renderBody = function () {
         var html = this.helper.renderTemplate('table-body', {
+            summary: this.summary,
             datasource: this.datasource || [],
             dataLength: this.datasource.length,
             realFields: this.realFields,
@@ -1176,6 +1189,37 @@ define(function (require) {
         }
 
         return tip;
+    };
+
+    /**
+     * 默认的获取汇总行单元格内文本内容的方法。经由表格模板回调。
+     * 调用summary[field.name].content，获得cell的文字内容。
+     *
+     * @protected
+     * @this Table
+     * @param {Object} summary 汇总行数据
+     * @param {Table~field} field 本单元格的field对象
+     * @return {string} HTML的string。
+     */
+    proto.renderSummaryContent = function (summary, field) {
+        // 先生成基本的content
+        var summaryField = summary[field.field];
+        if (summaryField) {
+            var content = summaryField.content;
+            var contentHtml = 'function' === typeof content
+                ? content.call(this, summary)
+                : (this.encode
+                    ? lib.encodeHTML(content)
+                    : content
+                );
+            // content需要有一个默认值
+            if (isNullOrEmpty(contentHtml)) {
+                contentHtml = '&nbsp;';
+            }
+            return contentHtml;            
+        }
+
+        return '&nbsp;'
     };
 
     /**

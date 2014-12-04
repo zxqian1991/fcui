@@ -121,6 +121,18 @@
                     background: @skin-fc-bg-color-selected;
                 }
             }
+
+            &-summary {
+                .ui-table-cell {
+                    background-color: @skin-fc-bg-color-gray-light;
+                    &-text {
+                        padding: 12px 5px;
+                        font-weight: bold;
+                        font-size: 12px;
+                        color: #333;                        
+                    }
+                }
+            }
         }
     }
 }
@@ -155,9 +167,6 @@
 
     &-has-vborder {
         .ui-table-col {
-            border-right: 1px solid @skin-fc-border-color-light;
-        }
-        .ui-table-hcell {
             border-right: 1px solid @skin-fc-border-color-light;
         }
     }

@@ -191,9 +191,45 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
 <!-- // @param fieldsLength 表格的fields长度 -->
 <!-- // @param order 当前排序方向 -->
 <!-- // @param orderBy 排序字段 -->
+<!-- // @param summary 汇总行信息 -->
 <!-- if: ${dataLength} == 0 -->
     <!-- import: table-no-data -->
 <!-- else -->
+    <!-- if: typeof ${summary} === "object" -->
+        <tr class="${row | class} ${row-summary | class}">
+            <!-- for: ${realFields} as ${field}, ${columnIndex} -->
+                <td class="${cell | class}
+                    <!-- if: ${field.field} === ${orderBy} -->
+                        ${cell-sorted | class}
+                    <!-- /if -->
+                    <!-- if: !${field.align} -->
+                    <!-- elif: ${field.align} === "left" -->
+                        ${cell-align-left | class}
+                    <!-- elif: ${field.align} === "right" -->
+                        ${cell-align-right | class}
+                    <!-- elif: ${field.align} === "center" -->
+                        ${cell-align-center | class}
+                    <!-- else -->
+                        ${cell-align-justify | class}
+                    <!-- /if -->
+                ">
+                    <!-- if: ${field.maxWidth} -->
+                        <div class="${cell-max-width | class}">
+                    <!-- /if -->
+                    <!-- if: ${field.select} -->
+                        &nbsp;
+                    <!-- else -->
+                        <div class="${cell-text | class}">
+                            ${renderSummaryContent | call(${summary}, ${field})}
+                        </div>
+                    <!-- /if -->
+                    <!-- if: ${field.maxWidth} -->
+                        </div>
+                    <!-- /if -->
+                </td>
+            <!-- /for -->
+        </tr>
+    <!-- /if -->
     <!-- for: ${datasource} as ${dataItem}, ${rowIndex} -->
         <tr class="${row | class}" data-row="${rowIndex}">
             <!-- import: table-row-cells -->
