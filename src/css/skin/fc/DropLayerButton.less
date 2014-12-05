@@ -1,0 +1,50 @@
+.ui-droplayerbutton:extend(.ui-select) {}
+.skin-ui-fc-droplayerbutton:extend(.skin-ui-fc-select) {}
+.skin-ui-fc-droplayerbutton:hover:extend(.skin-ui-fc-select:hover) {}
+.skin-ui-fc-droplayerbutton:focus:extend(.skin-ui-fc-select:focus) {}
+.skin-ui-fc-droplayerbutton:after:extend(.skin-ui-fc-select:after) {}
+
+.skin-ui-fc-droplayerbutton-active:extend(.skin-ui-fc-select-active) {}
+.skin-ui-fc-droplayerbutton-active:hover:extend(.skin-ui-fc-select-active) {}
+.skin-ui-fc-droplayerbutton-active:focus:extend(.skin-ui-fc-select-active) {}
+.skin-ui-fc-droplayerbutton-active:after:extend(.skin-ui-fc-select-active:after) {}
+
+.ui-droplayerbutton-layer:extend(.ui-commandmenu-layer) {
+    overflow: visible;
+    .ui-droplayerbutton-footer {
+        padding: 10px;
+    }
+    .ui-droplayerbutton-content{
+        padding: 10px 10px 0;
+    }
+    .ui-droplayerbutton-title {
+        position: relative;
+        line-height: 25px;
+        .ui-droplayerbutton-close-icon {
+            position: absolute;
+            top: 7px;
+            right: 7px;
+            cursor: pointer;
+            height: 12px;
+            width: 12px;
+            overflow: hidden;
+            color: #F00;
+        }
+    }
+    .ui-droplayerbutton-confirm {
+        margin-right:10px;
+    }
+    &-hidden {
+        display: none!important;
+    }
+    .hide {
+        display: none;
+    }
+}
+.skin-ui-fc-droplayerbutton-layer:extend(.ui-commandmenu-layer) {}
+
+.ui-droplayerbutton-layer-hidden:extend(.ui-commandmenu-layer-hidden) {}
+.skin-ui-fc-droplayerbutton-layer-hidden:extend(.ui-commandmenu-layer-hidden) {}
+
+.ui-commandmenu-disabled:extend(.ui-commandmenu-disabled) {}
+.skin-ui-fc-commandmenu-disabled:extend(.ui-commandmenu-disabled) {}
