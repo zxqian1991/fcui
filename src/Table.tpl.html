@@ -244,6 +244,7 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
 <!-- // @param rowIndex 当前行的index -->
 <!-- // @param dataItem 当前行的数据项 -->
 <!-- for: ${realFields} as ${field}, ${columnIndex} -->
+<!-- var: editable = ${isFieldEditable | call(${field}, ${rowIndex}, ${columnIndex})} -->
     <td class="${cell | class}
         <!-- if: ${field.field} === ${orderBy} -->
             ${cell-sorted | class}
@@ -258,7 +259,7 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
         <!-- else -->
             ${cell-align-justify | class}
         <!-- /if -->
-        <!-- if: ${field.editable} === true -->
+        <!-- if: ${editable} === true -->
             ${cell-editable | class}
         <!-- /if -->
         <!-- if: ${field.tdClassName} -->
@@ -280,7 +281,7 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
         ${cell-text | class}
     ">
         ${renderCellTextContent | call(${dataItem}, ${field}, ${rowIndex}, ${columnIndex})}
-        <!-- if: ${field.editable} -->
+        <!-- if: ${editable} -->
             <div class="${cell-edit-entry | class}"
                 <!-- if: ${field.editType} -->
                     data-edit-type="${field.editType}"
