@@ -1,0 +1,491 @@
+/**
+ * @file 数字输入控件，支持值的上下调节，只允许输入数字
+ * @author Lingling Yan(yanlingling@baidu.com)
+ */
+
+define(
+    function (require) {
+        var u = require('underscore');
+        var lib = require('esui/lib');
+        var InputControl = require('esui/InputControl');
+        var painters = require('esui/painters');
+        var esui = require('esui');
+
+        /**
+         * 隐藏dom的样式
+         *
+         * @const
+         * @type {string}
+         */
+        var HIDE_CLASS = 'state-hidden';
+
+        /**
+         * 箭头操作类型配置
+         *
+         * @const
+         * @type {Object}
+         */
+        var ARROW_OPT = {
+            ADD: 'add',
+            MINUS: 'minus'
+        };
+
+        /**
+         * 保留小数点后decimalPlace位数
+         * @param {string|number} value 值 数字的string或者数字
+         * @param {number} decimalPlace 截取的位数
+         * @return {number} 修正后的小数
+         */
+        function fixNumber (value, decimalPlace) {
+            return parseFloat(value).toFixed(decimalPlace);
+        }
+
+        /**
+         * 只能输入数字的input
+         * @param {Object} options 控件初始化参数
+         * @param {number} options.stepValue 每次调节的变化值，默认为1
+         * @param {number} options.scene 指定某种场景，提供默认配置，
+         *      默认为default,比例因子stepValue为0.01，min为0.01,max为1,
+         *      目前提供的还有money
+         * @param {number} options.min value的最小值，
+         *      默认为Number.NEGATIVE_INFINITY
+         * @param {number} options.max value 的最大值，
+         *      默认为Number.POSITIVE_INFINITY
+         * @param {number} options.value 当前控件的value值
+         * @param {boolean} options.isShowTimelyTip 是否输入范围的即时提示
+         *      提示为：有效范围：**~**,默认没有上下限，不会提示
+         * @param {number} options.decimalPlace 取值保留几位小数点,默认不截断
+         * @param {boolean} options.disabled 是否禁用
+         * @param {boolean} options.hidden 是否隐藏
+         * @extends InputControl
+         * @requires TextBox
+         * @constructor
+         */
+        function NumberBox(options) {
+            InputControl.apply(this, arguments);
+        }
+
+        /**
+         * 控件类型，始终为`"NumberBox"`
+         *
+         * @type {string}
+         * @readonly
+         * @override
+         */
+        NumberBox.prototype.type = 'NumberBox';
+
+        /**
+         * 初始化参数
+         *
+         * @param {Object} options 构造函数传入的参数
+         * @protected
+         * @override
+         */
+        NumberBox.prototype.initOptions = function (options) {
+            // 默认选项配置
+            var properties = {
+                stepValue: 1,
+                scene: 'default',
+                min: Number.NEGATIVE_INFINITY,
+                max: Number.POSITIVE_INFINITY,
+                isShowTimelyTip: true,
+                value: '',
+                isNumber: true,
+                required: true
+            };
+            if (options.scene) {
+                properties.scene = options.scene;
+            }
+            var sceneOptions = this.getOptionsByScene(properties.scene);
+            // 如果配置了场景的话，用场景的配置覆盖默认配置
+            sceneOptions ? u.extend(properties, sceneOptions) : '';
+            // options里面配置的优先级高于场景的
+            u.extend(properties, options);
+            this.setProperties(properties);
+        };
+
+        /**
+         * 获取特定的场景配置，如money,factor
+         * @param {string} name 场景名
+         * @return {*}
+         */
+        NumberBox.prototype.getOptionsByScene = function (name) {
+            return this.scene[name];
+        };
+
+        /**
+         * 通过scene提供一些使用场景认配置
+         */
+        NumberBox.prototype.scene = {
+            // 默认场景设置
+            'default': {
+                stepValue: 0.01,
+                isShowTimelyTip: true,
+                decimalPlace: 2,
+                min: 0.01,
+                max: 1
+            },
+            // money的默认设置
+            'money': {
+                stepValue: 0.01,
+                isShowTimelyTip: true,
+                decimalPlace: 2,
+                min: 0
+            }
+        };
+
+        /**
+         * 获取html片段
+         *
+         * @return {string} html片段
+         */
+        NumberBox.prototype.getMainHTML = function () {
+            var helper = this.helper;
+            var tipString = this.getTip();
+            // 写这么多html是因为模板加载跨域的问题
+            var htmlStr = ''
+                + '<div id="' + helper.getId('wrapper')
+                + '" class="' + this.getPartClasses('wrapper') + '">'
+                +    '<div class="' + this.getPartClasses('main-content') + '">'
+                +       '<input id="' + helper.getId('input') + '" class="'
+                +           this.getPartClasses('input') + '"/>'
+                +       '<div id="' + helper.getId('arrow-wrapper')
+                +           '" class="' + this.getPartClasses('arrow-wrapper')
+                +               '">'
+                +           '<div opt="add" class="'
+                +                this.getPartClasses('arrow-up') + '">'
+                +                '<i opt="add" class="font-icon '
+                +                   'font-icon-caret-up"></i>'
+                +           '</div>'
+                +           '<div opt="minus" class="'
+                +               this.getPartClasses('arrow-down') + '">'
+                +               '<i opt="minus"  class="font-icon '
+                +                   'font-icon-caret-down"></i>'
+                +            '</div>'
+                +        '</div>'
+                +        '<div id="' + helper.getId('tip') + '" class="'
+                +            this.getPartClasses('range-tip')
+                +            ' ' + HIDE_CLASS + '">'
+                +            tipString
+                +        '</div>'
+                +    '</div>'
+                + '</div>';
+            return htmlStr;
+        };
+
+        /**
+         * 生成class
+         *
+         * @param {string} partName 指定名称
+         * @return {string} 完整的class
+         */
+        NumberBox.prototype.getPartClasses = function (partName) {
+            return this.helper.getPartClasses(partName).join(' ');
+        };
+
+        /**
+         * 获取提示字符串
+         *
+         * @return {string} 提示信息
+         */
+        NumberBox.prototype.getTip = function () {
+            // 没有最小值的时候
+            var str = '有效范围:';
+            if (this.min !== Number.NEGATIVE_INFINITY
+                && this.max !== Number.POSITIVE_INFINITY) {
+                str += this.min + '~' + this.max;
+            }
+            else if (this.min === Number.NEGATIVE_INFINITY
+                && this.max === Number.POSITIVE_INFINITY) {
+                str = '';
+            }
+            else if (this.min === Number.NEGATIVE_INFINIT) {
+                str += '小于' + this.max;
+            }
+            else {
+                str += '大于' + this.min;
+            }
+            return str;
+        };
+
+
+        /**
+         * 初始化DOM结构
+         *
+         * @protected
+         * @override
+         */
+        NumberBox.prototype.initStructure = function () {
+            var helper = this.helper;
+            this.main.innerHTML = this.getMainHTML();
+            // 创建控件树
+            helper.initChildren();
+            this.initEvents();
+
+        };
+
+        /**
+         * 事件的初始化
+         */
+        NumberBox.prototype.initEvents = function () {
+            var helper = this.helper;
+            // 输入区变化监听
+            var input = helper.getPart('input');
+            var inputEvent = ('oninput' in input)
+                ? 'input' : 'propertychange';
+            helper.addDOMEvent(input, inputEvent, this.onInputChange());
+            helper.addDOMEvent(input, 'focus', this.onInputFocus());
+            helper.addDOMEvent(input, 'blur', this.onInputBlur());
+            helper.addDOMEvent(
+                helper.getPart('arrow-wrapper'),
+                'click',
+                this.onArrowClick()
+            );
+        };
+
+        /**
+         * 箭头区块点击的处理函数
+         *
+         * @return {Function}
+         */
+        NumberBox.prototype.onArrowClick = function () {
+            var me = this;
+            return function (e) {
+                var target = e.target;
+                var opt = lib.getAttribute(target, 'opt');
+                if (opt) {
+                    me.changeValueByStepValue(opt);
+                    me.fire(
+                        opt === ARROW_OPT.ADD ? 'addbyarrow' : 'minusbyarrow'
+                    );
+                }
+            };
+        };
+
+        /**
+         * input变化时候的事件
+         *
+         * @return {Function} 事件处理函数
+         */
+        NumberBox.prototype.onInputChange = function () {
+            var me = this;
+            return function () {
+                me.setValue(me.helper.getPart('input').value);
+            };
+        };
+
+        /**
+         * input 获取focus的事件
+         *
+         * @return {Function} focus处理事件
+         */
+        NumberBox.prototype.onInputFocus = function () {
+            var me = this;
+            return function () {
+                if (me.isShowTimelyTip) {
+                    me.showRangeTip();
+                    // 否则提示跟错误会冲突
+                    me.hideError();
+                    me.isOnFocus = true;
+                }
+            };
+        };
+
+        /**
+         * 当前是否是合法状态
+         *
+         * @return {boolean} 是或否
+         */
+        NumberBox.prototype.isValide = function () {
+            return this.validity.getValidState() !== 'invalid';
+        };
+
+        /**
+         * input 获取blur的事件
+         *
+         * @return {Function} blur处理事件
+         */
+        NumberBox.prototype.onInputBlur = function () {
+            var me = this;
+            return function () {
+                me.hideRangeTip();
+                me.isOnFocus = false;
+                me.setValue(me.fixValue(me.helper.getPart('input').value));
+            };
+        };
+
+        /**
+         * 对输入值进行验证
+         */
+        NumberBox.prototype.validateValue = function () {
+            var isValide = this.validate();
+            // 范围之类的合法以后，进行小数截断
+            if (isValide) {
+                // 合法的值变化时触发
+                this.fire('valid');
+            }
+        };
+
+        /**
+         * 截取小数位数
+         * @param {number} value 要截取的值
+         * @return {number} 截取后的值
+         */
+        NumberBox.prototype.fixValue = function (value) {
+            if (this.decimalPlace && !isNaN(value) && value !== '') {
+                value = fixNumber(value, this.decimalPlace);
+            }
+            return value;
+        };
+
+        /**
+         * 隐藏范围提示
+         */
+        NumberBox.prototype.hideRangeTip = function () {
+            lib.addClasses(
+                this.helper.getPart('tip'),
+                [HIDE_CLASS]
+            );
+        };
+
+        /**
+         * 显示范围提示
+         */
+        NumberBox.prototype.showRangeTip = function () {
+            lib.removeClasses(
+                this.helper.getPart('tip'),
+                [HIDE_CLASS]
+            );
+        };
+
+        /**
+         * 输入非法时候的处理
+         */
+        NumberBox.prototype.oninvalid = function () {
+            this.hideRangeTip();
+        };
+
+        /**
+         * 隐藏错误
+         */
+        NumberBox.prototype.hideError = function () {
+            lib.addClasses(
+                this.helper.getPart('validity'),
+                [HIDE_CLASS]
+            );
+        };
+
+        /**
+         * 重新渲染
+         *
+         * @override
+         */
+        NumberBox.prototype.repaint = painters.createRepaint(
+            InputControl.prototype.repaint,
+            {
+                /**
+                 * 控件的原始值，为字符串数组，每行表示一个字符串
+                 *
+                 * @property {string[]} rawValue
+                 * @override
+                 */
+                name: 'rawValue',
+                paint: function (NumberBox, value) {
+                    // 输入区
+                    // 在输入框里即时输入的时候，不做小数截断
+                    value = (isNaN(+value) || NumberBox.isOnFocus)
+                        ? value : NumberBox.fixValue(value);
+                    NumberBox.helper.getPart('input').value = value;
+                    NumberBox.validateValue();
+                }
+            },
+            {
+                name: 'disabled',
+                paint: function (NumberBox, disabled) {
+                    var input = NumberBox.helper.getPart('input');
+                    input.disabled = !!disabled;
+                    if (disabled) {
+                        NumberBox.helper.addStateClasses('disabled');
+                    }
+                    else {
+                        NumberBox.helper.removeStateClasses('disabled');
+                    }
+                }
+            }
+        );
+
+        /**
+         * 按stepValue的值的粒度变化input的值 加 或者 减
+         *
+         * @param {string} opt 取值 'add' 或者 'minus'
+         */
+        NumberBox.prototype.changeValueByStepValue = function (opt) {
+            // 输入的不是数字的时候或者为空的时候
+            if (this.validity.states[0].state === false
+                || this.validity.states[1].state === false) {
+                return;
+            }
+            var newValue;
+            if (opt === ARROW_OPT.ADD) {
+                newValue = +this.getValue() + this.stepValue;
+            }
+            else {
+                newValue = +this.getValue() - this.stepValue;
+            }
+            this.setValue(newValue);
+        };
+
+        /**
+         * 设置value的值
+         *
+         * @param {number|string} value 要设置的值
+         * @pubic
+         */
+        NumberBox.prototype.setValue = function (value) {
+            this.setProperties({value: '' + value});
+            // 每次设置值的时候 都要validate一下，
+            // repait里面只有只变化的时候才会validate
+            this.validateValue();
+            this.fire('inputchange');
+        };
+
+        /**
+         * get value的值
+         *
+         * @override
+         * @pubic
+         */
+        NumberBox.prototype.getValue = function () {
+            return this.fixValue(this.getRawValue());
+        };
+
+
+        /**
+         * 隐藏控件
+         *
+         * @override
+         * @pubic
+         */
+        NumberBox.prototype.hide = function () {
+            this.addState('hidden');
+            var label = this.getValidityLabel();
+            label && label.hide();
+        };
+
+        /**
+         * 显示控件
+         *
+         * @override
+         * @pubic
+         */
+        NumberBox.prototype.show = function () {
+            this.removeState('hidden');
+            var label = this.getValidityLabel();
+            label && label.show();
+        };
+
+        lib.inherits(NumberBox, InputControl);
+        esui.register(NumberBox);
+        return NumberBox;
+    }
+);
