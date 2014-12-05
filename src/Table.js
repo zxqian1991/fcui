@@ -1216,10 +1216,10 @@ define(function (require) {
             if (isNullOrEmpty(contentHtml)) {
                 contentHtml = '&nbsp;';
             }
-            return contentHtml;            
+            return contentHtml;
         }
 
-        return '&nbsp;'
+        return '&nbsp;';
     };
 
     /**
@@ -1647,6 +1647,25 @@ define(function (require) {
                 selectedIndex: record2
             }
         );
+    };
+
+    /**
+     * 判断当前单元格是否可编辑
+     * @param {Object} field 列配置
+     * @param {number} row 单元格所在行
+     * @param {number} col 单元格所在列
+     * @return {boolean} 是否可编辑
+     */
+    proto.isFieldEditable = function (field, row, col) {
+        // 第0列是一个checkbox，没有对应field，直接设置成不可编辑
+        if (field) {
+            if ('function' === typeof field.editable) {
+                return field.editable
+                    .apply(this, [this.datasource[row], row, col]);
+            }
+            return !!field.editable;
+        }
+        return false;
     };
 
     /**
