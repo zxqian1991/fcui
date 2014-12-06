@@ -10,9 +10,6 @@
 define(function (require) {
     var u = require('underscore');
     var main = require('esui/main');
-
-    var skin = require('./extension/FcUiSkin');
-
     main.esuiVersion = main.version;
 
     /**
@@ -27,11 +24,10 @@ define(function (require) {
      * @param {Object} option 扩展初始化参数
      */
     main.attachExtension = function (type, option) {
-        var options;
         if (typeof this.globalExtensionOptions === 'undefined') {
-            options = this.globalExtensionOptions = {};
+            this.globalExtensionOptions = {};
         }
-        options[type] = option || {};
+        this.globalExtensionOptions[type] = option || {};
     };
 
     /**
@@ -298,10 +294,6 @@ define(function (require) {
         return controls;
     };
     /* eslint-enable fecs-max-statements */
-
-    main.registerExtension(skin);
-
-    main.attachExtension('FcUiSkin', {});
 
     main.version = '0.0.2-alpha.8';
 
