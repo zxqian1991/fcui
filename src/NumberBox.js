@@ -448,14 +448,15 @@ define(
             if (this.validity.states[0].state === false) {
                 return;
             }
-            var newValue;
+            var newValue = parseFloat(this.getValue(), 10);
             if (opt === ARROW_OPT.ADD) {
-                newValue = +this.getValue() + parseFloat(this.stepValue, 10);
+                newValue += parseFloat(this.stepValue, 10);
             }
             else {
-                newValue = +this.getValue() - parseFloat(this.stepValue, 10);
+                newValue -= parseFloat(this.stepValue, 10);
             }
-            if (newValue <= this.max && newValue >= this.min) {
+            if ((opt === ARROW_OPT.ADD && newValue <= this.max)
+                || (opt === ARROW_OPT.MINUS && newValue >= this.min)) {
                 this.setValue(newValue);
             }
         };
