@@ -5,9 +5,9 @@
  * @return {Object} main
  */
 define(function (require) {
-
     var lib = require('../lib');
     var Extension = require('../Extension');
+    var ui = require('../main');
 
     /**
      * 凤巢皮肤定制
@@ -47,6 +47,9 @@ define(function (require) {
     FcUiSkin.prototype.inactivate = function () {
         Extension.prototype.inactivate.apply(this, arguments);
     };
+
+    ui.registerExtension(FcUiSkin);
+    ui.attachExtension('FcUiSkin', {});
 
     return FcUiSkin;
 });
