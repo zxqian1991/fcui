@@ -295,7 +295,7 @@ define(function (require) {
     };
     /* eslint-enable fecs-max-statements */
 
-    main.version = '0.0.2-alpha.8';
+    main.version = '0.0.2-alpha.9';
 
     return main;
 });
