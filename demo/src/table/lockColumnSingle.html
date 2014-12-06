@@ -3,7 +3,12 @@
     <head>
         <meta charset="UTF-8" />
         <title>Table with Lock Column - FCUI Demo</title>
-        <script src="../../dep/esl/src/esl.js"></script>
+        <script src="../esl.js"></script>
+        <script src="../jquery.min.js"></script>
+        <script src="../../../dep/esui/3.1.0-beta.3/src/customShim.js"></script>
+        <link rel="stylesheet" href="../demo.css" />
+        <link rel="stylesheet" href="../../../src/css/main.css" />
+
         <script>
             // derived from ESUI 3.1.0-beta.5 demo file
             require.config({
@@ -37,7 +42,7 @@
                     },
                     {
                         'name': 'fcui',
-                        'location': '../dep/fcui/current/src',
+                        'location': './',
                         'main': 'main'
                     },
                     {
