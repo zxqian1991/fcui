@@ -9,14 +9,22 @@
 .skin-ui-fc-droplayerbutton-active:focus:extend(.skin-ui-fc-select-active) {}
 .skin-ui-fc-droplayerbutton-active:after:extend(.skin-ui-fc-select-active:after) {}
 
-.ui-droplayerbutton-layer:extend(.ui-commandmenu-layer) {
+.ui-droplayerbutton-layer {
     overflow: visible;
+    padding: 4px 0;
+    color: @skin-fc-text-color-gray-dark;
+    border: 1px solid @skin-fc-text-color-gray-light;
+    #skin-fc-mixin > .box-shadow(0px 1px 3px @skin-fc-shadow-color);
+    background: @skin-fc-bg-color-white;
+
     .ui-droplayerbutton-footer {
         padding: 10px;
     }
+
     .ui-droplayerbutton-content{
         padding: 10px 10px 0;
     }
+
     .ui-droplayerbutton-title {
         position: relative;
         line-height: 25px;
@@ -31,20 +39,12 @@
             color: #F00;
         }
     }
-    .ui-droplayerbutton-confirm {
+
+    &-confirm-button {
         margin-right:10px;
     }
+    
     &-hidden {
-        display: none!important;
-    }
-    .hide {
         display: none;
     }
 }
-.skin-ui-fc-droplayerbutton-layer:extend(.ui-commandmenu-layer) {}
-
-.ui-droplayerbutton-layer-hidden:extend(.ui-commandmenu-layer-hidden) {}
-.skin-ui-fc-droplayerbutton-layer-hidden:extend(.ui-commandmenu-layer-hidden) {}
-
-.ui-commandmenu-disabled:extend(.ui-commandmenu-disabled) {}
-.skin-ui-fc-commandmenu-disabled:extend(.ui-commandmenu-disabled) {}

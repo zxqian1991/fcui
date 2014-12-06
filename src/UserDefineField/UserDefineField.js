@@ -1,15 +1,16 @@
 /**
  * @file 自定义列
  * @author XiaobinLi （lixiaobin01@baidu.com）
+ * @param {Function} require require
+ * @return {Table} 表格控件类
  */
-
-define(function (require) { 
-    var lib = require('esui/lib');
-    var ui = require('esui');
-    var Control = require('esui/Control');
+define(function (require) {
     var underscore = require('underscore');
-    require('esui/Tip');
-    require('esui/Tab');
+    var lib = require('../lib');
+    var ui = require('../main');
+    var Control = require('../Control');
+    require('../Tip');
+    require('../Tab');
     var config = require('./config');
     require('./UserDefineFieldDataSet');
     require('../DropLayerButton/DropLayerButton');
@@ -35,9 +36,11 @@ define(function (require) {
 
     /**
      * 做一个custom的event，将参数包裹在data域中。
+     * @param {Object} params params
+     * @return {Object} object
      */
     function makeEvent(params) {
-        return { data: params };
+        return {data: params};
     }
 
     /**
@@ -48,16 +51,12 @@ define(function (require) {
      *     @param {Array<Object>} fieldsConf 全部列配置信息
      *         如:[{field: 'unit', title: '单元'}]
      *     @param {Array<string>=} options.forbidRemoveFields 不可移除的列
-     *     @param {string=} options.storedKey 本地存储key，如果不传将不会本地存储 
+     *     @param {string=} options.storedKey 本地存储key，如果不传将不会本地存储
      *     @param {Array<string>=} options.selectedFields: 手动显示列
-     *     @param {string=} options.alignPosition: layer的位置
-     *         left-bottom: 在主控件下方，对其主控件的左边,为默认值
-     *         right-bottom: 在主控件下方，对其主控件的右边
-     *         left-top: 在主控件上方，对其主控件的左边
-     *         right-top: 在主控件上方，对其主控件的右边 
+     *     @param {string=} options.dockPosition: layer的位置
      *     @param {boolean} options.disabled 控件btn是否锁定
      * @override
-     */ 
+     */
     UserDefineField.prototype.initOptions = function (options) {
         /**
          * 默认选项配置
@@ -66,14 +65,14 @@ define(function (require) {
             defaultFields: [],
             fieldsConf: [],
             forbidRemoveFields: [],
-            storedFields: [], 
-            alignPosition: 'left-bottom',
+            storedFields: [],
+            dockPosition: lib.DockPosition.TOP_BOTTOM_LEFT_LEFT,
             disabled: false
         };
         underscore.extend(properties, options);
         this.setProperties(properties);
     };
-       
+
     /**
      * 初始化控件结构
      * @override
@@ -82,7 +81,7 @@ define(function (require) {
         var me = this;
         me.main.style.position = 'relative';
         me.createDropLayerButton();
-    };    
+    };
 
     /**
      * dropLayerButton render后事件处理
@@ -99,6 +98,7 @@ define(function (require) {
 
     /**
      * 适配数据
+     * @return {Object} object
      */
     UserDefineField.prototype.adaptData = function () {
         var me = this;
@@ -147,7 +147,8 @@ define(function (require) {
     /**
      * 排除异常和锁定的列
      *
-     * @param {Array<string>} fields 需要过滤的列 
+     * @param {Array<string>} fields 需要过滤的列
+     * @return {Object} object
      */
     UserDefineField.prototype.filterFields = function (fields) {
         var result = [];
@@ -206,19 +207,20 @@ define(function (require) {
 
     /**
      * item移动时，事件处理
+     * @param {Object} event event
      */
     UserDefineField.prototype.moveItemHandler = function (event) {
         var type = event.data.type;
         var key = event.data.key;
         var datasource = [].concat(this.get('datasource'));
         var index = datasource.indexOf(event.data.key);
-        if (type == 'left') {
-            var preIndex = index - 1; 
+        if (type === 'left') {
+            var preIndex = index - 1;
             var preKey = datasource[preIndex];
             datasource.splice(index, 1, preKey);
             datasource.splice(preIndex, 1, key);
-        } else if (type == 'right') {
-            var nextIndex = index + 1; 
+        } else if (type === 'right') {
+            var nextIndex = index + 1;
             var nextKey = datasource[nextIndex];
             datasource.splice(index, 1, nextKey);
             datasource.splice(nextIndex, 1, key);
@@ -232,6 +234,8 @@ define(function (require) {
 
     /**
      * 初始化已添加列表
+     * @param {Object} adaptData data
+     * @return {Object} object
      */
     UserDefineField.prototype.initIncludedList = function (adaptData) {
         var me = this;
@@ -257,6 +261,7 @@ define(function (require) {
 
     /**
      * 初始化自定义列中的tab信息
+     * @return {Object} object
      */
     UserDefineField.prototype.initTab = function () {
         var me = this;
@@ -264,36 +269,38 @@ define(function (require) {
         var defaultFields = this.get('defaultFields');
         var allFieldList = this.get('allFieldList');
         var datasource = this.includedList.get('datasource');
-        if (datasource.length == allFieldList.length) {
+        if (datasource.length === allFieldList.length) {
             activeIndex = 1;
-        } else if (datasource.toString() == defaultFields.toString()) {
+        } else if (datasource.toString() === defaultFields.toString()) {
             activeIndex = 0;
         }
         if (this.tab) {
             this.tab.setProperties({
                 activeIndex: activeIndex
             });
-            return this.tab; 
-        } else {
-            var tab = ui.create('Tab', {
-                tabs: config.tabDatesource,
-                id: 'user-define-field-tab-' + me.helper.getId(),
-                skin: 'user-define-field',
-                activeIndex: activeIndex
-            });
-            tab.on('activate', this.tabActivate, this);
-            tab.appendTo(
-                lib.g('user-define-field-tab-wrap-' + me.helper.getId())
-            );
-            return tab;
+            return this.tab;
         }
+
+        var tab = ui.create('Tab', {
+            tabs: config.tabDatesource,
+            id: 'user-define-field-tab-' + me.helper.getId(),
+            skin: 'user-define-field',
+            activeIndex: activeIndex
+        });
+        tab.on('activate', this.tabActivate, this);
+        tab.appendTo(
+            lib.g('user-define-field-tab-wrap-' + me.helper.getId())
+        );
+        return tab;
     };
 
     /**
      * 初始化待添加区域
+     * @param {Object} adaptData data
+     * @return {Object} object
      */
     UserDefineField.prototype.initExcludedList = function (adaptData) {
-        var me = this
+        var me = this;
         var excludedList = ui.get('excluded-list-' + me.helper.getId());
         if (!excludedList) {
             return;
@@ -303,11 +310,11 @@ define(function (require) {
             id: 'excluded-list-' + me.helper.getId(),
             mainControlId: me.helper.getId(),
             fieldTitleConf: adaptData.fieldTitleConf,
-            itemTpl:config.excludeItemTpl,
+            itemTpl: config.excludeItemTpl
         });
 
-        excludedList.on('itemsadd', this.addItemHandler, excludedList); 
-        excludedList.on('itemsremove', this.removeItemHandler, excludedList); 
+        excludedList.on('itemsadd', this.addItemHandler, excludedList);
+        excludedList.on('itemsremove', this.removeItemHandler, excludedList);
         excludedList.render();
         return excludedList;
     };
@@ -318,7 +325,7 @@ define(function (require) {
      * @param {Event} event 事件对象
      */
     UserDefineField.prototype.tabActivate = function (event) {
-        if (event.activeIndex == -1) {
+        if (event.activeIndex === -1) {
             return;
         }
         var value = event.tab.value;
@@ -326,8 +333,8 @@ define(function (require) {
         var allFieldList = this.get('allFieldList');
         var datasource = this.includedList.get('datasource');
         var showFields = defaultFields;
-        if (value == 'all') {
-            showFields = datasource.length == allFieldList.length ? datasource 
+        if (value === 'all') {
+            showFields = datasource.length === allFieldList.length ? datasource
                 : allFieldList;
         }
         this.includedList.setProperties({
@@ -347,12 +354,11 @@ define(function (require) {
         var me = this;
         var dropLayerButton = ui.create('DropLayerButton', {
             displayText: '自定义列',
-            layercontent: lib.format(config.layerContentTpl, {
+            layerContent: lib.format(config.layerContentTpl, {
                 id: me.helper.getId()
             }),
-            layerWidth: 385,
             autoClose: true,
-            alignPosition: me.get('alignPosition')
+            dockPosition: this.dockPosition
         });
         dropLayerButton.appendTo(me.main);
         dropLayerButton.layer.control.on('confirm', me.confirm, me);
@@ -373,23 +379,23 @@ define(function (require) {
     UserDefineField.prototype.confirm = function () {
         var fields = this.includedList.get('datasource');
         fields = this.get('lockedFields').concat(fields);
-        var storedKey = this.get('storedKey');
         var storedFields = this.getStoredFields();
         var defaultFields = this.get('defaultFields');
         var showFields = storedFields || defaultFields;
-        if (showFields.toString() != fields.toString()) {
+        if (showFields.toString() !== fields.toString()) {
             this.fire('change', makeEvent({
                 fields: fields
             }));
         }
         this.fire('confirm', makeEvent({
-            fields: fields  
+            fields: fields
         }));
 
     };
 
     /**
      * 获取本地存储的列
+     * @return {Object} fields
      */
     UserDefineField.prototype.getStoredFields = function () {
         return this.storedFields;
@@ -412,23 +418,21 @@ define(function (require) {
     /**
      * 手动设置显示列
      *
-     * @param {Array<string>} selectedFields 选择的列 
-     * @param {Array<Object>=} opt_fieldsConf 全部列配置信息 
+     * @param {Array<string>} selectedFields 选择的列
+     * @param {Array<Object>=} optFieldsConf 全部列配置信息
      */
     UserDefineField.prototype.setSelectedFields = function (
-            selectedFields, opt_fieldsConf) {
+            selectedFields, optFieldsConf) {
         var me = this;
-        if (opt_fieldsConf) {
-            this.fieldsConf = opt_fieldsConf;
+        if (optFieldsConf) {
+            this.fieldsConf = optFieldsConf;
         }
-        me.selectedFields = selectedFields; 
+        me.selectedFields = selectedFields;
         me.reset();
-        
     };
 
     /**
-     * 设置列配置信息 
-     * 
+     * 设置列配置信息
      * @param {Array<Object>=} fieldsConf 全部列配置信息
      */
     UserDefineField.prototype.setFieldsConfig = function (fieldsConf) {
@@ -446,7 +450,7 @@ define(function (require) {
     /**
      * 销毁控件
      *
-     * @override 
+     * @override
      */
     UserDefineField.prototype.dispose = function () {
         if (this.excludedList) {
@@ -466,33 +470,34 @@ define(function (require) {
 
     /**
      * 根据本地存储key获取本地存储数据
-     * 
+     *
      * @param {string} storedKey 本地存储key
-     * @param {Array<Object>=} opt_fieldsConf 全部列配置信息
+     * @param {Array<Object>=} optFieldsConf 全部列配置信息
+     * @return {Object} object
      */
-    UserDefineField.getStoredFields = function (storedKey, opt_fieldsConf) {
+    UserDefineField.getStoredFields = function (storedKey, optFieldsConf) {
         var storedFields = this.getStoredFields();
-        if (!opt_fieldsConf || !storedFields) {
+        if (!optFieldsConf || !storedFields) {
             return storedFields;
-        } else {
-            var allFieldList = underscore.pluck(opt_fieldsConf, 'field');
-            var abnormalFields = [];
-            for (var i = 0, length = storedFields.length; i < length; i++) {
-                if (!underscore.contains(allFieldList, storedFields[i])) {
-                    abnormalFields.push(storedFields[i]);
-                }
-            }
-            var leftFields = underscore
-                .difference(storedFields, abnormalFields);
-            // 加入storedFields中不含的新加的locked field
-            for (var i = 0, length = opt_fieldsConf.length; i < length; i++) {
-                var f = opt_fieldsConf[i];
-                if (f.locked && !underscore.contains(leftFields, f.field)) {
-                    leftFields.unshift(f.field);
-                }
-            }
-            return leftFields;
         }
+
+        var allFieldList = underscore.pluck(optFieldsConf, 'field');
+        var abnormalFields = [];
+        for (var i = 0, length = storedFields.length; i < length; i++) {
+            if (!underscore.contains(allFieldList, storedFields[i])) {
+                abnormalFields.push(storedFields[i]);
+            }
+        }
+        var leftFields = underscore
+            .difference(storedFields, abnormalFields);
+        // 加入storedFields中不含的新加的locked field
+        for (i = 0, length = optFieldsConf.length; i < length; i++) {
+            var f = optFieldsConf[i];
+            if (f.locked && !underscore.contains(leftFields, f.field)) {
+                leftFields.unshift(f.field);
+            }
+        }
+        return leftFields;
     };
 
     ui.register(UserDefineField);

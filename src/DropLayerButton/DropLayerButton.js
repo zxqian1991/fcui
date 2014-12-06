@@ -10,17 +10,15 @@
  *     displayText: 按钮上的文本
  *     width: 按钮宽，
  *     autoClose：是否自动关闭，
- *     alignPosition: layer的位置
- *         left-bottom: 在主控件下方，对其主控件的左边,为默认值
- *         right-bottom: 在主控件下方，对其主控件的右边
- *         left-top: 在主控件上方，对其主控件的左边
- *         right-top: 在主控件上方，对其主控件的右边
+ *     dockPosition: layer的位置，参考dom.dock()
  *     title: layer的title，
- *     template：layer完全用template的内容,无需单独配置title、content等
  *     hideTitle: true时，隐藏title，
  *     hideFooter: true时，隐藏footer，
+ *     LayerClass: 可以自定义的Layer实现，
  *     layerWidth：layer的宽，
- *     layercontent:  layer的内容，
+ *     layerContent: layer的内容，
+ *     layerTemplate：layer完全用template的内容,无需单独配置title、content等，
+ *     layerClass: layer 的样式
  *     selfClass：button自定义样式
  * }
  * 事件
@@ -29,13 +27,17 @@
  * layercancle: 点击取消按钮
  *
  * @author Shiying Wang （wangshiying@baidu.com）
+ * @author Han Bing Feng
+ * @param {Function} require require
+ * @return {Table} 表格控件类
  */
 define(function (require) {
     var underscore = require('underscore');
-    var ui = require('esui');
-    var lib = require('esui/lib');
-    var CommandMenu = require('esui/CommandMenu');
-    var InputControl = require('esui/InputControl');
+    var etpl = require('etpl');
+    var ui = require('../main');
+    var lib = require('../lib');
+    var CommandMenu = require('../CommandMenu');
+    var Control = require('../Control');
     var DropLayer = require('./DropLayer');
 
     /**
@@ -43,17 +45,25 @@ define(function (require) {
      *
      * 类似HTML的`<select>`元素
      *
+     * @param {Object} options options
      * @extends InputControl
      * @constructor
      */
     function DropLayerButton(options) {
-        InputControl.apply(this, arguments);
-        // 一些特殊的layer，可以自己继承DropLayer，做特殊处理
-        if (options && options.Layer) {
-            this.layer = new options.Layer(this);
-        } else {
-            this.layer = new DropLayer(this);
+        Control.apply(this, arguments);
+        var engine;
+
+        if (options.templateEngine) {
+            engine = options.templateEngine;
         }
+        else {
+            engine = new etpl.Engine();
+
+            var template = require('../text!./template.tpl');
+            engine.compile(template);
+        }
+
+        this.helper.setTemplateEngine(engine);
     }
 
     /**
@@ -71,6 +81,13 @@ define(function (require) {
         // 如果传入特殊样式，增加样式
         if (this.selfClass) {
             lib.addClass(this.main, this.selfClass);
+        }
+        // 一些特殊的layer，可以自己继承DropLayer，做特殊处理
+        if (this.LayerClass) {
+            this.layer = new this.LayerClass(this);
+        }
+        else {
+            this.layer = new DropLayer(this);
         }
     };
 
@@ -98,17 +115,6 @@ define(function (require) {
      */
     DropLayerButton.prototype.type = 'DropLayerButton';
 
-    /**
-     * 设置layer的内容
-     *
-     * @param {string} content 组件下拉层的内容
-     */
-    DropLayerButton.prototype.setLayerContent = function (content) {
-        this.viewContext.clean();
-        lib.g(this.helper.getId('content')).innerHTML = content;
-        ui.init(lib.g(this.helper.getId('content')));
-    };
-
-    require('esui').register(DropLayerButton);
+    ui.register(DropLayerButton);
     return DropLayerButton;
 });

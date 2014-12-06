@@ -1,14 +1,17 @@
 /**
  * @file DropLayerButton的基础层
  * @author Shiying Wang （wangshiying@baidu.com）
+ * @author Han Bing Feng (hanbingfeng@baidu.com)
+ * @param {Function} require require
+ * @return {Table} 表格控件类
  */
 define(function (require) {
-    var lib = require('esui/lib');
-    var InputControl = require('esui/InputControl');
-    var Layer = require('esui/Layer');
     var underscore = require('underscore');
-    var etpl = require('etpl');
+    var lib = require('../lib');
+    var Layer = require('../Layer');
     require('etpl/tpl!./template.tpl');
+
+    require('../Button');
 
     /**
      * 像素单位
@@ -22,27 +25,11 @@ define(function (require) {
      * 获得hidden样式
      *
      * @param {Object} layer DropLayer组件本身
+     * @return {string} hidden的class样式
      */
     function getHiddenClasses(layer) {
         var classes = layer.control.helper.getPartClasses('layer-hidden');
-        classes.unshift('ui-layer-hidden');
         return classes;
-    }
-
-    /**
-     * 获得样式拼接
-     *
-     * @param {Object} 样式配置
-     * @return {string} 样式配置字符串
-     */
-    function getCssText(options) {
-        var result = '';
-        for (var key in options) {
-            if (options.hasOwnProperty(key)) {
-                result += key + ':' + options[key] + ';';
-            }
-        }
-        return result;
     }
 
     /**
@@ -70,10 +57,10 @@ define(function (require) {
      */
     DropLayer.prototype.getElement = function (isAutoCreate) {
         var me = this;
-        var control = me.control
+        var control = me.control;
         var element = control.helper.getPart('layer');
 
-        if (element || isAutoCreate === false ) {
+        if (element || isAutoCreate === false) {
             return element;
         }
 
@@ -104,18 +91,10 @@ define(function (require) {
             );
         }
         me.syncState(element);
-        if (!element.parentElement) {
-            // 放入select的父元素，取代原来的放入document.body
-            // 解决layer不跟随主control滑动的问题
-            var parent = control.main.parentNode;
-            if (parent) {
-                parent.appendChild(element);
-            } else {
-                document.body.appendChild(element);
-            }
-        }
         me.initBehavior(element);
+        document.body.appendChild(element);
         control.fire('afterrender');
+        return element;
     };
 
     /**
@@ -136,31 +115,35 @@ define(function (require) {
             helper.initChildren(element);
             return;
         }
-        var titleClass = helper.getPartClasses('title')[0];
-        var footerClass = helper.getPartClasses('footer')[0];
+        var titleClass = helper.getPartClasses('title');
+        var footerClass = helper.getPartClasses('footer');
         // 要隐藏title
         if (control.hideTitle) {
-            titleClass += ' hide';
+            titleClass = titleClass.concat(
+                helper.getPartClasses('title-hidden')
+            );
         }
 
         // 要隐藏footer
         if (control.hideFooter) {
-            footerClass += ' hide';
+            footerClass = footerClass.concat(
+                helper.getPartClasses('footer-hidden')
+            );
         }
         if (control.layerWidth) {
             element.style.width = control.layerWidth + PX;
         }
-        element.innerHTML = etpl.render(
-            'library-framwork-ui-dropLayerButton',
+        element.innerHTML = helper.renderTemplate(
+            'dropLayer',
             {
-                titleClass: titleClass,
+                titleClass: titleClass.join(' '),
                 title: control.title || '',
                 closeId: helper.getId('close'),
-                closeIconClass: helper.getPartClasses('close-icon')[0],
+                closeIconClass: helper.getPartClasses('close-icon').join(' '),
                 contentId: helper.getId('content'),
-                contentClass: helper.getPartClasses('content')[0],
-                content: control.layercontent || '',
-                footerClass: footerClass
+                contentClass: helper.getPartClasses('content').join(' '),
+                content: control.layerContent || '',
+                footerClass: footerClass.join(' ')
             }
         );
         helper.initChildren(element);
@@ -237,7 +220,6 @@ define(function (require) {
      */
     DropLayer.prototype.hide = function () {
         var control = this.control;
-        var helper = control.helper;
         var classes = getHiddenClasses(this);
         var element = this.getElement();
         lib.addClasses(element, classes);
@@ -251,7 +233,6 @@ define(function (require) {
     DropLayer.prototype.show = function () {
         var element = this.getElement();
         var control = this.control;
-        var helper = control.helper;
         element.style.zIndex = this.getZIndex();
         this.position();
         var classes = getHiddenClasses(this);
@@ -275,48 +256,9 @@ define(function (require) {
      * @override
      */
     DropLayer.prototype.position = function () {
-        var element = this.getElement();
-        var main = this.control.main;
-        // 先计算需要的尺寸，浮层必须显示出来才能真正计算里面的内容
-        element.style.cssText = getCssText({
-            'display': 'block',
-            'visibility': 'hidden'
-        });
-        var mainPosition = lib.getOffset(main);
-        var layPosition = lib.getOffset(element);
-        var left = '';
-        var top = '';
-        var minWidth = mainPosition.width + PX;
-        element.style.display = '';
-        // left-bottom: 在主控件下方，对其主控件的左边
-        // right-bottom: 在主控件下方，对其主控件的右边
-        // left-top: 在主控件上方，对其主控件的左边
-        // right-top: 在主控件上方，对其主控件的右边
-        switch (this.control.alignPosition || 'left-bottom') {
-            case 'right-bottom':
-                left = main.scrollLeft - layPosition.width
-                    + mainPosition.width;
-                top = main.scrollTop + mainPosition.height;
-                break;
-            case 'left-bottom':
-                left = main.scrollLeft;
-                top = main.scrollTop + mainPosition.height;
-                break;
-            case 'right-top':
-                left = main.scrollLeft - layPosition.width
-                    + mainPosition.width;
-                top = main.scrollTop - layPosition.height;
-                break;
-            case 'left-top':
-                left = main.scrollLeft;
-                top = main.scrollTop - layPosition.height;
-                break;
-        }
-        element.style.cssText = getCssText({
-            'left': left + PX,
-            'top': top + PX,
-            'min-width': minWidth
-        });
+        var dockPosition = this.control.dockPosition
+            || lib.DockPosition.TOP_BOTTOM_LEFT_LEFT;
+        lib.dock(this.control.main, this.getElement(), dockPosition);
     };
 
     return DropLayer;

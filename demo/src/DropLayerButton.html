@@ -97,12 +97,14 @@
             function (ui, DropLayerButton) {
                 var menu = ui.create('DropLayerButton', {
                     displayText: 'hello',
-                    content: '<div>AAAAA</div>'
+                    layerContent: '<div>AAAAA</div>'
                 });
-                menu.appendTo(document.body);
+                menu.appendTo($('#wrap')[0]);
                 menu.render();
             }
         )
         </script>
+        <div id="wrap"></div>
+        <div style="height: 4096px;"></div>
     </body>
 </html>
