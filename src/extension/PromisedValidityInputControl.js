@@ -8,6 +8,7 @@
 define(function (require) {
     var oo = require('fc-core/oo');
     var Promise = require('fc-core/Promise');
+    var u = require('underscore');
     var ui = require('../main');
     var Extension = require('../Extension');
     var Validity = require('../validator/Validity');
@@ -134,8 +135,13 @@ define(function (require) {
      */
     function validate() {
         var validity = this.getValidationResult();
-        this.showValidity(validity);
-        return validity.isValid();
+        var show = u.bind(this.showValidity, this, validity);
+        show();
+        var p = validity.isValid();
+        if (p.then) {
+            p.then(show, show);
+        }
+        return p;
     }
 
 
@@ -158,21 +164,16 @@ define(function (require) {
             return;
         }
 
+        // 重绘validity需要一个不同的实例，有可能不重绘
+        var needRepaint = (label.validity === validity);
+
         var properties = {
             target: this,
             focusTarget: this.getFocusTarget(),
             validity: validity
         };
         label.setProperties(properties);
-
-        var me = this;
-        function callMeAgain() {
-            me.showValidity(validity);
-        }
-
-        if (validity.isValid().then) {
-            validity.isValid().then(callMeAgain, callMeAgain);
-        }
+        needRepaint && label.repaint();
     }
 
     /**
@@ -202,5 +203,9 @@ define(function (require) {
     };
 
     var PromisedValidity = oo.derive(Extension, proto);
+
+    ui.registerExtension(PromisedValidity);
+    ui.attachExtension('PromisedValidityInputControl', {});
+
     return PromisedValidity;
 });

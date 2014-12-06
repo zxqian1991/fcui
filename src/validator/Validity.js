@@ -133,9 +133,16 @@ define(function (require) {
             return false;
         }
 
-        var promises = u.filter(this.getStates(), function (state) {
-            return typeof state === 'object' && state.constructor === Promise;
-        });
+        var promises = u.chain(this.getStates()).filter(
+            function (state) {
+                return typeof state.state === 'object'
+                    && state.state.constructor === Promise;
+            }
+        ).map(
+            function (state) {
+                return state.state;
+            }
+        ).value();
 
         if (promises.length) {
             // 有任何的Promise存在，验证的结果取决于这一组promise的验证结果
@@ -152,7 +159,7 @@ define(function (require) {
      * @return {string}
      */
     Validity.prototype.getValidState = function () {
-        if (typeof this.customValidState !== 'undefined') {
+        if (this.customValidState) {
             return this.customValidState;
         }
 
