@@ -152,12 +152,14 @@ define(
                 +       '<div id="' + helper.getId('arrow-wrapper')
                 +           '" class="' + this.getPartClasses('arrow-wrapper')
                 +               '">'
-                +           '<div opt="add" class="'
-                +                this.getPartClasses('arrow-up') + '">'
-                +                '<i opt="add" class="font-icon '
+                +           '<div opt="add" id="' + helper.getId('arrow-up')
+                +               '" class="'
+                +               this.getPartClasses('arrow-up') + '">'
+                +               '<i opt="add" class="font-icon '
                 +                   'font-icon-caret-up"></i>'
                 +           '</div>'
-                +           '<div opt="minus" class="'
+                +           '<div opt="minus" id="' + helper.getId('arrow-down')
+                +               '" class="'
                 +               this.getPartClasses('arrow-down') + '">'
                 +               '<i opt="minus"  class="font-icon '
                 +                   'font-icon-caret-down"></i>'
@@ -220,7 +222,6 @@ define(
             this.main.innerHTML = this.getMainHTML();
             // 创建控件树
             helper.initChildren();
-            this.initEvents();
 
         };
 
@@ -241,6 +242,29 @@ define(
                 'click',
                 this.onArrowClick()
             );
+            this.on('inputchange', this.enableOrDisableArrowHandler);
+        };
+
+        /**
+         * 启用或禁用上下箭头按钮
+         */
+        NumberBox.prototype.enableOrDisableArrowHandler = function () {
+            var helper = this.helper;
+            var value = this.getValue();
+            var arrowDown = helper.getPart('arrow-down');
+            var arrowUp = helper.getPart('arrow-up');
+            if (+value <= +this.min) {
+                helper.addPartClasses('arrow-down-disabled', arrowDown);
+            }
+            else {
+                helper.removePartClasses('arrow-down-disabled', arrowDown);
+            }
+            if (+value >= +this.max) {
+                helper.addPartClasses('arrow-up-disabled', arrowUp);
+            }
+            else {
+                helper.removePartClasses('arrow-up-disabled', arrowUp);
+            }
         };
 
         /**
@@ -421,18 +445,20 @@ define(
          */
         NumberBox.prototype.changeValueByStepValue = function (opt) {
             // 输入的不是数字的时候或者为空的时候
-            if (this.validity.states[0].state === false
-                || this.validity.states[1].state === false) {
+            if (this.validity.states[0].state === false) {
                 return;
             }
-            var newValue;
+            var newValue = parseFloat(this.getValue(), 10);
             if (opt === ARROW_OPT.ADD) {
-                newValue = +this.getValue() + this.stepValue;
+                newValue += parseFloat(this.stepValue, 10);
             }
             else {
-                newValue = +this.getValue() - this.stepValue;
+                newValue -= parseFloat(this.stepValue, 10);
             }
-            this.setValue(newValue);
+            if ((opt === ARROW_OPT.ADD && newValue <= this.max)
+                || (opt === ARROW_OPT.MINUS && newValue >= this.min)) {
+                this.setValue(newValue);
+            }
         };
 
         /**
