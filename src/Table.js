@@ -335,15 +335,9 @@ define(function (require) {
      * @param {HTMLElement} el 发生了点击事件的元素
      */
     function textEditHandler(rowIndex, columnIndex, el) {
-        var field = this.realFields[columnIndex];
         var editor = this.createInlineEditor(
             'text', rowIndex, columnIndex, el
         );
-        this.fire('startedit', {
-            field: field,
-            rowIndex: rowIndex,
-            columnIndex: columnIndex
-        });
         editor.show();
     }
 
@@ -1722,7 +1716,7 @@ define(function (require) {
             editor.getChild('okButton').on('click', function () {
                 var inputControl = editor.getChild('inputControl');
                 if (inputControl.validate()) {
-                    var eventArgs = me.fire('saveedit',
+                    var eventArgs = me.fire('editsaved',
                         getEditEventProps(me, editor, rowIndex, columnIndex));
                     if (!eventArgs.isDefaultPrevented()) {
                         editor.hide();
@@ -1730,7 +1724,7 @@ define(function (require) {
                 }
             });
             editor.getChild('cancelButton').on('click', function () {
-                var eventArgs = me.fire('savecancel',
+                var eventArgs = me.fire('editcancelled',
                     getEditEventProps(me, editor, rowIndex, columnIndex));
                 if (!eventArgs.isDefaultPrevented()) {
                     editor.hide();
@@ -1824,9 +1818,8 @@ define(function (require) {
      * @param {string} select 强制以某种select状态执行选择。当Table作为锁定列
      *        表的子控件时有用
      */
-    proto.selectRow = function (index, select) {
-        select = select || this.select;
-        switch (select.toLowerCase()) {
+    proto.selectRow = function (index) {
+        switch (this.select.toLowerCase()) {
             case 'multi':
                 this.selectedIndex.push(index);
                 this.renderSelectedRows();
@@ -1837,6 +1830,9 @@ define(function (require) {
             default:
                 break;
         }
+        this.fire('rowselected', {
+            rowIndex: index
+        });
     };
 
     /**
@@ -1845,9 +1841,8 @@ define(function (require) {
      * @param {string} select 强制以某种select状态执行选择。当Table作为锁定列
      *        表的子控件时有用
      */
-    proto.unselectRow = function (index, select) {
-        select = select || this.select;
-        switch (select.toLowerCase()) {
+    proto.unselectRow = function (index) {
+        switch (this.select.toLowerCase()) {
             case 'multi':
                 var selected = this.selectedIndex;
                 selected.splice(u.indexOf(selected, index), 1);
@@ -1858,6 +1853,9 @@ define(function (require) {
             default:
                 break;
         }
+        this.fire('rowunselected', {
+            rowIndex: index
+        });
     };
 
     /**

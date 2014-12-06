@@ -63,6 +63,7 @@ define(function (require) {
                 this.fire('editstarted', {
                     rowIndex: rowIndex,
                     columnIndex: columnIndex,
+                    item: this.datasource[rowIndex],
                     editType: editType
                 });
                 if (this.editHandlers[editType]) {
