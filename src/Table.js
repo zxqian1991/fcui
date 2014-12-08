@@ -1904,6 +1904,11 @@ define(function (require) {
         else {
             this.getRow(row).innerHTML = html;
         }
+        if (this.bodyHasControls) {
+            this.helper.initChildren(this.getRow(row), {
+                group: this.getGroupName('body')
+            });
+        }
     };
 
     /**
