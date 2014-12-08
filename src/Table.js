@@ -1363,14 +1363,22 @@ define(function (require) {
                     );
                 }
                 else {
+                    var overallCheckbox = lib.find(this.getHead(),
+                        '.ui-table-select-all');
                     if (isRevert) {
                         u.each(selected, function (rowIndex) {
+                            if (overallCheckbox.checked) {
+                                overallCheckbox.checked = false;
+                            }
                             lib.removeClasses(trs[rowIndex],
                                 this.helper.getPartClasses('row-selected'));
                         }, this);
                     }
                     else {
                         u.each(selected, function (rowIndex) {
+                            if (this.datasource.length === selected.length) {
+                                overallCheckbox.checked = true;
+                            }
                             lib.addClasses(trs[rowIndex],
                                 this.helper.getPartClasses('row-selected'));
                         }, this);
@@ -1907,11 +1915,6 @@ define(function (require) {
         }
         else {
             this.getRow(row).innerHTML = html;
-        }
-        if (this.bodyHasControls) {
-            this.helper.initChildren(this.getRow(row), {
-                group: this.getGroupName('body')
-            });
         }
     };
 
