@@ -525,17 +525,20 @@ define(function (require) {
                     select: true,
                     maxWidth: 30,
                     title: function (item, index) {
+                        var isChecked = 
+                            (me.selectedIndex.length === me.datasource.length);
                         return me.helper.renderTemplate('table-select-all', {
                             index: index,
                             disabled: me.disabled ? 'disabled="disabled"' : '',
-                            checked: ''
+                            checked: isChecked ? 'checked="checked"' : ''
                         });
                     },
                     content: function (item, index) {
+                        var isChecked = u.contains(me.selectedIndex, index);
                         return me.helper.renderTemplate('table-select-multi', {
                             index: index,
                             disabled: me.disabled ? 'disabled="disabled"' : '',
-                            checked: ''
+                            checked: isChecked ? 'checked="checked"' : ''
                         });
                     }
                 });
@@ -546,10 +549,11 @@ define(function (require) {
                     select: true,
                     maxWidth: 30,
                     content: function (item, index) {
+                        var isChecked = u.contains(me.selectedIndex, index);
                         return me.helper.renderTemplate('table-select-single', {
                             index: index,
                             disabled: me.disabled ? 'disabled="disabled"' : '',
-                            checked: ''
+                            checked: isChecked ? 'checked="checked"' : ''
                         });
                     }
                 });
