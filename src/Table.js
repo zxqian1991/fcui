@@ -1363,27 +1363,30 @@ define(function (require) {
                     );
                 }
                 else {
-                    var overallCheckbox = lib.find(this.getHead(),
-                        '.ui-table-select-all');
-                    if (isRevert) {
-                        u.each(selected, function (rowIndex) {
-                            if (overallCheckbox.checked) {
-                                overallCheckbox.checked = false;
-                            }
-                            lib.removeClasses(trs[rowIndex],
-                                this.helper.getPartClasses('row-selected'));
-                        }, this);
+                    if (selected.length === this.datasource.length) {
+                        // 当所选的行数为当前页上所有的行数时，则转为全选状态。
+                        this.set('selectedIndex', -1);
+                        break;
                     }
                     else {
-                        u.each(selected, function (rowIndex) {
-                            if (this.datasource.length === selected.length) {
-                                overallCheckbox.checked = true;
-                            }
-                            lib.addClasses(trs[rowIndex],
-                                this.helper.getPartClasses('row-selected'));
-                        }, this);
+                        if (isRevert) {
+                            u.each(selected, function (rowIndex) {
+                                lib.removeClasses(trs[rowIndex],
+                                    this.helper.getPartClasses('row-selected'));
+                            }, this);
+                        }
+                        else {
+                            u.each(selected, function (rowIndex) {
+                                lib.addClasses(trs[rowIndex],
+                                    this.helper.getPartClasses('row-selected'));
+                            }, this);
+                        }
                     }
                 }
+                var overallCheckbox = lib.find(this.getHead(),
+                    '.ui-table-select-all');
+                // 设置全选状态。
+                overallCheckbox.checked = (this.selectedIndex === -1);
                 break;
             case 'single':
                 if (typeof selected.length === 'undefined') {
@@ -1856,8 +1859,17 @@ define(function (require) {
     proto.unselectRow = function (index) {
         switch (this.select.toLowerCase()) {
             case 'multi':
-                var selected = this.selectedIndex;
-                selected.splice(u.indexOf(selected, index), 1);
+                if (this.selectedIndex === -1) { // 当前为全选
+                    this.selectedIndex = [];
+                    for (var i = 0, j = this.datasource.length; i < j; ++i) {
+                        if (i != index) {
+                            this.selectedIndex.push(i);
+                        }
+                    }
+                } else {
+                    var selected = this.selectedIndex;
+                    selected.splice(u.indexOf(selected, index), 1);
+                }
                 this.renderSelectedRows(true, [index]);
                 break;
             case 'single':
