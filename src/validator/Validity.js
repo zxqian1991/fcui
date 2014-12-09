@@ -120,7 +120,7 @@ define(function (require) {
      * @return {boolean|Promise}
      */
     Validity.prototype.isValid = function () {
-        var result = u.all(
+        var result = u.some(
             this.getStates(),
             function (state) {
                 // 只有当state是确定的false的时候，才是验证不通过
