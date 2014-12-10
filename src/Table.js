@@ -525,7 +525,7 @@ define(function (require) {
                     select: true,
                     maxWidth: 30,
                     title: function (item, index) {
-                        var isChecked = 
+                        var isChecked =
                             (me.selectedIndex.length === me.datasource.length);
                         return me.helper.renderTemplate('table-select-all', {
                             index: index,
@@ -605,18 +605,17 @@ define(function (require) {
     function wrapTableHtml(wrapper, html) {
         var frag = document.createDocumentFragment();
         var div = document.createElement('div');
-        var actualWrapper = wrapper === 'thead' ? 'tbody' : wrapper;
         div.innerHTML = ''
             + '<table>'
-            + '<' + actualWrapper + '>'
+            + '<' + wrapper + '>'
             + html
-            + '</' + actualWrapper + '>'
+            + '</' + wrapper + '>'
             + '</table>';
         frag.appendChild(div);
         var fragTable = div.firstChild;
         switch (wrapper) {
             case 'thead':
-                return fragTable.tBodies[0];
+                return fragTable.tHead;
             case 'tbody':
                 return fragTable.tBodies[0];
             case 'tfoot':
@@ -666,7 +665,7 @@ define(function (require) {
         var tbody = wrapTableHtml('tbody', html);
         this.helper.addPartClasses('tbody', tbody);
         tbody.id = this.helper.getId('tbody');
-        tableEl.insertBefore(tbody, tableEl.tBodies[0].nextElementSibling);
+        tableEl.insertBefore(tbody, tableEl.tHead.nextElementSibling);
     };
 
     /**
@@ -1865,11 +1864,12 @@ define(function (require) {
                 if (this.selectedIndex === -1) { // 当前为全选
                     this.selectedIndex = [];
                     for (var i = 0, j = this.datasource.length; i < j; ++i) {
-                        if (i != index) {
+                        if (i !== index) {
                             this.selectedIndex.push(i);
                         }
                     }
-                } else {
+                }
+                else {
                     var selected = this.selectedIndex;
                     selected.splice(u.indexOf(selected, index), 1);
                 }
