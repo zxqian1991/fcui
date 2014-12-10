@@ -1370,22 +1370,24 @@ define(function (require) {
                         break;
                     }
                     else {
+                        var checkboxNodes = lib.findAll(this.getBody(), '.ui-table-multi-select');
                         if (isRevert) {
                             u.each(selected, function (rowIndex) {
+                                checkboxNodes[rowIndex].checked = false;
                                 lib.removeClasses(trs[rowIndex],
                                     this.helper.getPartClasses('row-selected'));
                             }, this);
                         }
                         else {
                             u.each(selected, function (rowIndex) {
+                                checkboxNodes[rowIndex].checked = true;
                                 lib.addClasses(trs[rowIndex],
                                     this.helper.getPartClasses('row-selected'));
                             }, this);
                         }
                     }
                 }
-                var overallCheckbox = lib.find(this.getHead(),
-                    '.ui-table-select-all');
+                var overallCheckbox = lib.find(this.getHead(), '.ui-table-select-all');
                 // 设置全选状态。
                 overallCheckbox.checked = (this.selectedIndex === -1);
                 break;
@@ -1928,6 +1930,11 @@ define(function (require) {
         }
         else {
             this.getRow(row).innerHTML = html;
+        }
+        if (this.bodyHasControls) {
+            this.helper.initChildren(this.getRow(row), {
+                group: this.getGroupName('body')
+            });
         }
     };
 
