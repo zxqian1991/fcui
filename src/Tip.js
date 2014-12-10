@@ -55,18 +55,6 @@ define(
                 title: '',
                 content: '',
                 /**
-                 * @property {boolean} arrow
-                 *
-                 * 是否需要箭头
-                 *
-                 * 为了方便从DOM生成，此属性在初始化时如果为字符串`"false"`，
-                 * 将被认为是布尔值`false`处理
-                 *
-                 * 具体参考{@link TipLayer#arrow}属性
-                 */
-                arrow: true,
-
-                /**
                  * @property {string} showMode
                  *
                  * 指定信息浮层的显示方案，
@@ -95,10 +83,6 @@ define(
                  */
                 iconType: '?'
             };
-
-            if (options.arrow === 'false') {
-                options.arrow = false;
-            }
 
             extractDOMProperties(this.main, properties);
 
@@ -151,7 +135,11 @@ define(
                     childName: 'layer',
                     content: this.content,
                     title: this.title,
-                    arrow: this.arrow,
+                    /**
+                     * FCUI Tip不支持arrow，始终为false
+                     * @type {Boolean}
+                     */
+                    arrow: false,
                     /**
                      * @property {number} [layerWidth=200]
                      *

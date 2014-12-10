@@ -605,17 +605,18 @@ define(function (require) {
     function wrapTableHtml(wrapper, html) {
         var frag = document.createDocumentFragment();
         var div = document.createElement('div');
+        var actualWrapper = wrapper === 'thead' ? 'tbody' : wrapper;
         div.innerHTML = ''
             + '<table>'
-            + '<' + wrapper + '>'
+            + '<' + actualWrapper + '>'
             + html
-            + '</' + wrapper + '>'
+            + '</' + actualWrapper + '>'
             + '</table>';
         frag.appendChild(div);
         var fragTable = div.firstChild;
         switch (wrapper) {
             case 'thead':
-                return fragTable.tHead;
+                return fragTable.tBodies[0];
             case 'tbody':
                 return fragTable.tBodies[0];
             case 'tfoot':
@@ -665,7 +666,7 @@ define(function (require) {
         var tbody = wrapTableHtml('tbody', html);
         this.helper.addPartClasses('tbody', tbody);
         tbody.id = this.helper.getId('tbody');
-        tableEl.insertBefore(tbody, tableEl.tHead.nextElementSibling);
+        tableEl.insertBefore(tbody, tableEl.tBodies[0].nextElementSibling);
     };
 
     /**

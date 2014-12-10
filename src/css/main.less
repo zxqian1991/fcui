@@ -1,4 +1,8 @@
+// 关于fc-icon
+// 打包考虑，要将fc-icon从fcui的总less里分离，从这里去掉fc-icon less的引用
+// 为了皮肤，只引入fc-icon的variables
 
+@import "./fc-icon-variable";
 @import "./esui/common.less";
 @import "./esui/reset.less";
 @import "./esui/mixin.less";
@@ -26,6 +30,5 @@
 @import "./esui/Tree.less";
 @import "./esui/Wizard.less";
 
-@import "../UserDefineField/style";
 @import "./mixin";
 @import "./skin/fc";
