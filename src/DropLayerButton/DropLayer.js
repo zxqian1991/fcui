@@ -67,6 +67,9 @@ define(function (require) {
         element = me.create();
         me.render(element);
         lib.addClasses(element, getHiddenClasses(me));
+        if (control.layerClass) {
+            lib.addClass(element, control.layerClass);
+        }
         // 如果设置自动关闭为true
         if (control.autoClose) {
             // 点击document关掉layer
@@ -106,7 +109,7 @@ define(function (require) {
     DropLayer.prototype.render = function (element) {
         var control = this.control;
         var helper = control.helper;
-        var customTemplate = control.template;
+        var customTemplate = control.layerTemplate;
 
         // 传入template，表示完全用自己的模板
         if (customTemplate) {

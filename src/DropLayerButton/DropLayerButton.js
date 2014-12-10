@@ -14,7 +14,7 @@
  *     title: layer的title，
  *     hideTitle: true时，隐藏title，
  *     hideFooter: true时，隐藏footer，
- *     LayerClass: 可以自定义的Layer实现，
+ *     LayerType: 可以自定义的Layer实现，
  *     layerWidth：layer的宽，
  *     layerContent: layer的内容，
  *     layerTemplate：layer完全用template的内容,无需单独配置title、content等，
@@ -83,8 +83,8 @@ define(function (require) {
             lib.addClass(this.main, this.selfClass);
         }
         // 一些特殊的layer，可以自己继承DropLayer，做特殊处理
-        if (this.LayerClass) {
-            this.layer = new this.LayerClass(this);
+        if (this.LayerType) {
+            this.layer = new this.LayerType(this);
         }
         else {
             this.layer = new DropLayer(this);
