@@ -1386,8 +1386,7 @@ define(function (require) {
                         }
                     }
                 }
-                var overallCheckbox = lib.find(this.getHead(),
-                    '.ui-table-select-all');
+                var overallCheckbox = lib.find(this.getHead(), '.ui-table-select-all');
                 // 设置全选状态。
                 overallCheckbox.checked = (this.selectedIndex === -1);
                 break;
