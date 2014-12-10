@@ -1369,14 +1369,17 @@ define(function (require) {
                         break;
                     }
                     else {
+                        var checkboxNodes = lib.findAll(this.getBody(), '.ui-table-multi-select');
                         if (isRevert) {
                             u.each(selected, function (rowIndex) {
+                                checkboxNodes[rowIndex].checked = false;
                                 lib.removeClasses(trs[rowIndex],
                                     this.helper.getPartClasses('row-selected'));
                             }, this);
                         }
                         else {
                             u.each(selected, function (rowIndex) {
+                                checkboxNodes[rowIndex].checked = true;
                                 lib.addClasses(trs[rowIndex],
                                     this.helper.getPartClasses('row-selected'));
                             }, this);
@@ -1927,6 +1930,11 @@ define(function (require) {
         }
         else {
             this.getRow(row).innerHTML = html;
+        }
+        if (this.bodyHasControls) {
+            this.helper.initChildren(this.getRow(row), {
+                group: this.getGroupName('body')
+            });
         }
     };
 
