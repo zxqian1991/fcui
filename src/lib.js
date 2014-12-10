@@ -17,7 +17,8 @@ define(function (require) {
         lib,
         require('esui/lib'),
         require('./lib/template'),
-        require('./lib/dom')
+        require('./lib/dom'),
+        require('./lib/uiControl')
     );
 
     lib.ie = eLib.ie;
