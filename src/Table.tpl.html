@@ -36,7 +36,7 @@
 <!-- // 处于表格 thead 内的表头行 -->
 <tr>
     <!-- for: ${realFields} as ${field}, ${columnIndex} -->
-        <td class="
+        <th class="
             ${hcell | class}
             <!-- if: ${field.sortable} -->
                 ${hcell-sort | class}
@@ -64,7 +64,7 @@
             <!-- if: ${field.tdClassName} -->
                 ${field.tdClassName}
             <!-- /if -->
-        "><!-- import: table-head-content --></td>
+        "><!-- import: table-head-content --></th>
     <!-- /for -->
 </tr>
 
