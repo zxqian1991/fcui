@@ -5,9 +5,9 @@
         <title>Tip - FCUI Demo</title>
         <script src="./esl.js"></script>
         <script src="./jquery.min.js"></script>
-        <script src="../../dep/esui/3.1.0-beta.3/src/customShim.js"></script>
         <link rel="stylesheet" href="./demo.css" />
         <link rel="stylesheet" href="../../src/css/main.css" />
+        <link rel="stylesheet" href="../../dep/fc-icon/0.0.3/src/css/fc-icon.css" />
         <script>
             require.config({
                 'baseUrl': '../../src',
@@ -65,13 +65,18 @@
                     },
                     {
                         'name': 'fc-core',
-                        'location': '../dep/fc-core/0.0.1-alpha.5/src',
+                        'location': '../dep/fc-core/0.0.1-alpha.6/src',
                         'main': 'main'
                     },
                     {
                         'name': 'promise',
                         'location': '../dep/promise/1.0.0/src',
                         'main': 'main'
+                    },
+                    {
+                        'name': 'fc-icon',
+                        'location': '../dep/fc-icon/0.0.3/src',
+                        'main': 'index'
                     }
                 ]
             });
@@ -83,7 +88,8 @@
         require(
             [
                 'fcui',
-                'fcui/UserDefineField/UserDefineField'
+                'fcui/UserDefineField/UserDefineField',
+                'fcui/extension/FcUiSkin'
             ],
             function (ui, UserDefineField) {
                 var menu = ui.create('UserDefineField', {

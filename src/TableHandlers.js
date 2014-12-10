@@ -34,7 +34,7 @@ define(function (require) {
             query: '.ui-table-single-select',
             handler: function (e, el) {
                 var index = +lib.getAttribute(el, 'data-index');
-                this.set('selectedRowIndex', index);
+                this.set('selectedIndex', index);
                 this.fire('rowselected', {selectedIndex: index});
             }
         },
@@ -42,11 +42,13 @@ define(function (require) {
             eventType: 'click',
             query: '.ui-table-select-all',
             handler: function (e, el) {
-                this.set('selectedRowIndex',
-                    el.checked ? -1 : []);
-                this.fire(
-                    el.checked ? 'rowallselected' : 'rowallunselected'
-                );
+                if (el.checked) {
+                    this.set('selectedIndex', -1);
+                    this.fire('rowallselected');
+                } else {
+                    this.set('selectedIndex', []);
+                    this.fire('rowallunselected');
+                }
             }
         },
         /**

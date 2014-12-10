@@ -443,3 +443,5 @@ h2 {
     opacity: 1;
     transition: opacity .2s linear;
 }
+
+@import url(../../../dep/fc-icon/0.0.3/src/css/fc-icon.css)
