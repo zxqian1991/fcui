@@ -166,6 +166,7 @@ define(
             var element = this.getElement();
             lib.addClasses(element, classes);
             this.control.removeState('active');
+            this.control.fire('hidelayer');
         };
 
         /**
@@ -180,6 +181,7 @@ define(
             var classes = getHiddenClasses(this);
             lib.removeClasses(element, classes);
             this.control.addState('active');
+            this.control.fire('showlayer');
         };
 
         /**
