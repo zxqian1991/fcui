@@ -194,8 +194,10 @@ define(function (require) {
             okBtn.on(
                 'click',
                 function () {
-                    control.fire('confirm');
-                    me.hide();
+                    var e = control.fire('confirm');
+                    if (!e.isDefaultPrevented()) {
+                        me.hide();
+                    }
                 }
             );
         }
