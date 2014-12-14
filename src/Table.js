@@ -1847,9 +1847,6 @@ define(function (require) {
             default:
                 break;
         }
-        this.fire('rowselected', {
-            rowIndex: index
-        });
     };
 
     /**
@@ -1880,9 +1877,6 @@ define(function (require) {
             default:
                 break;
         }
-        this.fire('rowunselected', {
-            rowIndex: index
-        });
     };
 
     /**
