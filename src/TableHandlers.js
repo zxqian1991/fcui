@@ -21,11 +21,11 @@ define(function (require) {
                 var index = +lib.getAttribute(el, 'data-index');
                 if (el.checked) {
                     this.selectRow(index);
-                    this.fire('rowselected', {selectedIndex: index});
+                    this.fire('rowselected', {rowIndex: index});
                 }
                 else {
                     this.unselectRow(index);
-                    this.fire('rowunselected', {selectedIndex: index});
+                    this.fire('rowunselected', {rowIndex: index});
                 }
             }
         },
@@ -35,7 +35,7 @@ define(function (require) {
             handler: function (e, el) {
                 var index = +lib.getAttribute(el, 'data-index');
                 this.set('selectedIndex', index);
-                this.fire('rowselected', {selectedIndex: index});
+                this.fire('rowselected', {rowIndex: index});
             }
         },
         'allselect': {
