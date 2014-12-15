@@ -8,6 +8,6 @@
  */
 define(
     function (require) {
-        return require('esui/validatorMinRule');
+        return require('esui/validator/MinRule');
     }
 );
