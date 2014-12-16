@@ -1,6 +1,6 @@
 {
     "name": "fcui",
-    "version": "0.0.2-alpha.13",
+    "version": "0.0.2-alpha.14",
     "contributors": [
         {
             "name": "Leo Wang",
@@ -9,6 +9,10 @@
         {
             "name": "Han Bing Feng",
             "email": "hanbingfeng@baidu.com"
+        },
+        {
+            "name": "Pride Leong",
+            "email": "liangjinping@baidu.com"
         }
     ],
     "dependencies": {

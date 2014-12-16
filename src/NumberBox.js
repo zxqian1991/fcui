@@ -11,6 +11,11 @@ define(
         var painters = require('esui/painters');
         var esui = require('esui');
 
+        require('./validator/IsNumberRule');
+        require('./validator/RequiredRule');
+        require('./validator/MaxRule');
+        require('./validator/MinRule');
+
         /**
          * 隐藏dom的样式
          *
