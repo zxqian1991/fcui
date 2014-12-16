@@ -1591,7 +1591,7 @@ define(function (require) {
         }
 
         // fields 发生变化，或者表体内容发生变化，重画表体
-        if (fieldsChanged || allProperities.datasource) {
+        if (fieldsChanged || allProperities.datasource || allProperities.summary) {
             this.renderBody();
             tBodyChanged = true;
         }
