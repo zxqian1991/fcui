@@ -1620,7 +1620,10 @@ define(function (require) {
             this.renderSort(changesIndex);
         }
 
-        if (tBodyChanged || allProperities.selectedIndex) {
+        if (this.datasource
+            && this.datasource.length > 0
+            && (tBodyChanged
+                || allProperities.selectedIndex)) {
             if (changesIndex && changesIndex.selectedIndex) {
                 var selectedObject = changesIndex.selectedIndex;
                 if (typeof selectedObject.oldValue !== 'undefined') {
