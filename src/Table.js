@@ -1603,7 +1603,10 @@ define(function (require) {
         }
 
         // 列宽发生了变化，重调最大列宽
-        if (columnsWidthChanged || tBodyChanged) {
+        if (this.datasource
+            && this.datasource.length > 0
+            && (columnsWidthChanged 
+                || tBodyChanged)) {
             this.setCellMaxWidth();
             this.adjustMaxColumnWidth();
             if (this.isNeedCoverHead) {
