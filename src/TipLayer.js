@@ -16,11 +16,13 @@ define(function (require) {
 
     var u = require('underscore');
     var oo = require('fc-core/oo');
+    var Promise = require('fc-core/Promise');
     var lib = require('./lib');
-    var helper = require('./controlHelper');
     var Control = require('./Control');
     var ui = require('./main');
     var paint = require('./painters');
+    var Layer = require('./Layer');
+    var painters = require('./painters');
 
     /**
      * 提示层控件类
@@ -85,7 +87,7 @@ define(function (require) {
             }
         }
         var headClasses = [].concat(
-            helper.getPartClasses(control, 'title')
+            control.helper.getPartClasses('title')
         );
         lib.addClasses(mainDOM, headClasses);
         var properties = {
@@ -136,7 +138,7 @@ define(function (require) {
 
         lib.addClasses(
             mainDOM,
-            helper.getPartClasses(control, type + '-panel')
+            control.helper.getPartClasses(type + '-panel')
         );
         var properties = {
             main: mainDOM,
@@ -274,9 +276,9 @@ define(function (require) {
             if (this.arrow) {
                 var arrow = document.createElement('div');
                 // 初始化箭头
-                arrow.id = helper.getId(this, 'arrow');
+                arrow.id = this.helper.getId('arrow');
                 arrow.className =
-                    helper.getPartClasses(this, 'arrow').join(' ');
+                    this.helper.getPartClasses('arrow').join(' ');
                 this.main.appendChild(arrow);
             }
         },
@@ -288,7 +290,7 @@ define(function (require) {
          * @param {Array=} 变更过的属性的集合
          * @override
          */
-        repaint: helper.createRepaint(
+        repaint: painters.createRepaint(
             Control.prototype.repaint,
             paint.style('width'),
             {
@@ -312,22 +314,46 @@ define(function (require) {
             {
                 name: 'content',
                 paint: function (tipLayer, value) {
+                    /**
+                     * 在body内渲染确定的tip内容。
+                     * 直接写在paint里了。放外面麻烦。而且tip能刷新几次……
+                     * @param {string} content 内容
+                     */
                     var bfTpl = ''
                         + '<div class="${class}" id="${id}">'
                         + '${content}'
                         + '</div>';
-                    // 获取body panel
-                    var body = tipLayer.getBody();
-                    var bodyId = helper.getId(tipLayer, 'body');
-                    var bodyClass = helper.getPartClasses(tipLayer, 'body');
-                    var data = {
-                        'class': bodyClass.join(' '),
-                        'id': bodyId,
-                        'content': value
-                    };
-                    body.setContent(
-                        lib.format(bfTpl, data)
-                    );
+                    function renderContent(value, extraData) {
+                        // 获取body panel
+                        var body = tipLayer.getBody();
+                        var bodyId = tipLayer.helper.getId('body');
+                        var bodyClass = tipLayer.helper.getPartClasses('body');
+                        var data = u.extend({
+                            'class': bodyClass.join(' '),
+                            'id': bodyId,
+                            'content': value
+                        }, extraData || {});
+                        body.setContent(
+                            lib.format(bfTpl, data)
+                        );
+                    }
+                    if (typeof value === 'string') {
+                        renderContent(value);
+                    }
+                    else {
+                        // value 是个function，换个名字
+                        var getContent = value;
+                        renderContent('');
+
+                        tipLayer.once('show', function (e) {
+                            tipLayer.helper.addPartClasses('tip-content-loading');
+                            Promise.cast(getContent()).then(function (realContent) {
+                                tipLayer.helper.removePartClasses('tip-content-loading');
+                                renderContent(realContent);
+                                tipLayer.autoPosition(e.attachedTargetElement, e.positionOptions);
+                            });
+                        });
+                    }
                 }
             },
             {
@@ -337,8 +363,8 @@ define(function (require) {
                         + '<div class="${class}" id="${id}">'
                         + '${content}'
                         + '</div>';
-                    var footId = helper.getId(tipLayer, 'foot');
-                    var footClass = helper.getPartClasses(tipLayer, 'foot');
+                    var footId = tipLayer.helper.getId('foot');
+                    var footClass = tipLayer.helper.getPartClasses('foot');
                     // 取消了foot
                     var foot = tipLayer.getFoot();
                     if (value == null) {
@@ -438,29 +464,29 @@ define(function (require) {
                 this.show(targetElement, options.positionOpt);
             }
             else {
-                helper.addDOMEvent(
-                    this, targetElement, showEvent,
+                this.helper.addDOMEvent(
+                    targetElement, showEvent,
                     lib.curry(
                         delayShow, this, options.delayTime,
                         targetElement, options.positionOpt
                     )
                 );
-                helper.addDOMEvent(
-                    this, this.main, 'mouseover',
+                this.helper.addDOMEvent(
+                    this.main, 'mouseover',
                     lib.bind(
                         this.show, this, targetElement, options.positionOpt
                     )
                 );
 
-                helper.addDOMEvent(
-                    this, this.main, 'mouseout',
+                this.helper.addDOMEvent(
+                    this.main, 'mouseout',
                     lib.curry(delayHide, this, 150)
                 );
             }
 
             if (hideEvent === 'mouseout') {
-                helper.addDOMEvent(
-                    this, targetElement, hideEvent,
+                this.helper.addDOMEvent(
+                    targetElement, hideEvent,
                     lib.curry(delayHide, this, 150)
                 );
             }
@@ -504,22 +530,22 @@ define(function (require) {
          *
          */
         show: function (targetElement, options) {
-            if (helper.isInStage(this, 'INITED')) {
+            if (this.helper.isInStage('INITED')) {
                 this.render();
             }
-            else if (helper.isInStage(this, 'DISPOSED')) {
+            else if (this.helper.isInStage('DISPOSED')) {
                 return;
             }
 
             clearTimeout(this.hideTimeout);
 
-            helper.addDOMEvent(
-                this, window, 'resize',
+            this.helper.addDOMEvent(
+                window, 'resize',
                 lib.curry(resizeHandler, this, targetElement, options)
             );
 
             // 动态计算layer的zIndex
-            this.main.style.zIndex = helper.layer.getZIndex(targetElement);
+            this.main.style.zIndex = Layer.getZIndex(targetElement);
 
             this.removeState('hidden');
 
@@ -529,7 +555,10 @@ define(function (require) {
                 options
             );
 
-            this.fire('show');
+            this.fire('show', {
+                attachedTargetElement: targetElement,
+                positionOptions: options
+            });
             this.isShow = true;
         },
 
@@ -580,7 +609,7 @@ define(function (require) {
          * 销毁控件
          */
         dispose: function () {
-            if (helper.isInStage(this, 'DISPOSED')) {
+            if (this.helper.isInStage('DISPOSED')) {
                 return;
             }
             this.hide();
@@ -637,7 +666,7 @@ define(function (require) {
         var main = document.createElement('div');
         document.body.appendChild(main);
 
-        var tipLayerId = helper.getGUID(tipLayerPrefix);
+        var tipLayerId = lib.getGUID(tipLayerPrefix);
         properties.id = tipLayerId;
         properties.main = main;
 
@@ -652,7 +681,7 @@ define(function (require) {
             + '<div data-ui="type:Button;childName:okBtn;id:'
             + tipLayerId + '-' + okPrefix + ';width:50;"'
             + 'class="'
-            + helper.getPartClasses(tipLayer, 'once-notice')
+            + tipLayer.helper.getPartClasses('once-notice')
             + '">'
             + okText
             + '</div>'

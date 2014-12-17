@@ -125,7 +125,9 @@
                 绕着我
             </Button>
             <br>
-            <br>            
+            <br>
+            <br>
+            <br>
         </div>
         <script>
         require(
@@ -134,9 +136,11 @@
                 'fcui/Tip',
                 'fcui/TipLayer',
                 'fcui/Label',
-                'fcui/lib'
+                'fcui/lib',
+                'fcui/extension/FcUiSkin',
+                'fc-core/Promise'
             ],
-            function (ui, Tip, TipLayer, label, lib) {
+            function (ui, Tip, TipLayer, label, lib, skin, p) {
                 var controls = ui.init();
                 var tip = controls[0];
 
@@ -200,6 +204,19 @@
                     positionOpt: 12
                 });
 
+                var delayTip = ui.create('Tip', {
+                    title: '延迟提示',
+                    content: function () {
+                        return new p(function (resolve) {
+                            setTimeout(function () {
+                                resolve('姗姗来迟');
+                            }, 2000);
+                        });
+                    },
+                    showMode: 'over',
+                    delayTime: 800
+                });
+                delayTip.appendTo(document.querySelector('.container'));
             }
         )
         </script>

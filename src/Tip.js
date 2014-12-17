@@ -53,6 +53,15 @@ define(
             // 默认选项配置
             var properties = {
                 title: '',
+                /**
+                 * 供给TipLayer的content。
+                 * 当传入一个string时，内容直接渲染在TipLayer内。
+                 * 当传入一个Function时，内容渲染延迟至TipLayer show的时候开始。
+                 * 此时接受2种返回：若为string，则直接渲染在TipLayer内。若为Promise，则先loading，
+                 * resolve后渲染在TipLayer中。
+                 *
+                 * @type {string | Function}
+                 */
                 content: '',
                 /**
                  * @property {string} showMode
