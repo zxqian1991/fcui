@@ -10,7 +10,7 @@
 define(function (require) {
     var u = require('underscore');
     var eoo = require('eoo');
-    var etpl = require('etpl');
+    var fc = require('fc-core');
 
     require('./TipLayer');
     require('./Panel');
@@ -38,6 +38,8 @@ define(function (require) {
      */
     var proto = {};
 
+    var _engine = new fc.tpl.Engine();
+
     /**
      * FCUI 表格控件构造函数。
      * @param  {Object} options 构建参数
@@ -53,9 +55,9 @@ define(function (require) {
             engine = options.templateEngine;
         }
         else {
-            engine = new etpl.Engine();
+            engine = _engine;
 
-            var tableTemplate = require('./text!./Table.tpl.html');
+            var tableTemplate = require('fcui/text!./Table.tpl.html');
             engine.compile(tableTemplate);
         }
 
