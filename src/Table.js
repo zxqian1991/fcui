@@ -1373,14 +1373,18 @@ define(function (require) {
                         if (isRevert) {
                             u.each(selected, function (rowIndex) {
                                 checkboxNodes[rowIndex].checked = false;
-                                lib.removeClasses(trs[rowIndex],
+                                lib.removeClasses(trs[
+                                    rowIndex + (this.summary ? 1 : 0)
+                                    ],
                                     this.helper.getPartClasses('row-selected'));
                             }, this);
                         }
                         else {
                             u.each(selected, function (rowIndex) {
                                 checkboxNodes[rowIndex].checked = true;
-                                lib.addClasses(trs[rowIndex],
+                                lib.addClasses(trs[
+                                    rowIndex + (this.summary ? 1 : 0)
+                                    ],
                                     this.helper.getPartClasses('row-selected'));
                             }, this);
                         }
