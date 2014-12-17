@@ -9,7 +9,6 @@ define(function (require) {
     var underscore = require('underscore');
     var lib = require('../lib');
     var Layer = require('../Layer');
-    require('etpl/tpl!./template.tpl');
 
     require('../Button');
 

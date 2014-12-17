@@ -33,12 +33,16 @@
  */
 define(function (require) {
     var underscore = require('underscore');
-    var etpl = require('etpl');
+    var fc = require('fc-core');
     var ui = require('../main');
     var lib = require('../lib');
     var CommandMenu = require('../CommandMenu');
     var Control = require('../Control');
     var DropLayer = require('./DropLayer');
+
+    var _engine = new fc.tpl.Engine();
+    var _template = require('fcui/text!./template.tpl');
+    _engine.compile(_template);
 
     /**
      * 点击按钮出浮层控件
@@ -57,10 +61,7 @@ define(function (require) {
             engine = options.templateEngine;
         }
         else {
-            engine = new etpl.Engine();
-
-            var template = require('../text!./template.tpl');
-            engine.compile(template);
+            engine = _engine;
         }
 
         this.helper.setTemplateEngine(engine);

@@ -39,6 +39,8 @@ define(function (require) {
     var proto = {};
 
     var _engine = new fc.tpl.Engine();
+    var tableTemplate = require('fcui/text!./Table.tpl.html');
+    _engine.compile(tableTemplate);
 
     /**
      * FCUI 表格控件构造函数。
@@ -56,9 +58,6 @@ define(function (require) {
         }
         else {
             engine = _engine;
-
-            var tableTemplate = require('fcui/text!./Table.tpl.html');
-            engine.compile(tableTemplate);
         }
 
         this.helper.setTemplateEngine(engine);
