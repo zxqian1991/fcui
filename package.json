@@ -16,7 +16,7 @@
         }
     ],
     "dependencies": {
-        "esui": "~3.1.0-beta.3",
+        "esui": "3.1.0-beta.4",
         "fc-core": "~0.0.1-alpha.2",
         "fc-icon": "~0.0.3"
     },
@@ -31,7 +31,7 @@
         "loaderAutoConfig": "js,htm,html,tpl,vm,phtml",
         "loaderUrl": "http://s1.bdstatic.com/r/www/cache/ecom/esl/1-8-2/esl.js",
         "dependencies": {
-            "esui": "~3.1.0-beta.3",
+            "esui": "3.1.0-beta.4",
             "eoo": "~0.1.1",
             "etpl": "~3.0.0",
             "fc-core": "~0.0.1-alpha.2",
