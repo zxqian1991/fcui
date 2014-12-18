@@ -1719,6 +1719,13 @@ define(function (require) {
         var childName = 'inlineEditor-' + type + '-' + rowIndex
             + '-' + columnIndex;
         var editor = this.getChild(childName);
+        var field = this.realFields[columnIndex];
+        var data = this.datasource[rowIndex];
+        var content = field.editContent;
+        var value = 'function' === typeof content
+            ? content.call(this, data, rowIndex, columnIndex)
+            : data[field.field];
+        var inputControl;
         if (!editor) {
             editor = ui.create('Panel', {
                 parent: this,
@@ -1740,7 +1747,16 @@ define(function (require) {
             document.body.appendChild(editor.main);
             editor.render();
             var me = this;
-            var field = this.realFields[columnIndex];
+            inputControl = editor.getChild('inputControl');
+            inputControl.on('input', function (e) {
+                var okButton = editor.getChild('okButton');
+                if (this.validate()) {
+                    okButton.enable();
+                }
+                else {
+                    okButton.disable();
+                }
+            });
             editor.getChild('okButton').on('click', function () {
                 var inputControl = editor.getChild('inputControl');
                 if (inputControl.validate()) {
@@ -1758,13 +1774,7 @@ define(function (require) {
                     editor.hide();
                 }
             });
-            var inputControl = editor.getChild('inputControl');
             if (inputControl) {
-                var data = this.datasource[rowIndex];
-                var content = field.editContent;
-                var value = 'function' === typeof content
-                    ? content.call(this, data, rowIndex, columnIndex)
-                    : data[field.field];
                 inputControl.setValue(value);
                 // 关联验证器
                 var valid = editor.getChild('inputControlValid');
@@ -1777,6 +1787,13 @@ define(function (require) {
                         inputControl[name] = rule;
                     });
                 }
+            }
+        }
+        else {
+            // 重置编辑内容
+            inputControl = editor.getChild('inputControl');
+            if (inputControl) {
+                inputControl.setValue(value);
             }
         }
         // 定位editor到TD
