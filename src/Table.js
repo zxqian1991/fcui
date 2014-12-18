@@ -267,7 +267,7 @@ define(function (require) {
          * @property {String} <id> field name作为id
          * @property {Function|string} content 获得汇总行单元格内容
          */
-        summary: null,
+        summaryFields: null,
         /**
          * 按照哪个field排序，提供field名字
          * @type {string}
@@ -451,7 +451,7 @@ define(function (require) {
      * @return {HTMLElement} TR元素
      */
     proto.getRow = function (index) {
-        if (this.summary) {
+        if (this.summaryFields) {
             // 如果有汇总行，index要+1
             index++;
         }
@@ -1152,7 +1152,7 @@ define(function (require) {
      */
     proto.renderBody = function () {
         var html = this.helper.renderTemplate('table-body', {
-            summary: this.summary,
+            summaryFields: this.summaryFields,
             datasource: this.datasource || [],
             dataLength: this.datasource.length,
             realFields: this.realFields,
@@ -1196,17 +1196,17 @@ define(function (require) {
      *
      * @protected
      * @this Table
-     * @param {Object} summary 汇总行数据
+     * @param {Object} summaryFields 汇总行数据
      * @param {Table~field} field 本单元格的field对象
      * @return {string} HTML的string。
      */
-    proto.renderSummaryContent = function (summary, field) {
+    proto.renderSummaryFieldsContent = function (summaryFields, field) {
         // 先生成基本的content
-        var summaryField = summary[field.field];
+        var summaryField = summaryFields[field.field];
         if (summaryField) {
             var content = summaryField.content;
             var contentHtml = 'function' === typeof content
-                ? content.call(this, summary)
+                ? content.call(this, this.get('summary') || {})
                 : (this.encode
                     ? lib.encodeHTML(content)
                     : content
@@ -1375,7 +1375,7 @@ define(function (require) {
                             u.each(selected, function (rowIndex) {
                                 checkboxNodes[rowIndex].checked = false;
                                 lib.removeClasses(trs[
-                                    rowIndex + (this.summary ? 1 : 0)
+                                    rowIndex + (this.summaryFields ? 1 : 0)
                                     ],
                                     this.helper.getPartClasses('row-selected'));
                             }, this);
@@ -1384,7 +1384,7 @@ define(function (require) {
                             u.each(selected, function (rowIndex) {
                                 checkboxNodes[rowIndex].checked = true;
                                 lib.addClasses(trs[
-                                    rowIndex + (this.summary ? 1 : 0)
+                                    rowIndex + (this.summaryFields ? 1 : 0)
                                     ],
                                     this.helper.getPartClasses('row-selected'));
                             }, this);
@@ -1596,7 +1596,10 @@ define(function (require) {
         }
 
         // fields 发生变化，或者表体内容发生变化，重画表体
-        if (fieldsChanged || allProperities.datasource || allProperities.summary) {
+        if (fieldsChanged
+            || allProperities.datasource
+            || allProperities.summaryFields
+            || allProperities.summary) {
             this.renderBody();
             tBodyChanged = true;
         }
