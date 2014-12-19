@@ -269,6 +269,12 @@ define(function (require) {
          */
         summaryFields: null,
         /**
+         * 表格汇总各个单元格默认内容。
+         * @type {string}
+         * @default '&nbsp;'
+         */
+        summaryEmptyContent: '&nbsp;',
+        /**
          * 按照哪个field排序，提供field名字
          * @type {string}
          * @default ''
@@ -1213,12 +1219,12 @@ define(function (require) {
                 );
             // content需要有一个默认值
             if (isNullOrEmpty(contentHtml)) {
-                contentHtml = '&nbsp;';
+                contentHtml = this.get('summaryEmptyContent');
             }
             return contentHtml;
         }
 
-        return '&nbsp;';
+        return this.get('summaryEmptyContent');
     };
 
     /**
