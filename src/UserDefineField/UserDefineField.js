@@ -386,11 +386,11 @@ define(function (require) {
             this.fire('change', makeEvent({
                 fields: fields
             }));
+            this.setSelectedFields(fields);
         }
         this.fire('confirm', makeEvent({
             fields: fields
         }));
-
     };
 
     /**
