@@ -693,10 +693,9 @@ define(function (require) {
      */
     proto.disposeHeadChildren = function () {
         // getGroup 遇到空会新建一个空的，所以不怕空
-        this.viewContext.getGroup(this.getGroupName('head')).disposeGroup();
+        lib.disposeControlsInGroup(this.viewContext.getGroup(this.getGroupName('head')));
         if (this.isNeedCoverHead) {
-            this.viewContext.getGroup(this.getGroupName('head')).disposeGroup();
-            this.helper.disposeChildrenInGroup('cover-head');
+            lib.disposeControlsInGroup(this.viewContext.getGroup(this.getGroupName('cover-head')));
         }
     };
 
@@ -705,7 +704,7 @@ define(function (require) {
      */
     proto.disposeBodyChildren = function () {
         if (this.bodyHasControls) {
-            this.viewContext.getGroup(this.getGroupName('body')).disposeGroup();
+            lib.disposeControlsInGroup(this.viewContext.getGroup(this.getGroupName('body')));
         }
     };
 
@@ -1240,9 +1239,7 @@ define(function (require) {
      * @param {number} columnIndex 当前列的序号，0开始
      * @return {string} HTML的string。
      */
-    proto.renderCellTextContent = function (
-        data, field, rowIndex, columnIndex
-    ) {
+    proto.renderCellTextContent = function (data, field, rowIndex, columnIndex) {
         // 先生成基本的content
         var content = field.content;
         var contentHtml = 'function' === typeof content
@@ -1270,9 +1267,7 @@ define(function (require) {
      * @param {number} columnIndex 当前列的序号，0开始
      * @return {string} HTML的string。
      */
-    proto.renderCellExtraContent = function (
-        data, field, rowIndex, columnIndex
-    ) {
+    proto.renderCellExtraContent = function (data, field, rowIndex, columnIndex) {
         var extraContent = field.extraContent;
         var extraHtml = 'function' === typeof extraContent
             ? extraContent.call(this, data, rowIndex, columnIndex)
@@ -1740,6 +1735,7 @@ define(function (require) {
                 },
                 content: this.helper.renderTemplate('table-edit-' + type)
             });
+            editor.on('afterdispose', u.bind(editor.destroy, editor));
             this.addChild(editor, childName);
             this.helper.addPartClasses('inline-editor', editor.main);
             this.helper.addPartClasses('inline-editor-' + type, editor.main);

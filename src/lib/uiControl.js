@@ -36,5 +36,12 @@ define(function (require) {
         });
     };
 
+    exports.disposeControlsInGroup = function (group) {
+        var arrGroup = Array.prototype.slice.call(group);
+        u.each(arrGroup, function (control) {
+            control && control.dispose && control.dispose();
+        });
+    };
+
     return exports;
 });
