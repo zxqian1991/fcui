@@ -7,6 +7,7 @@
 
 .@{skin-fc-prefix}-schedule {
     padding: 10px 0;
+    height: 254px;
     background: @skin-fc-bg-color-white;
     color: @skin-fc-text-color-gray-dark;
 
@@ -19,13 +20,44 @@
         width: 70px;
     }
 
+    &-hour-head {
+        margin-left: 90px;
+        width: 600px;
+        float: left;
+        height: 18px;
+        input[type=checkbox] {
+            -webkit-appearance: none;
+            -mox-appearance: none;
+            appearance: none;
+            outline: none;
+            border: none;
+            color: @skin-fc-icon-color-gray;
+            &:before {
+                #skin-fc-mixin > .use-font-icon(@font-icon-largeable-arrow-down);
+            }
+            &:hover {
+                cursor: pointer;
+            }
+            &:checked {
+                color: @skin-fc-icon-orange-color;
+            }
+        }
+    }
+
+    &-hour {
+        display: inline-block;
+        vertical-align: middle;
+        text-align: center;
+        width: 25px;
+    }
+
     &-time {
         background: @skin-fc-bg-color-gray-light;
     }
 
     &-time-line {
         position: relative;
-        top: 207px;
+        top: 225px;
     }
 
     &-shortcut {
