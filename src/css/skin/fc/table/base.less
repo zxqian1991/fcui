@@ -44,6 +44,15 @@
         }
     }
 
+    &:first-child {
+        // 第一个单元格左padding是10
+        .ui-table-cell-text,
+        .ui-table-hcell-text,
+        .ui-tablefcell-text {
+            padding-left: 10px;
+        }
+    }
+
     &-align-left {
         text-align: left;
     }
@@ -209,16 +218,14 @@
                 position: absolute;
                 display: none;
             }
-
-            &-fixing {
-                display: block;
-            }
         }
     }
 
     &-head-fixing {
         .ui-table-cover-table {
-            display: table;
+            &-wrapper {
+                display: block;
+            }
         }
     }
 }

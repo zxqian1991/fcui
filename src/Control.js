@@ -138,6 +138,35 @@ define(function (require) {
     };
 
     /**
+     * 私有变量，所有的scroll handler。
+     * @type {Array}
+     */
+    proto._scrollHandlers = null;
+
+    /**
+     * 用上面的handler创建global的scroll，性能会有问题，用原生的方法做scroll handler
+     * @param {Function} handler handler
+     */
+    proto.addGlobalScrollHandler = function (handler) {
+        if (this._scrollHandlers == null) {
+            this._scrollHandlers = [handler];
+            var me = this;
+            var mainHandler = function (e) {
+                u.each(me._scrollHandlers, function (h) {
+                    h(e);
+                });
+            };
+            window.addEventListener('scroll', mainHandler);
+            this.on('afterdispose', function () {
+                window.removeEventListener('scroll', mainHandler);
+            });
+        }
+        else {
+            this._scrollHandlers.push(handler);
+        }
+    };
+
+    /**
      * 供子类填写的event handlers配置。id为event的名字，值为handler描述。
      * Event会delegate到this.main上。
      * 可以通过cssMatch和attrMatch锁定需要的event target。

@@ -27,7 +27,6 @@ define(function (require) {
     var ui = require('./main');
     var lib = require('./lib');
     var Control = require('./Control');
-    var handlers = require('./TableHandlers');
 
     /**
      * @class Table
@@ -62,8 +61,6 @@ define(function (require) {
 
         this.helper.setTemplateEngine(engine);
     };
-
-    proto.eventHandlers = handlers;
 
     /**
      * 表示一个表格field的对象。
@@ -159,6 +156,12 @@ define(function (require) {
          * @default false
          */
         sortable: false,
+        /**
+         * 当列上没有配置sortField时，是否采用平实的排序而不是浮层式的
+         * @type {boolean}
+         * @default true
+         */
+        plainSort: true,
         /**
          * 是否对单元格内容进行HTML encode
          * 不可通过setProperties修改
@@ -721,6 +724,9 @@ define(function (require) {
         }
         if (this.sortable) {
             this.initSort();
+            if (this.isNeedCoverHead) {
+                this.initSort(this.getCoverHead());
+            }
         }
     };
 
@@ -771,44 +777,56 @@ define(function (require) {
 
     /**
      * 初始化排序
+     * @param {HTMLElement} headEl 头部的DOM元素，默认为this.getHead()
      */
-    proto.initSort = function () {
-        var head = this.isNeedCoverHead ? this.getCoverHead() : this.getHead();
-        var hsorts = lib.findAll(head, '.ui-table-hcell-hsort');
+    proto.initSort = function (headEl) {
+        headEl = headEl || this.getHead();
+        var hsorts = lib.findAll(headEl, '.ui-table-hcell-hsort');
         u.each(hsorts, function (el) {
             var columnIndex = +lib.getAttribute(el, 'data-column');
             var field = this.realFields[columnIndex];
             var me = this;
-            var tipLayer = ui.create('TipLayer', {
-                id: this.getSortLayerId(field),
-                content: this.getSortLayerContent(columnIndex),
-                layerClasses: this.helper.getPartClasses('sort-layer'),
-                eventHandlers: {
-                    click: {
-                        eventType: 'click',
-                        query: '.ui-table-sort-item-wrapper',
-                        handler: function (e, el) {
-                            this.fire('close');
-                            this.hide();
+            if (field.sortField || !this.plainSort) {
+                var tipLayer = ui.create('TipLayer', {
+                    id: this.getSortLayerId(field),
+                    content: this.getSortLayerContent(columnIndex),
+                    layerClasses: this.helper.getPartClasses('sort-layer'),
+                    eventHandlers: {
+                        click: {
+                            eventType: 'click',
+                            query: '.ui-table-sort-item-wrapper',
+                            handler: function (e, el) {
+                                this.fire('close');
+                                this.hide();
 
-                            var order = lib.getAttribute(el, 'data-order');
-                            var field = lib.getAttribute(el, 'data-order-by');
-                            var realField = lib.getAttribute(el,
-                                'data-real-order-by');
-                            me.doSort(order, field, realField);
+                                var order = lib.getAttribute(el, 'data-order');
+                                var field = lib.getAttribute(el, 'data-order-by');
+                                var realField = lib.getAttribute(el,
+                                    'data-real-order-by');
+                                me.doSort(order, field, realField);
+                            }
                         }
                     }
-                }
-            });
-            tipLayer.appendTo(document.body);
-            tipLayer.render();
-            this.addChild(tipLayer, tipLayer.id);
-            tipLayer.attachTo({
-                targetDOM: el,
-                showMode: 'over',
-                delayTime: 500,
-                positionOpt: lib.DockPosition.TOP_BOTTOM_RIGHT_RIGHT
-            });
+                });
+                tipLayer.appendTo(document.body);
+                tipLayer.render();
+                this.addChild(tipLayer, tipLayer.id);
+                tipLayer.attachTo({
+                    targetDOM: el,
+                    showMode: 'over',
+                    delayTime: 500,
+                    positionOpt: lib.DockPosition.TOP_BOTTOM_RIGHT_RIGHT
+                });
+            }
+            else {
+                this.helper.addDOMEvent(el, 'click', function (event) {
+                    var target = event.target;
+                    var order = this.orderBy === field.field
+                        ? (this.order === 'asc' ? 'desc' : 'asc')
+                        : 'desc';
+                    this.doSort(order, field.field, field.field);
+                });
+            }
         }, this);
     };
 
@@ -843,7 +861,7 @@ define(function (require) {
                 // 重绘排序浮层的内容
                 field = this.realFields[columnIndex];
                 layer = this.getChild(this.getSortLayerId(field));
-                layer.setContent(this.getSortLayerContent(columnIndex));
+                layer && layer.setContent(this.getSortLayerContent(columnIndex));
             }
             columnIndex = this.fieldsMap[change.newValue];
             sorted = lib.getChildren(lib.dom.first(head))[columnIndex];
@@ -876,7 +894,7 @@ define(function (require) {
         columnIndex = this.fieldsMap[this.orderBy];
         field = this.realFields[columnIndex];
         layer = this.getChild(this.getSortLayerId(field));
-        layer.setContent(this.getSortLayerContent(columnIndex));
+        layer && layer.setContent(this.getSortLayerContent(columnIndex));
     };
 
     /**
@@ -908,6 +926,7 @@ define(function (require) {
      * @proeprty {string} sort.realOrderBy 当配置了多字段排序时，真正的排序字段
      */
     proto.doSort = function (order, orderBy, realOrderBy) {
+        console.log(arguments);
         var props = {
             order: order,
             orderBy: orderBy,
@@ -1506,6 +1525,42 @@ define(function (require) {
         lib.addClasses(this.main,
             this.helper.getStateClasses('fix-head'));
         this.refreshFixTop();
+        this.addGlobalScrollHandler(u.bind(function () {
+            var pageScrollTop = lib.page.getScrollTop();
+            var wrapper = this.getCoverTableWrapper();
+
+            if (this.fixTop < pageScrollTop) {
+                if (!this._headFixing) {
+                    this._headFixing = true;
+                    this.helper.addStateClasses('head-fixing');
+                    if (this.fixAtDom) {
+                        this.fixAtDom.style.position = 'absolute';
+                    }
+                    wrapper.style.left =
+                        lib.getOffset(this.getTable()).left + 'px';
+                }
+                if (this.fixAtDom) {
+                    this.fixAtDom.style.top = pageScrollTop + 'px';
+                    // 减掉10px padding和2px border
+                    this.fixAtDom.style.width = (this.getWidth() - 12) + 'px';
+                    wrapper.style.top =
+                        (pageScrollTop + this.fixHeight) + 'px';
+                }
+                else {
+                    wrapper.style.top = pageScrollTop + 'px';
+                }
+            }
+            else {
+                if (this._headFixing) {
+                    this._headFixing = false;
+                    this.helper.removeStateClasses('head-fixing');
+                    if (this.fixAtDom) {
+                        this.fixAtDom.style.position = 'inherit';
+                        this.fixAtDom.style.width = 'auto';
+                    }
+                }
+            }
+        }, this));
     };
 
     /**
@@ -1962,6 +2017,112 @@ define(function (require) {
             this.helper.initChildren(this.getRow(row), {
                 group: this.getGroupName('body')
             });
+        }
+    };
+
+    proto.eventHandlers = {
+        /**
+         * 表格行单选，多选，全选事件
+         */
+        'mselect': {
+            eventType: 'click',
+            query: '.ui-table-multi-select',
+            handler: function (e, el) {
+                var index = +lib.getAttribute(el, 'data-index');
+                if (el.checked) {
+                    this.selectRow(index);
+                    this.fire('rowselected', {rowIndex: index});
+                }
+                else {
+                    this.unselectRow(index);
+                    this.fire('rowunselected', {rowIndex: index});
+                }
+            }
+        },
+        'sselect': {
+            eventType: 'click',
+            query: '.ui-table-single-select',
+            handler: function (e, el) {
+                var index = +lib.getAttribute(el, 'data-index');
+                this.set('selectedIndex', index);
+                this.fire('rowselected', {rowIndex: index});
+            }
+        },
+        'allselect': {
+            eventType: 'click',
+            query: '.ui-table-select-all',
+            handler: function (e, el) {
+                if (el.checked) {
+                    this.set('selectedIndex', -1);
+                    this.fire('rowallselected');
+                }
+                else {
+                    this.set('selectedIndex', []);
+                    this.fire('rowallunselected');
+                }
+            }
+        },
+        /**
+         * 表内编辑事件
+         */
+        'edit': {
+            eventType: 'click',
+            query: '.ui-table-cell-edit-entry',
+            handler: function (e, el) {
+                var editType = lib.getAttribute(el, 'data-edit-type');
+                editType = editType || 'text';
+                var rowIndex = +lib.getAttribute(el, 'data-row');
+                var columnIndex = +lib.getAttribute(el, 'data-column');
+                this.fire('editstarted', {
+                    rowIndex: rowIndex,
+                    columnIndex: columnIndex,
+                    item: this.datasource[rowIndex],
+                    editType: editType
+                });
+                if (this.editHandlers[editType]) {
+                    this.editHandlers[editType].call(
+                        this, rowIndex, columnIndex, el
+                    );
+                }
+            }
+        },
+        /**
+         * 改变大小的事件
+         */
+        'window-resized': {
+            eventType: 'resize',
+            el: window,
+            enable: function () {
+                return this.fixHeadAtTop;
+            },
+            handler: function () {
+                this.syncWidth();
+                // 减掉10px padding和2px border
+                this.fixAtDom && (this.fixAtDom.style.width = (this.getWidth() - 12) + 'px');
+            }
+        },
+        /**
+         * 锁表头的事件：在window上锁定表头和在表格wrapper内锁定表头
+         */
+        'main-scroll': {
+            eventType: 'scroll',
+            enable: function () {
+                return this.tableMaxHeight > 0;
+            },
+            handler: function (e, el) {
+                var scrollTop = el.scrollTop;
+                var cover = this.getCoverTable();
+                cover.style.top = scrollTop + 'px';
+            }
+        },
+        'window-scroll': {
+            eventType: 'scroll',
+            el: document,
+            enable: function () {
+                // return this.fixHeadAtTop
+                return false;
+            },
+            handler: function (e, el) {}
         }
     };
 

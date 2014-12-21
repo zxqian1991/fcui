@@ -90,4 +90,16 @@
             }
         }
     }
+
+    &-head-fixing {
+        .ui-table-thead:not(.ui-table-cover-thead) {
+            .ui-table-hcell {
+                &-sort, &-tip {
+                    .ui-table-hcell-wrapper {
+                        position: inherit;
+                    }
+                }
+            }
+        }
+    }
 }
