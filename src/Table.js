@@ -820,7 +820,6 @@ define(function (require) {
             }
             else {
                 this.helper.addDOMEvent(el, 'click', function (event) {
-                    var target = event.target;
                     var order = this.orderBy === field.field
                         ? (this.order === 'asc' ? 'desc' : 'asc')
                         : 'desc';
@@ -834,14 +833,15 @@ define(function (require) {
      * 重绘排序
      * @param {Object} changesIndex 给repaint的changesIndex，其中
      *        order，orderBy，realOrderBy至少一项不是空的
+     * @param {HTMLElement} head 头部元素
      */
-    proto.renderSort = function (changesIndex) {
+    proto.renderSort = function (changesIndex, head) {
         if (changesIndex == null) {
             return;
         }
 
         var columnIndex;
-        var head = this.isNeedCoverHead ? this.getCoverHead() : this.getHead();
+        head = head || this.getHead();
         var sorted;
         var layer;
         var field;
@@ -926,7 +926,6 @@ define(function (require) {
      * @proeprty {string} sort.realOrderBy 当配置了多字段排序时，真正的排序字段
      */
     proto.doSort = function (order, orderBy, realOrderBy) {
-        console.log(arguments);
         var props = {
             order: order,
             orderBy: orderBy,
@@ -1682,6 +1681,9 @@ define(function (require) {
             || allProperities.orderBy
             || allProperities.realOrderBy) {
             this.renderSort(changesIndex);
+            if (this.isNeedCoverHead) {
+                this.renderSort(changesIndex, this.getCoverHead());
+            }
         }
 
         if (this.datasource
