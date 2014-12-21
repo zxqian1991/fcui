@@ -162,7 +162,7 @@ define(
             tipLayer.render();
 
             var attachOptions = {
-                showMode: this.mode,
+                showMode: this.showMode,
                 delayTime: this.delayTime,
                 targetControl: this,
                 positionOpt: this.positionOpt
