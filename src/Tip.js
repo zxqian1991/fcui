@@ -161,6 +161,8 @@ define(
             this.addChild(tipLayer);
             tipLayer.render();
 
+            this.helper.addStateClasses(this.showMode);
+
             var attachOptions = {
                 showMode: this.showMode,
                 delayTime: this.delayTime,
