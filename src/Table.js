@@ -38,7 +38,7 @@ define(function (require) {
     var proto = {};
 
     var _engine = new fc.tpl.Engine();
-    var tableTemplate = require('fcui/text!./Table.tpl.html');
+    var tableTemplate = require('./Table.tpl.html');
     _engine.compile(tableTemplate);
 
     /**
