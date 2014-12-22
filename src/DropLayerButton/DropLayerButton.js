@@ -41,7 +41,7 @@ define(function (require) {
     var DropLayer = require('./DropLayer');
 
     var _engine = new fc.tpl.Engine();
-    var _template = require('fcui/text!./template.tpl');
+    var _template = require('./template.tpl');
     _engine.compile(_template);
 
     /**
