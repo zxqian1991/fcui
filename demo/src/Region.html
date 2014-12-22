@@ -109,7 +109,7 @@
                 </ul>
                 <div>
                     <label for="text-box-normal">多选</label>
-                    <esui-region data-ui="id:test;name:region1"></esui-region>
+                    <esui-region data-ui="id:test;name:region1;" data-ui-extension-region-type="IndeterminateRegion"></esui-region>
                 </div>
                 <div>
                     <label for="text-box-normal">单选</label>
@@ -144,7 +144,8 @@
                 'fcui',
                 'fcui/Region',
                 'fcui/Button',
-                'fcui/extension/FcUiSkin'
+                'fcui/extension/FcUiSkin',
+                'fcui/extension/IndeterminateRegion'
             ],
             function (ui) {
                 var controls = ui.init();
