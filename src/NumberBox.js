@@ -5,7 +5,7 @@
 
 define(
     function (require) {
-        var u = require('underscore');
+        var _ = require('underscore');
         var lib = require('esui/lib');
         var InputControl = require('esui/InputControl');
         var painters = require('esui/painters');
@@ -105,9 +105,9 @@ define(
             }
             var sceneOptions = this.getOptionsByScene(properties.scene);
             // 如果配置了场景的话，用场景的配置覆盖默认配置
-            sceneOptions ? u.extend(properties, sceneOptions) : '';
+            sceneOptions ? _.extend(properties, sceneOptions) : '';
             // options里面配置的优先级高于场景的
-            u.extend(properties, options);
+            _.extend(properties, options);
             this.setProperties(properties);
         };
 
@@ -301,7 +301,7 @@ define(
          */
         NumberBox.prototype.onInputChange = function () {
             var me = this;
-            return function () {
+            return function (e) {
                 me.setValue(me.helper.getPart('input').value);
             };
         };
@@ -342,7 +342,7 @@ define(
             return function () {
                 me.hideRangeTip();
                 me.isOnFocus = false;
-                me.setValue(me.helper.getPart('input').value);
+                me.setValue(me.fixValue(me.helper.getPart('input').value));
             };
         };
 
@@ -364,7 +364,7 @@ define(
          * @return {number} 截取后的值
          */
         NumberBox.prototype.fixValue = function (value) {
-            if (this.decimalPlace && !isNaN(value) && value !== '') {
+            if (this.decimalPlace && !isNaN(value) && !/^ *$/.test(value)) {
                 value = fixNumber(value, this.decimalPlace);
             }
             return value;
@@ -497,7 +497,7 @@ define(
          * @pubic
          */
         NumberBox.prototype.getValue = function () {
-            return this.fixValue(this.getRawValue());
+            return this.getRawValue();
         };
 
 
