@@ -56,6 +56,7 @@ define(
          *      默认为Number.NEGATIVE_INFINITY
          * @param {number} options.max value 的最大值，
          *      默认为Number.POSITIVE_INFINITY
+         * @param {string} options.placeholder 文本框的placeholder
          * @param {number} options.value 当前控件的value值
          * @param {boolean} options.isShowTimelyTip 是否输入范围的即时提示
          *      提示为：有效范围：**~**,默认没有上下限，不会提示
@@ -96,7 +97,8 @@ define(
                 isShowTimelyTip: true,
                 value: '',
                 isNumber: true,
-                required: true
+                required: true,
+                placeholder: ''
             };
             if (options.scene) {
                 properties.scene = options.scene;
@@ -227,7 +229,8 @@ define(
             this.main.innerHTML = this.getMainHTML();
             // 创建控件树
             helper.initChildren();
-
+            var input = helper.getPart('input');
+            input.placeholder = this.placeholder;
         };
 
         /**
@@ -339,7 +342,7 @@ define(
             return function () {
                 me.hideRangeTip();
                 me.isOnFocus = false;
-                me.setValue(me.fixValue(me.helper.getPart('input').value));
+                me.setValue(me.helper.getPart('input').value);
             };
         };
 
@@ -422,10 +425,17 @@ define(
                 paint: function (NumberBox, value) {
                     // 输入区
                     // 在输入框里即时输入的时候，不做小数截断
-                    value = (isNaN(+value) || NumberBox.isOnFocus)
+                    value = (isNaN(window.parseInt(value, 10))
+                        || NumberBox.isOnFocus)
                         ? value : NumberBox.fixValue(value);
                     NumberBox.helper.getPart('input').value = value;
                     NumberBox.validateValue();
+                }
+            },
+            {
+                name: 'placeholder',
+                paint: function (NumberBox, value) {
+                    NumberBox.helper.getPart('input').placeholder = value;
                 }
             },
             {
