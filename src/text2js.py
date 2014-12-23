@@ -40,5 +40,5 @@ if __name__ == "__main__":
         print "/* This file is auto generated. Don't edit. */"
         print "define(function(){return ''"
         for chunk in lineChunks(f):
-            print "+'" + chunk.strip() + "'"
+            print "+'" + chunk.strip() + " '"
         print ";});"
