@@ -228,4 +228,25 @@
             }
         }
     }
+
+    &-no-data {
+        border-left: 1px solid @skin-fc-border-color-light;
+        text-align: center;
+        padding: 50px 0;
+
+        .ui-table-no-data-message {
+            display: inline-block;
+            border: 1px solid @skin-fc-shadow-color;
+            line-height: 50px;
+            padding: 0 20px;
+            color: @skin-fc-text-color-gray-dark;
+            .ui-table-no-data-icon {
+                &:after {
+                    #skin-fc-mixin > .use-font-icon(@font-icon-desktop);
+                }
+
+                margin-right: 10px;
+            }
+        }
+    }
 }

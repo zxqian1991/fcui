@@ -357,7 +357,8 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
 <!-- target: table-no-data -->
 <!-- // 表格体不含有数据时候的内容 -->
 <tr>
-    <td colspan="${fieldsLength}">
-        没有数据
+    <td class="${no-data | class}" colspan="${fieldsLength}">
+        <div class="${no-data-message | class}"><span class="${no-data-icon | class}"></span>没有数据</div>
     </td>
 </tr>
+
