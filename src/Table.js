@@ -38,7 +38,7 @@ define(function (require) {
     var proto = {};
 
     var _engine = new fc.tpl.Engine();
-    var tableTemplate = require('fcui/text!./Table.tpl.html');
+    var tableTemplate = require('./Table.tpl.html');
     _engine.compile(tableTemplate);
 
     /**
@@ -1530,10 +1530,23 @@ define(function (require) {
         this.addGlobalScrollHandler(u.bind(function () {
             var pageScrollTop = lib.page.getScrollTop();
             var wrapper = this.getCoverTableWrapper();
+            var fixTop;
 
-            if (this.fixTop < pageScrollTop) {
+            if (!this._headFixing) {
+                // 如果还没有开始吸顶，看当前顶所在的位置
+                var fixTop = this.fixAtDom
+                    ? lib.getOffset(this.fixAtDom).top
+                    : lib.getOffset(this.getTable()).top;
+            }
+
+            if ((this.fixTop != null && this.fixTop < pageScrollTop)
+                || (fixTop < pageScrollTop)
+            ) {
+                // 吸顶
                 if (!this._headFixing) {
                     this._headFixing = true;
+                    // 在top多少的时候进入fix状态
+                    this.fixTop = fixTop;
                     this.helper.addStateClasses('head-fixing');
                     if (this.fixAtDom) {
                         this.fixAtDom.style.position = 'absolute';
@@ -1555,6 +1568,7 @@ define(function (require) {
             else {
                 if (this._headFixing) {
                     this._headFixing = false;
+                    this.fixTop = null;
                     this.helper.removeStateClasses('head-fixing');
                     if (this.fixAtDom) {
                         this.fixAtDom.style.position = 'inherit';
@@ -1574,12 +1588,10 @@ define(function (require) {
             var position = this.fixAtDom.style.position;
             this.fixAtDom.style.position = 'inherit';
             this.fixHeight = lib.getOuterHeight(this.fixAtDom);
-            this.fixTop = lib.getOffset(this.fixAtDom).top;
             this.fixAtDom.style.position = position;
         }
         else {
             this.fixHeight = 0;
-            this.fixTop = lib.getOffset(this.getTable()).top;
         }
     };
 
@@ -2121,15 +2133,6 @@ define(function (require) {
                 var cover = this.getCoverTable();
                 cover.style.top = scrollTop + 'px';
             }
-        },
-        'window-scroll': {
-            eventType: 'scroll',
-            el: document,
-            enable: function () {
-                // return this.fixHeadAtTop
-                return false;
-            },
-            handler: function (e, el) {}
         }
     };
 
