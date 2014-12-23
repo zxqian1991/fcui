@@ -38,7 +38,7 @@ define(function (require) {
     var proto = {};
 
     var _engine = new fc.tpl.Engine();
-    var tableTemplate = require('./Table.tpl.html');
+    var tableTemplate = require('fcui/text!./Table.tpl.html');
     _engine.compile(tableTemplate);
 
     /**
@@ -345,6 +345,9 @@ define(function (require) {
      * @param {HTMLElement} el 发生了点击事件的元素
      */
     function textEditHandler(rowIndex, columnIndex, el) {
+        // 先将其它编辑器隐藏掉
+        var groupName = this.getGroupName('body.texteditor');
+        this.viewContext.getGroup(groupName).hide();
         var editor = this.createInlineEditor(
             'text', rowIndex, columnIndex, el
         );
@@ -1787,10 +1790,12 @@ define(function (require) {
             ? content.call(this, data, rowIndex, columnIndex)
             : data[field.field];
         var inputControl;
+        // 先将其它编辑器隐藏掉
+        var groupName = this.getGroupName('body.texteditor');
         if (!editor) {
             editor = ui.create('Panel', {
                 parent: this,
-                group: this.getGroupName('body'),
+                group: groupName,
                 show: function () {
                     this.setStyle('display', 'block');
                 },
