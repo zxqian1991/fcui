@@ -535,6 +535,7 @@ define(function (require) {
             // 如果表是锁定表的右子控件，不要画select fields
             case 'multi':
                 realFields.unshift({
+                    field: 'fcui-table-multi-select',
                     select: true,
                     maxWidth: 30,
                     title: function (item, index) {
@@ -558,6 +559,7 @@ define(function (require) {
                 break;
             case 'single':
                 realFields.unshift({
+                    field: 'fcui-table-single-select',
                     title: '&nbsp;',
                     select: true,
                     maxWidth: 30,
@@ -1534,7 +1536,7 @@ define(function (require) {
 
             if (!this._headFixing) {
                 // 如果还没有开始吸顶，看当前顶所在的位置
-                var fixTop = this.fixAtDom
+                fixTop = this.fixAtDom
                     ? lib.getOffset(this.fixAtDom).top
                     : lib.getOffset(this.getTable()).top;
             }
@@ -1549,20 +1551,14 @@ define(function (require) {
                     this.fixTop = fixTop;
                     this.helper.addStateClasses('head-fixing');
                     if (this.fixAtDom) {
-                        this.fixAtDom.style.position = 'absolute';
+                        this.fixAtDom.style.position = 'fixed';
+                        this.fixAtDom.style.top = '0';
+                        // 减掉10px padding和2px border
+                        this.fixAtDom.style.width = (this.getWidth() - 12) + 'px';
                     }
                     wrapper.style.left =
                         lib.getOffset(this.getTable()).left + 'px';
-                }
-                if (this.fixAtDom) {
-                    this.fixAtDom.style.top = pageScrollTop + 'px';
-                    // 减掉10px padding和2px border
-                    this.fixAtDom.style.width = (this.getWidth() - 12) + 'px';
-                    wrapper.style.top =
-                        (pageScrollTop + this.fixHeight) + 'px';
-                }
-                else {
-                    wrapper.style.top = pageScrollTop + 'px';
+                    wrapper.style.top = this.fixHeight + 'px';
                 }
             }
             else {
