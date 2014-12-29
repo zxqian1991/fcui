@@ -11,6 +11,7 @@ define(function (require) {
     var u = require('underscore');
     var libDom = require('esui/lib/dom');
     var libPage = require('esui/lib/page').page;
+    var libAttribute = require('esui/lib/attribute');
 
     var exports = {};
 
@@ -464,6 +465,103 @@ define(function (require) {
                 break;
         }
         el.style.display = previousDisplayValue;
+    };
+
+    /**
+     * 动画任务id保存key
+     */
+    var ANIMATE_TASK_ID_KEY = 'esui-animate-ids';
+
+    /**
+     * 动画 TODO(yuanfeixiang) 现只支持单位为px的
+     * @param {HTMLElement} el 元素
+     * @param {Object} styles 目标值
+     * @param {number} duration 用时
+     * @param {Function} callback 回调函数
+     * @return {number} 动画id
+     */
+    exports.animate = function (el, styles, duration, callback) {
+        var initedStyles = {};
+        for (var k in styles) {
+            if (!styles.hasOwnProperty(k)) {
+                continue;
+            }
+            initedStyles[k] =
+                +libDom.getComputedStyle(el, k).replace(/px/, '');
+            styles[k] = +styles[k].toString().replace(/px/, '');
+        }
+        function setStyles(factor) {
+            for (var k in styles) {
+                if (!styles.hasOwnProperty(k)) {
+                    continue;
+                }
+                el.style[k] = initedStyles[k]
+                    + (styles[k] - initedStyles[k]) * factor + 'px';
+            }
+        }
+        // 变换函数
+        function transformFun(factor) {
+            return factor;
+        }
+        var startTime = +new Date();
+        var intervalId = setInterval(function () {
+            var passed = +new Date() - startTime;
+            if (passed >= duration) {
+                exports.stop(el, intervalId);
+                setStyles(1);
+                callback && callback.apply(el);
+            }
+            else {
+                setStyles(transformFun(passed / duration));
+            }
+        }, 13);
+        var animateAttr =
+            libAttribute.getAttribute(el, ANIMATE_TASK_ID_KEY) || '';
+        var animateIds = u.map(
+            animateAttr ? animateAttr.split(',') : [],
+            function (item) {
+                return +item;
+            }
+        );
+        animateIds.push(intervalId);
+        libAttribute
+            .setAttribute(el, ANIMATE_TASK_ID_KEY, animateIds.join(','));
+        return intervalId;
+    };
+
+    /**
+     * 停止动画
+     * @param {HTMLElement} el 元素
+     * @param {?number} id 动画id
+     */
+    exports.stop = function (el, id) {
+        var animateAttr =
+            libAttribute.getAttribute(el, ANIMATE_TASK_ID_KEY) || '';
+        var animateIds = u.map(
+            animateAttr ? animateAttr.split(',') : [],
+            function (item) {
+                return +item;
+            }
+        );
+        function clearId(id) {
+            clearInterval(id);
+            var idx = u.indexOf(animateIds, id);
+            if (idx !== -1) {
+                animateIds.splice(idx - 1, 1);
+            }
+        }
+        if (id) {
+            clearId(id);
+        }
+        else {
+            for (var i in animateIds) {
+                if (animateIds.hasOwnProperty(i)) {
+                    clearId(animateIds[i]);
+                }
+            }
+        }
+        libAttribute
+            .setAttribute(el, ANIMATE_TASK_ID_KEY, animateIds.join(','));
     };
 
     return exports;
