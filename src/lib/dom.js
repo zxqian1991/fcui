@@ -74,8 +74,7 @@ define(function (require) {
      */
     exports.parent = function (el, query, endEl) {
         endEl = endEl || document.body;
-        if (typeof query === 'undefined'
-            || (query.length && query.length === 0)) {
+        if (typeof query === 'undefined' || query.length === 0) {
             // 没给query，直接退出
             return endEl;
         }
