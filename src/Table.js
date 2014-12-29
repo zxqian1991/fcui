@@ -2035,6 +2035,51 @@ define(function (require) {
         }
     };
 
+    /**
+     * 阈值，当update行数多于这个数量时，重绘整个table而不是刷新单个的行。
+     * @type {Number}
+     */
+    proto.THRESHOLD_UPDATE_ALL_FOR_ROWS = 30;
+
+    /**
+     * 同上，为IE9准备的阈值。
+     * @type {Number}
+     */
+    proto.THRESHOLD_UPDATE_ALL_FOR_ROWS_IE9 = 10;
+
+    /**
+     * 更新多行数据。
+     * 当rows传入的数据行数多于THRESHOLD_UPDATE_ALL_FOR_ROWS时，刷新整个table，否则，刷新单个的行。
+     * @param {Object} rows 以行号为key，每行更新的数据为值的对象。
+     * {
+     *      1: {...}
+     * }
+     */
+    proto.updateRows = function (rows) {
+        var length = u.keys(rows).length;
+        var me = this;
+        // 先更新datasource
+        var datasource = this.datasource;
+        u.each(rows, function (data, index) {
+            datasource[+index] = data;
+        });
+
+        if ((lib.ie && lib.ie <= 9 && length <= this.THRESHOLD_UPDATE_ALL_FOR_ROWS_IE9)
+            || (length <= this.THRESHOLD_UPDATE_ALL_FOR_ROWS)
+        ) {
+            // 在阈值内，刷新每一行
+            u.each(rows, function (data, index) {
+                me.updateRowAt(+index, data);
+            });
+        }
+        else {
+            // 在阈值外，直接repaint table
+            this.repaint([{name: 'datasource'}], {
+                datasource: datasource
+            });
+        }
+    };
+
     proto.eventHandlers = {
         /**
          * 表格行单选，多选，全选事件
