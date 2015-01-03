@@ -1559,6 +1559,11 @@ define(function (require) {
                     wrapper.style.left =
                         lib.getOffset(this.getTable()).left + 'px';
                     wrapper.style.top = this.fixHeight + 'px';
+                    if (this.fixHeight) {
+                        // 如果有fixDom，fixDom从flow中拿走会使得table掉上去。
+                        // 加一个fixHeight的margin使得表格还能待在原位。
+                        this.getTable().style.marginTop = this.fixHeight + 'px';
+                    }
                 }
             }
             else {
@@ -1566,6 +1571,9 @@ define(function (require) {
                     this._headFixing = false;
                     this.fixTop = null;
                     this.helper.removeStateClasses('head-fixing');
+                    if (this.fixHeight) {
+                        this.getTable().style.marginTop = '';
+                    }
                     if (this.fixAtDom) {
                         this.fixAtDom.style.position = 'inherit';
                         this.fixAtDom.style.width = 'auto';
