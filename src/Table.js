@@ -652,7 +652,7 @@ define(function (require) {
         tableEl.removeChild(tableEl.getElementsByTagName('colgroup')[0]);
         var colgroup = wrapTableHtml('colgroup', html);
         this.helper.addPartClasses('colgroup', colgroup);
-        colgroup.id = this.helper.getId('colgroup');
+        colgroup.id = this.helper.getId(isCover ? 'cover-colgroup' : 'colgroup');
         tableEl.insertBefore(colgroup, tableEl.firstChild);
     };
 
@@ -666,8 +666,13 @@ define(function (require) {
         tableEl.deleteTHead();
         var thead = wrapTableHtml('thead', html);
         this.helper.addPartClasses('thead', thead);
-        thead.id = this.helper.getId('thead');
-        tableEl.insertBefore(thead, tableEl.tBodies[0]);
+        thead.id = this.helper.getId(isCover ? 'cover-thead' : 'thead');
+        if (tableEl.tBodies.length) {
+            tableEl.insertBefore(thead, tableEl.tBodies[0]);
+        }
+        else {
+            tableEl.appendChild(thead);
+        }
     };
 
     /**
