@@ -47,6 +47,16 @@
                 color: @skin-fc-icon-orange-color;
             }
         }
+        label {
+            color: @skin-fc-icon-color-gray;
+            cursor: pointer;
+            &:before {
+                #skin-fc-mixin > .use-font-icon(@font-icon-largeable-arrow-down);
+            }
+            &.selected {
+                color: @skin-fc-icon-orange-color;
+            }
+        }
     }
 
     &-hour {

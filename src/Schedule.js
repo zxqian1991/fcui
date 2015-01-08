@@ -220,9 +220,9 @@ define(function (require) {
         html.push('<div id="', hourHId, '" class="', hourHClass, '">');
         var hourClass = getClass(me, 'hour');
         var hourTpl = ''
-            + '<div class="' + hourClass + '">'
-            + '<input type="checkbox" id="${hourId}" value=${value}>'
-            + '<label for="${hourId}" class="${calsses}"></label>'
+            + '<div class="' + hourClass + '" onselectstart="return false;">'
+            + '<input hidden type="checkbox" id="${hourId}" value=${value}>'
+            + '<label id="${labelid}" for="${hourId}" class="${calsses}"></label>'
             + '</div>';
 
         for (var i = 0; i < 24; i++) {
@@ -230,6 +230,7 @@ define(function (require) {
                 lib.format(
                     hourTpl,
                     {
+                        labelid: getId(me, 'col-state-label' + i),
                         classes: getClass(me, 'col-label' + i),
                         hourId: getId(me, 'col-state' + i),
                         value: i
@@ -362,6 +363,13 @@ define(function (require) {
         _.each(lastRow, function (selected, idx) {
             var checkInput = lib.g(getId(me, 'col-state' + idx));
             checkInput.checked = selected;
+            var label = lib.g(getId(me, 'col-state-label' + idx));
+            if (selected) {
+                lib.addClass(label, 'selected');
+            }
+            else {
+                lib.removeClass(label, 'selected');
+            }
         });
 
         for (var i = 0; i < 7; i++) {
