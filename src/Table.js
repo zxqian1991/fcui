@@ -666,6 +666,9 @@ define(function (require) {
         tableEl.deleteTHead();
         var thead = wrapTableHtml('thead', html);
         this.helper.addPartClasses('thead', thead);
+        if (isCover) {
+            this.helper.addPartClasses('cover-thead', thead);
+        }
         thead.id = this.helper.getId(isCover ? 'cover-thead' : 'thead');
         if (tableEl.tBodies.length) {
             tableEl.insertBefore(thead, tableEl.tBodies[0]);
