@@ -463,11 +463,7 @@ define(function (require) {
      * @return {HTMLElement} TR元素
      */
     proto.getRow = function (index) {
-        if (this.summaryFields) {
-            // 如果有汇总行，index要+1
-            index++;
-        }
-        return lib.getChildren(this.getBody())[index];
+        return lib.find(this.getBody(), '.ui-table-row[data-row="' + index + '"]');
     };
 
     /**
@@ -666,9 +662,6 @@ define(function (require) {
         tableEl.deleteTHead();
         var thead = wrapTableHtml('thead', html);
         this.helper.addPartClasses('thead', thead);
-        if (isCover) {
-            this.helper.addPartClasses('cover-thead', thead);
-        }
         thead.id = this.helper.getId(isCover ? 'cover-thead' : 'thead');
         if (tableEl.tBodies.length) {
             tableEl.insertBefore(thead, tableEl.tBodies[0]);
