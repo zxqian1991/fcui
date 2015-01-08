@@ -1552,6 +1552,7 @@ define(function (require) {
                     this.fixTop = fixTop;
                     this.helper.addStateClasses('head-fixing');
                     if (this.fixAtDom) {
+                        lib.addClasses(this.fixAtDom, this.helper.getPartClasses('head-fixed-item'));
                         this.fixAtDom.style.position = 'fixed';
                         this.fixAtDom.style.top = '0';
                         // 减掉10px padding和2px border
@@ -1576,6 +1577,7 @@ define(function (require) {
                         this.getTable().style.marginTop = '';
                     }
                     if (this.fixAtDom) {
+                        lib.removeClasses(this.fixAtDom, this.helper.getPartClasses('head-fixed-item'));
                         this.fixAtDom.style.position = 'inherit';
                         this.fixAtDom.style.width = 'auto';
                     }
