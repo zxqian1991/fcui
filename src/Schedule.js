@@ -347,6 +347,7 @@ define(function (require) {
      */
     function repaintView(schedule, value) {
         var me = schedule;
+        me.fire('beforerepaintview');
         var selectedClass = helper.getPartClasses(me, 'time-selected');
         var hoverClass = helper.getPartClasses(me, 'time-hover');
 
@@ -392,6 +393,7 @@ define(function (require) {
             // 根据每周的value, 创建连续选中遮罩
             createSelectedLineCoverTip(me, statusArr, lineEl, i);
         }
+        me.fire('afterrepaintview');
     }
 
     /**
@@ -1178,6 +1180,20 @@ define(function (require) {
     }
 
     /**
+     * 设置时间checkbox的状态
+     * @param {Schedule} schedule 当前控件
+     * @param {string} state 状态
+     * @param {boolean} value 值
+     */
+    function setHourCheckboxState(schedule, state, value) {
+        var hourHead = lib.g(getId(schedule, 'hour-head'));
+        var inputs = hourHead.getElementsByTagName('input');
+        _.each(inputs, function (item) {
+            item[state] = value;
+        });
+    }
+
+    /**
      * 根据坐标值改变当前值
      * @param {Schedule} schedule 当前控件
      * @param {boolean} isSelect 是否选中当前坐标
@@ -1388,6 +1404,7 @@ define(function (require) {
                 paint: function (schedule, value) {
 
                     setDayCheckboxState(schedule, 'disabled', value);
+                    setHourCheckboxState(schedule, 'disabled', value);
                 }
             },
             {
@@ -1395,6 +1412,7 @@ define(function (require) {
                 paint: function (schedule, value) {
 
                     setDayCheckboxState(schedule, 'readonly', value);
+                    setHourCheckboxState(schedule, 'readonly', value);
                 }
             }
         ),
