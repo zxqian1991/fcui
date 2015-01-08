@@ -393,7 +393,7 @@ define(function (require) {
                 else {
                     lib.removeClasses(item, selectedClass);
                 }
-                item.dataset.value = val;
+                item.setAttribute('data-value', val);
 
                 lib.removeClasses(item, hoverClass);
                 statusArr.push(val);
