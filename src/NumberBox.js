@@ -148,6 +148,7 @@ define(
          */
         NumberBox.prototype.getMainHTML = function () {
             var helper = this.helper;
+            var tipString = this.getTip();
             // 写这么多html是因为模板加载跨域的问题
             var htmlStr = ''
                 + '<div id="' + helper.getId('wrapper')
@@ -171,6 +172,11 @@ define(
                 +                   'font-icon-caret-down"></i>'
                 +            '</div>'
                 +        '</div>'
+                +        '<div id="' + helper.getId('tip') + '" class="'
+                +            this.getPartClasses('range-tip')
+                +            ' ' + HIDE_CLASS + '">'
+                +            tipString
+                +        '</div>'
                 +    '</div>'
                 + '</div>';
             return htmlStr;
@@ -185,6 +191,32 @@ define(
         NumberBox.prototype.getPartClasses = function (partName) {
             return this.helper.getPartClasses(partName).join(' ');
         };
+
+        /**
+         * 获取提示字符串
+         *
+         * @return {string} 提示信息
+         */
+        NumberBox.prototype.getTip = function () {
+            // 没有最小值的时候
+            var str = '有效范围:';
+            if (this.min !== Number.NEGATIVE_INFINITY
+                && this.max !== Number.POSITIVE_INFINITY) {
+                str += this.min + '~' + this.max;
+            }
+            else if (this.min === Number.NEGATIVE_INFINITY
+                && this.max === Number.POSITIVE_INFINITY) {
+                str = '';
+            }
+            else if (this.min === Number.NEGATIVE_INFINIT) {
+                str += '小于' + this.max;
+            }
+            else {
+                str += '大于' + this.min;
+            }
+            return str;
+        };
+
 
         /**
          * 初始化DOM结构
@@ -283,6 +315,7 @@ define(
             var me = this;
             return function () {
                 if (me.isShowTimelyTip) {
+                    me.showRangeTip();
                     // 否则提示跟错误会冲突
                     me.hideError();
                     me.isOnFocus = true;
@@ -307,6 +340,7 @@ define(
         NumberBox.prototype.onInputBlur = function () {
             var me = this;
             return function () {
+                me.hideRangeTip();
                 me.isOnFocus = false;
                 me.setValue(me.fixValue(me.helper.getPart('input').value));
             };
@@ -334,6 +368,33 @@ define(
                 value = fixNumber(value, this.decimalPlace);
             }
             return value;
+        };
+
+        /**
+         * 隐藏范围提示
+         */
+        NumberBox.prototype.hideRangeTip = function () {
+            lib.addClasses(
+                this.helper.getPart('tip'),
+                [HIDE_CLASS]
+            );
+        };
+
+        /**
+         * 显示范围提示
+         */
+        NumberBox.prototype.showRangeTip = function () {
+            lib.removeClasses(
+                this.helper.getPart('tip'),
+                [HIDE_CLASS]
+            );
+        };
+
+        /**
+         * 输入非法时候的处理
+         */
+        NumberBox.prototype.oninvalid = function () {
+            this.hideRangeTip();
         };
 
         /**

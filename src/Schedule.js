@@ -355,7 +355,7 @@ define(function (require) {
         var lastRow = valueCopy.pop();
         _.each(valueCopy, function (day) {
             _.each(day, function (hour, idx) {
-                lastRow[idx] &= +(!!hour);
+                lastRow[idx] &= +(hour === 1);
             });
         });
         _.each(lastRow, function (selected, idx) {
@@ -377,14 +377,14 @@ define(function (require) {
                 var val  = value[i][j];
 
                 // 根据value,设置item的选中状态
-                if (val) {
+                if (+val === 1) {
 
                     lib.addClasses(item, selectedClass);
                 }
                 else {
-
                     lib.removeClasses(item, selectedClass);
                 }
+                item.dataset.value = val;
 
                 lib.removeClasses(item, hoverClass);
                 statusArr.push(val);
@@ -569,8 +569,8 @@ define(function (require) {
         var hourIndex = parseInt(dom.value, 10);
         var hourState = dom.checked;
         var rawValueCopy = rawValueClone(me.rawValue);
-        _.each(rawValueCopy, function (day) {
-            day[hourIndex] = +(!!hourState);
+        _.each(rawValueCopy, function (day, idx) {
+            day[hourIndex] = hourState ? 1 : me.unSelectedValue[idx][hourIndex];
         });
         me.setRawValue(rawValueCopy);
     }
@@ -600,7 +600,7 @@ define(function (require) {
 
         for (var i = 0, len = timeValue.length; i < len; i++) {
 
-            timeValue[i] = dayState ? 1 : 0;
+            timeValue[i] = dayState ? 1 : me.unSelectedValue[dayIndex][i];
 
         }
 
@@ -966,8 +966,8 @@ define(function (require) {
         for (var i = minYCell; i <= maxYCell; i++) {
             for (var j = minXCell; j <= maxXCell; j++) {
 
-                if (rawValueCopy[i][j]) {
-                    rawValueCopy[i][j] = 0;
+                if (rawValueCopy[i][j] === 1) {
+                    rawValueCopy[i][j] = me.unSelectedValue[i][j];
                 }
                 else {
                     rawValueCopy[i][j] = 1;
@@ -1194,7 +1194,9 @@ define(function (require) {
             if (rawValueCopy[item[0]] != null
                 && rawValueCopy[item[0]][item[1]] != null) {
 
-                rawValueCopy[item[0]][item[1]] = isSelect ? 1 : 0;
+                var x = item[0];
+                var y = item[1];
+                rawValueCopy[x][y] = isSelect ? 1 : schedule.unSelectedValue[x][y];
             }
         }
 
@@ -1239,6 +1241,10 @@ define(function (require) {
             if (this.rawValue == null) {
 
                 this.setRawValue(initValue());
+            }
+
+            if (this.unSelectedValue == null) {
+                this.unSelectedValue = initValue();
             }
 
             // 记录当前创建的tip元素
