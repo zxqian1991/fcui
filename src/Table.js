@@ -2023,14 +2023,14 @@ define(function (require) {
             dataItem: data
         });
         if (lib.ie && lib.ie <= 9) {
-            var tbody = wrapTableHtml('tbody', '<tr>' + html + '</tr>');
+            var tbody = wrapTableHtml('tbody', '<tr data-row="' + row + '">' + html + '</tr>');
             var rowNode = tbody.rows[0];
             var inTableRow = this.getRow(row);
             rowNode.className = inTableRow.className;
             this.getBody().removeChild(inTableRow);
-            inTableRow = this.getRow(row);
+            inTableRow = this.getRow(row + 1);
             if (inTableRow) {
-                this.getBody().insertBefore(rowNode, this.getRow(row));
+                this.getBody().insertBefore(rowNode, this.getRow(row + 1));
             }
             else {
                 this.getBody().appendChild(rowNode);
