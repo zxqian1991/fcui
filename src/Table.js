@@ -1400,7 +1400,8 @@ define(function (require) {
                             u.each(selected, function (rowIndex) {
                                 checkboxNodes[rowIndex].checked = false;
                                 lib.removeClasses(trs[
-                                    rowIndex + (this.summaryFields ? 1 : 0)
+                                    // rowIndex + (this.summaryFields ? 1 : 0)
+                                    rowIndex  // 看现在的实现，不再往summaryFields扔checkbox了
                                     ],
                                     this.helper.getPartClasses('row-selected'));
                             }, this);
@@ -1409,7 +1410,8 @@ define(function (require) {
                             u.each(selected, function (rowIndex) {
                                 checkboxNodes[rowIndex].checked = true;
                                 lib.addClasses(trs[
-                                    rowIndex + (this.summaryFields ? 1 : 0)
+                                    // rowIndex + (this.summaryFields ? 1 : 0)
+                                    rowIndex  // 看现在的实现，不再往summaryFields扔checkbox了
                                     ],
                                     this.helper.getPartClasses('row-selected'));
                             }, this);
