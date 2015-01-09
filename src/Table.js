@@ -37,9 +37,7 @@ define(function (require) {
      */
     var proto = {};
 
-    var _engine = new fc.tpl.Engine();
     var tableTemplate = require('./Table.tpl.html');
-    _engine.compile(tableTemplate);
 
     /**
      * FCUI 表格控件构造函数。
@@ -56,7 +54,8 @@ define(function (require) {
             engine = options.templateEngine;
         }
         else {
-            engine = _engine;
+            engine = new fc.tpl.Engine();
+            engine.compile(tableTemplate);
         }
 
         this.helper.setTemplateEngine(engine);
@@ -544,7 +543,7 @@ define(function (require) {
                         });
                     },
                     content: function (item, index) {
-                        var isChecked = u.contains(me.selectedIndex, index);
+                        var isChecked = (+me.selectedIndex === -1) ? true : u.contains(me.selectedIndex, index);
                         return me.helper.renderTemplate('table-select-multi', {
                             index: index,
                             disabled: me.disabled ? 'disabled="disabled"' : '',
@@ -560,7 +559,7 @@ define(function (require) {
                     select: true,
                     maxWidth: 30,
                     content: function (item, index) {
-                        var isChecked = u.contains(me.selectedIndex, index);
+                        var isChecked = (+me.selectedIndex === -1) ? true : u.contains(me.selectedIndex, index);
                         return me.helper.renderTemplate('table-select-single', {
                             index: index,
                             disabled: me.disabled ? 'disabled="disabled"' : '',
@@ -593,10 +592,20 @@ define(function (require) {
      * 同步表格列的宽度到cover table上。
      */
     proto.syncWidth = function () {
-        var tr = lib.getChildren(this.getBody());
         var coverCols = lib.getChildren(this.getCoverColGroup());
-        if (tr.length) {
-            var tds = lib.getChildren(tr[0]);
+        var tr = this.getRow(0);
+        if (tr == null) {
+            // fall back to get thead
+            var thead = this.getHead();
+            if (thead) {
+                var trs = lib.getChildren(thead);
+                if (trs.length) {
+                    tr = trs[0];
+                }
+            }
+        }
+        if (tr) {
+            var tds = lib.getChildren(tr);
             u.each(tds, function (td, index) {
                 coverCols[index].style.width = td.offsetWidth + 'px';
             });
@@ -662,6 +671,9 @@ define(function (require) {
         tableEl.deleteTHead();
         var thead = wrapTableHtml('thead', html);
         this.helper.addPartClasses('thead', thead);
+        if (isCover) {
+            this.helper.addPartClasses('cover-thead', thead);
+        }
         thead.id = this.helper.getId(isCover ? 'cover-thead' : 'thead');
         if (tableEl.tBodies.length) {
             tableEl.insertBefore(thead, tableEl.tBodies[0]);
@@ -1359,10 +1371,12 @@ define(function (require) {
      */
     proto.renderSelectedRows = function (isRevert, selected) {
         var trs = lib.getChildren(this.getBody());
+
         // 仅保留带有data-row属性的trs
         trs = u.filter(trs, function (eachTr) {
             return eachTr.getAttribute('data-row') != null;
         });
+
         if (typeof selected === 'undefined') {
             selected = this.selectedIndex;
         }
@@ -2091,8 +2105,10 @@ define(function (require) {
         }
         else {
             // 在阈值外，直接repaint table
-            this.repaint([{name: 'datasource'}], {
-                datasource: datasource
+            var selectedIndex = this.selectedIndex;
+            this.repaint([{name: 'datasource'}, {name: 'selectedIndex'}], {
+                datasource: datasource,
+                selectedIndex: selectedIndex
             });
         }
     };
