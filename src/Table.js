@@ -37,7 +37,9 @@ define(function (require) {
      */
     var proto = {};
 
+    var _engine = new fc.tpl.Engine();
     var tableTemplate = require('./Table.tpl.html');
+    _engine.compile(tableTemplate);
 
     /**
      * FCUI 表格控件构造函数。
@@ -54,8 +56,7 @@ define(function (require) {
             engine = options.templateEngine;
         }
         else {
-            engine = new fc.tpl.Engine();
-            engine.compile(tableTemplate);
+            engine = _engine;
         }
 
         this.helper.setTemplateEngine(engine);
@@ -592,7 +593,6 @@ define(function (require) {
      * 同步表格列的宽度到cover table上。
      */
     proto.syncWidth = function () {
-        var coverCols = lib.getChildren(this.getCoverColGroup());
         var tr = this.getRow(0);
         if (tr == null) {
             // fall back to get thead
@@ -606,6 +606,7 @@ define(function (require) {
         }
         if (tr) {
             var tds = lib.getChildren(tr);
+            var coverCols = lib.getChildren(this.getCoverColGroup());
             u.each(tds, function (td, index) {
                 coverCols[index].style.width = td.offsetWidth + 'px';
             });
@@ -1371,12 +1372,6 @@ define(function (require) {
      */
     proto.renderSelectedRows = function (isRevert, selected) {
         var trs = lib.getChildren(this.getBody());
-
-        // 仅保留带有data-row属性的trs
-        trs = u.filter(trs, function (eachTr) {
-            return eachTr.getAttribute('data-row') != null;
-        });
-
         if (typeof selected === 'undefined') {
             selected = this.selectedIndex;
         }
@@ -1418,8 +1413,7 @@ define(function (require) {
                             u.each(selected, function (rowIndex) {
                                 checkboxNodes[rowIndex].checked = false;
                                 lib.removeClasses(trs[
-                                    // rowIndex + (this.summaryFields ? 1 : 0)
-                                    rowIndex
+                                    rowIndex + (this.summaryFields ? 1 : 0)
                                     ],
                                     this.helper.getPartClasses('row-selected'));
                             }, this);
@@ -1428,8 +1422,7 @@ define(function (require) {
                             u.each(selected, function (rowIndex) {
                                 checkboxNodes[rowIndex].checked = true;
                                 lib.addClasses(trs[
-                                    // rowIndex + (this.summaryFields ? 1 : 0)
-                                    rowIndex
+                                    rowIndex + (this.summaryFields ? 1 : 0)
                                     ],
                                     this.helper.getPartClasses('row-selected'));
                             }, this);
@@ -1572,7 +1565,6 @@ define(function (require) {
                     this.fixTop = fixTop;
                     this.helper.addStateClasses('head-fixing');
                     if (this.fixAtDom) {
-                        lib.addClasses(this.fixAtDom, this.helper.getPartClasses('head-fixed-item'));
                         this.fixAtDom.style.position = 'fixed';
                         this.fixAtDom.style.top = '0';
                         // 减掉10px padding和2px border
@@ -1597,7 +1589,6 @@ define(function (require) {
                         this.getTable().style.marginTop = '';
                     }
                     if (this.fixAtDom) {
-                        lib.removeClasses(this.fixAtDom, this.helper.getPartClasses('head-fixed-item'));
                         this.fixAtDom.style.position = 'inherit';
                         this.fixAtDom.style.width = 'auto';
                     }
@@ -2043,14 +2034,14 @@ define(function (require) {
             dataItem: data
         });
         if (lib.ie && lib.ie <= 9) {
-            var tbody = wrapTableHtml('tbody', '<tr data-row="' + row + '">' + html + '</tr>');
+            var tbody = wrapTableHtml('tbody', '<tr>' + html + '</tr>');
             var rowNode = tbody.rows[0];
             var inTableRow = this.getRow(row);
             rowNode.className = inTableRow.className;
             this.getBody().removeChild(inTableRow);
-            inTableRow = this.getRow(row + 1);
+            inTableRow = this.getRow(row);
             if (inTableRow) {
-                this.getBody().insertBefore(rowNode, this.getRow(row + 1));
+                this.getBody().insertBefore(rowNode, this.getRow(row));
             }
             else {
                 this.getBody().appendChild(rowNode);

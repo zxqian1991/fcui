@@ -165,6 +165,8 @@
 
 .ui-table {
     overflow-x: auto;
+    overflow-y: visible;
+    height: auto;
     
     &-has-max-height {
         overflow-y: auto;
@@ -196,6 +198,8 @@
             table-layout: auto;
             border-collapse: collapse;
             width: 100%;
+            // IE9 下，table会莫名出现竖滚动条，去掉它
+            margin-bottom: 1px;
         }
 
         .set-table-head();
