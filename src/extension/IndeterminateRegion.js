@@ -38,14 +38,18 @@ define(function (require) {
         var parent = lib.parent(dom, '.ui-region-province-item');
         var input = lib.find(parent, 'input[data-level="3"]');
 
-        if (lib.find(parent, 'input:checked')) {
+        var secondList = lib.find(parent, '.ui-region-locator');
+        if (lib.find(secondList, 'input:checked')) {
             // 有选中的input
-            if (lib.find(parent, 'input:not(:checked)')) {
+            if (lib.find(secondList, 'input:not(:checked)')) {
                 // 也有没选中的input，画半选
                 // 下属有任何input被check，则画上indeterminate
                 input.indeterminate = true;
             }
-            // else, 全选中，没有没选中的input，省上面现在是选定的状态，不要动了。
+            // else, 全选中，没有没选中的input
+            else {
+                input.indeterminate = false;  // 必须得标记状态，因为要操作后即时刷新
+            }
         }
         else {
             input.indeterminate = false;
@@ -122,5 +126,3 @@ define(function (require) {
 
     return IndeterminateRegion;
 });
-
-
