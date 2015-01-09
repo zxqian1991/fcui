@@ -40,9 +40,7 @@ define(function (require) {
     var Control = require('../Control');
     var DropLayer = require('./DropLayer');
 
-    var _engine = new fc.tpl.Engine();
     var _template = require('./template.tpl');
-    _engine.compile(_template);
 
     /**
      * 点击按钮出浮层控件
@@ -61,7 +59,8 @@ define(function (require) {
             engine = options.templateEngine;
         }
         else {
-            engine = _engine;
+            engine = new fc.tpl.Engine();
+            engine.compile(_template);
         }
 
         this.helper.setTemplateEngine(engine);

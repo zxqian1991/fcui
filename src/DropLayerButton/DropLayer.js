@@ -72,8 +72,15 @@ define(function (require) {
         // 如果设置自动关闭为true
         if (control.autoClose) {
             // 点击document关掉layer
-            control.helper.addDOMEvent(
-                document, 'mousedown', underscore.bind(me.hide, this)
+            control.helper.addDOMEvent(document, 'mousedown',
+                /**
+                 * @this control，DropLayer所附着的控件
+                 */
+                function (evt) {
+                    if (this.hasState('active')) {
+                        me.hide();
+                    }
+                }
             );
             // 点击layer自己不关掉，阻止冒泡到`document`
             control.helper.addDOMEvent(

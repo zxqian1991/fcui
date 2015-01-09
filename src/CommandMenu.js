@@ -21,7 +21,7 @@ define(
         /**
          * 选中某一项
          *
-         * @parma {Event} e DOM事件对象
+         * @param {Event} e DOM事件对象
          * @ignore
          */
         function selectItem(e) {
@@ -115,6 +115,12 @@ define(
 
         CommandMenuLayer.prototype.initBehavior = function (element) {
             this.control.helper.addDOMEvent(element, 'click', selectItem);
+            var me = this;
+            this.control.addGlobalScrollHandler(function () {
+                if (me.control.hasState('active')) {
+                    me.toggle();
+                }
+            });
         };
 
         /**
@@ -185,7 +191,8 @@ define(
             }
             if (this.isCommandButton) {
                 this.initCommandButton();
-            } else {
+            }
+            else {
                 switch (this.mode) {
                     case 'click':
                         helper.addDOMEvent(
@@ -392,7 +399,8 @@ define(
                     if (menu.isCommandButton) {
                         lib.find(menu.main, '.ui-commandmenu-mainButton')
                             .innerHTML = menu.displayText;
-                    } else {
+                    }
+                    else {
                         menu.main.innerHTML = menu.displayText;
                     }
                 }
