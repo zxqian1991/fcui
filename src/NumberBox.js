@@ -167,7 +167,7 @@ define(
                 + '<div id="' + helper.getId('wrapper')
                 + '" class="' + this.getPartClasses('wrapper') + '">'
                 +    '<div class="' + this.getPartClasses('main-content') + '">'
-                +       (this.placeholder ? this.getPlaceholderHTML() : '')
+                +       this.getPlaceholderHTML()
                 +       '<input id="' + helper.getId('input') + '" class="'
                 +           this.getPartClasses('input') + '"/>'
                 +       '<div id="' + helper.getId('arrow-wrapper')
