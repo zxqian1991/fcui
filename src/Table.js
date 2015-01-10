@@ -1900,6 +1900,9 @@ define(function (require) {
             inputControl = editor.getChild('inputControl');
             if (inputControl) {
                 inputControl.setValue(value);
+                // 这里fire了input事件是将重置value模拟成用户输入原始值的情况 ，
+                // 会走一遍验证。
+                inputControl.fire('input');
             }
         }
         // 定位editor到TD
