@@ -2063,7 +2063,9 @@ define(function (require) {
             realFields: this.realFields,
             fieldsLength: this.realFields.length,
             rowIndex: row,
-            dataItem: data
+            dataItem: data,
+            order: this.order,
+            orderBy: this.orderBy
         });
         if (lib.ie && lib.ie <= 9) {
             var tbody = wrapTableHtml('tbody', '<tr data-row="' + row + '">' + html + '</tr>');
