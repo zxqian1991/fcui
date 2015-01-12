@@ -470,7 +470,7 @@ define(function (require) {
      * @return {HTMLElement} TR元素
      */
     proto.getRow = function (index) {
-        return lib.find(this.getBody(), '.ui-table-row[data-row="' + index + '"]');
+        return this.getRows()[index];
     };
 
     /**
