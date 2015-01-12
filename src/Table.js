@@ -17,6 +17,8 @@ define(function (require) {
     require('./Button');
     require('./TextBox');
 
+    require('./lib/detect-element-resize');
+
     // 行内编辑验证规则
     require('esui/validator/MaxLengthRule');
     require('esui/validator/MaxRule');
@@ -1583,8 +1585,7 @@ define(function (require) {
                         // 减掉10px padding和2px border
                         this.fixAtDom.style.width = (this.getWidth() - 12) + 'px';
                     }
-                    wrapper.style.left =
-                        lib.getOffset(this.getTable()).left + 'px';
+                    wrapper.style.left = lib.getOffset(this.getTable()).left + 'px';
                     wrapper.style.top = this.fixHeight + 'px';
                     if (this.fixHeight) {
                         // 如果有fixDom，fixDom从flow中拿走会使得table掉上去。
@@ -1609,6 +1610,20 @@ define(function (require) {
                 }
             }
         }, this));
+
+        var resizeHandler = u.throttle(u.bind(function () {
+            this.syncWidth();
+            this.getCoverTableWrapper().style.left = lib.getOffset(this.getTable()).left + 'px';
+            // 减掉10px padding和2px border
+            this.fixAtDom.style.width = (this.getWidth() - 12) + 'px';
+        }, this), 500);
+
+        window.addResizeListener && window.addResizeListener(this.main, resizeHandler);
+
+        var me = this;
+        this.on('afterdispose', function () {
+            window.removeResizeListener && window.removeResizeListener(me.main, resizeHandler);
+        });
     };
 
     /**
