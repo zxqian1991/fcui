@@ -1813,6 +1813,47 @@ define(function (require) {
         return false;
     };
 
+    function getLength(str) {
+        return str.replace(/[\u0080-\ufff0]/g, 'xx').length;
+    }
+
+    function subString(str, len) {
+        while (getLength(str) > len) {
+            str = str.substr(0, str.length - 1);
+        }
+        return str;
+    }
+
+    proto.textEditorInputHandler = function (e) {
+        var inputControl = e.target;
+        var editor = inputControl.parent;
+
+        // 修正可输入长度
+        var val = inputControl.getRawValue();
+        var subVal = subString(val.trim(), editor.textInputMaxLength);
+        var len = getLength(val.trim());
+        if (len > editor.textInputMaxLength) {
+            inputControl.setProperties({
+                maxLength: val.length,
+                rawValue: subVal
+            });
+        }
+        else {
+            inputControl.setProperties({
+                maxLength: val.length + (editor.textInputMaxLength - len)
+            });
+        }
+
+        // 根据验证规则启用信用确定按钮
+        var okButton = editor.getChild('okButton');
+        if (inputControl.validate()) {
+            okButton.enable();
+        }
+        else {
+            okButton.disable();
+        }
+    };
+
     /**
      * 创建一个表格的行内编辑器。
      * 这个方法创建的行内编辑器会覆盖在发生了编辑的TD之上。编辑器的内容
@@ -1852,7 +1893,7 @@ define(function (require) {
         // 先将其它编辑器隐藏掉
         var groupName = this.getGroupName('body.texteditor');
         if (!editor) {
-            editor = ui.create('Panel', {
+            editor = ui.create('Panel', u.extend({
                 parent: this,
                 group: groupName,
                 show: function () {
@@ -1862,7 +1903,7 @@ define(function (require) {
                     this.setStyle('display', 'none');
                 },
                 content: this.helper.renderTemplate('table-edit-' + type)
-            });
+            }, field.textEditorOptions));
             editor.on('afterdispose', u.bind(editor.destroy, editor));
             this.addChild(editor, childName);
             this.helper.addPartClasses('inline-editor', editor.main);
@@ -1873,16 +1914,6 @@ define(function (require) {
             document.body.appendChild(editor.main);
             editor.render();
             var me = this;
-            inputControl = editor.getChild('inputControl');
-            inputControl.on('input', function (e) {
-                var okButton = editor.getChild('okButton');
-                if (this.validate()) {
-                    okButton.enable();
-                }
-                else {
-                    okButton.disable();
-                }
-            });
             editor.getChild('okButton').on('click', function () {
                 var inputControl = editor.getChild('inputControl');
                 if (inputControl.validate()) {
@@ -1900,7 +1931,9 @@ define(function (require) {
                     editor.hide();
                 }
             });
+            inputControl = editor.getChild('inputControl');
             if (inputControl) {
+                inputControl.on('input', this.textEditorInputHandler, this);
                 inputControl.setValue(value);
                 // 关联验证器
                 var valid = editor.getChild('inputControlValid');
