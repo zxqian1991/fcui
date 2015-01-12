@@ -859,12 +859,13 @@ define(function (require) {
         var me = this;
         var doc = document;
 
+        if (this.selectMode === 'block') {
+            getTimeBodyMoveHandler = lib.bind(timeBodyMoveHandler, me);
+            getTimeBodyUpHandler = lib.bind(timeBodyUpHandler, me);
 
-        getTimeBodyMoveHandler = lib.bind(timeBodyMoveHandler, me);
-        getTimeBodyUpHandler = lib.bind(timeBodyUpHandler, me);
-
-        lib.on(doc, 'mousemove', getTimeBodyMoveHandler);
-        lib.on(doc, 'mouseup', getTimeBodyUpHandler);
+            lib.on(doc, 'mousemove', getTimeBodyMoveHandler);
+            lib.on(doc, 'mouseup', getTimeBodyUpHandler);
+        }
 
 
         // 记录鼠标位置
@@ -898,8 +899,15 @@ define(function (require) {
         var tipId = getId(me, 'timeitem-tip');
         lib.g(tipId) && (lib.g(tipId).style.display = 'none');
 
-        // 渲染鼠标跟随div
-        repaintFollowEle(this, cellPos);
+        if (this.selectMode === 'block') {
+            // 渲染鼠标跟随div
+            repaintFollowEle(this, cellPos);
+        }
+        else if (this.selectMode === 'single') {
+            setTimeout(function () {
+                setSelectedAreaValue(me, cellPos);
+            }, 10);
+        }
     }
 
     /**
@@ -1234,6 +1242,15 @@ define(function (require) {
          * @type {string}
          */
         type: 'Schedule',
+
+        /**
+         * 选择模式，分为'single'和'block'
+         * 'single'为只能选择一块区域
+         * 'block'为块选，可一次性拖拽选择一块区域。
+         *
+         * @tyoe {string}
+         */
+        selectMode: 'single',
 
         /**
          * 创建控件主元素
