@@ -37,9 +37,7 @@ define(function (require) {
      */
     var proto = {};
 
-    var _engine = new fc.tpl.Engine();
     var tableTemplate = require('./Table.tpl.html');
-    _engine.compile(tableTemplate);
 
     /**
      * FCUI 表格控件构造函数。
@@ -56,7 +54,8 @@ define(function (require) {
             engine = options.templateEngine;
         }
         else {
-            engine = _engine;
+            engine = new fc.tpl.Engine();
+            engine.compile(tableTemplate);
         }
 
         this.helper.setTemplateEngine(engine);
@@ -458,6 +457,14 @@ define(function (require) {
     };
 
     /**
+     * 取得当前页table所有的TR元素
+     * @return {Array.<HTMLElement>} TR元素集合
+     */
+    proto.getRows = function () {
+        return lib.findAll(this.getBody(), '.ui-table-row[data-row]');
+    };
+
+    /**
      * 取得某一行的TR元素
      * @param {number} index 行号
      * @return {HTMLElement} TR元素
@@ -535,8 +542,11 @@ define(function (require) {
                     select: true,
                     maxWidth: 30,
                     title: function (item, index) {
-                        var isChecked =
-                            (me.selectedIndex.length === me.datasource.length);
+                        var isChecked = false;
+                        if (+me.selectedIndex === -1
+                            || (me.datasource.length > 0 && me.selectedIndex.length === me.datasource.length)) { // 全选
+                            isChecked = true;
+                        }
                         return me.helper.renderTemplate('table-select-all', {
                             index: index,
                             disabled: me.disabled ? 'disabled="disabled"' : '',
@@ -544,7 +554,7 @@ define(function (require) {
                         });
                     },
                     content: function (item, index) {
-                        var isChecked = u.contains(me.selectedIndex, index);
+                        var isChecked = (+me.selectedIndex === -1) ? true : u.contains(me.selectedIndex, index);
                         return me.helper.renderTemplate('table-select-multi', {
                             index: index,
                             disabled: me.disabled ? 'disabled="disabled"' : '',
@@ -560,7 +570,7 @@ define(function (require) {
                     select: true,
                     maxWidth: 30,
                     content: function (item, index) {
-                        var isChecked = u.contains(me.selectedIndex, index);
+                        var isChecked = (+me.selectedIndex === -1) ? true : u.contains(me.selectedIndex, index);
                         return me.helper.renderTemplate('table-select-single', {
                             index: index,
                             disabled: me.disabled ? 'disabled="disabled"' : '',
@@ -593,6 +603,7 @@ define(function (require) {
      * 同步表格列的宽度到cover table上。
      */
     proto.syncWidth = function () {
+        var coverCols = lib.getChildren(this.getCoverColGroup());
         var tr = this.getRow(0);
         if (tr == null) {
             // fall back to get thead
@@ -606,7 +617,6 @@ define(function (require) {
         }
         if (tr) {
             var tds = lib.getChildren(tr);
-            var coverCols = lib.getChildren(this.getCoverColGroup());
             u.each(tds, function (td, index) {
                 coverCols[index].style.width = td.offsetWidth + 'px';
             });
@@ -819,10 +829,10 @@ define(function (require) {
                                 this.hide();
 
                                 var order = lib.getAttribute(el, 'data-order');
-                                var field = lib.getAttribute(el, 'data-order-by');
-                                var realField = lib.getAttribute(el,
+                                var orderBy = lib.getAttribute(el, 'data-order-by');
+                                var realOrderBy = lib.getAttribute(el,
                                     'data-real-order-by');
-                                me.doSort(order, field, realField);
+                                me.doSort(order, orderBy, realOrderBy, field);
                             }
                         }
                     }
@@ -842,7 +852,7 @@ define(function (require) {
                     var order = this.orderBy === field.field
                         ? (this.order === 'asc' ? 'desc' : 'asc')
                         : 'desc';
-                    this.doSort(order, field.field, field.field);
+                    this.doSort(order, field.field, field.field, field);
                 });
             }
         }, this);
@@ -939,12 +949,14 @@ define(function (require) {
      * @param {string} order 排序方向
      * @param {string} orderBy 排序的字段名称
      * @param {string} realOrderBy 当配置了多字段排序时，真正的排序字段
+     * @param {Object} field 发生sort的field对象
      * @fires {Event} sort
      * @property {string} sort.order 排序方向
      * @property {string} sort.orderBy 发生排序的字段名称
      * @proeprty {string} sort.realOrderBy 当配置了多字段排序时，真正的排序字段
+     * @proeprty {string} sort.field 发生sort的field对象
      */
-    proto.doSort = function (order, orderBy, realOrderBy) {
+    proto.doSort = function (order, orderBy, realOrderBy, field) {
         var props = {
             order: order,
             orderBy: orderBy,
@@ -954,6 +966,7 @@ define(function (require) {
         if (isNullOrEmpty(props.realOrderBy)) {
             delete props.realOrderBy;
         }
+        props.field = field;
         this.fire('sort', props);
     };
 
@@ -1371,7 +1384,8 @@ define(function (require) {
      * @param {Array|number} selected 已选行。isRevert == true时候需要
      */
     proto.renderSelectedRows = function (isRevert, selected) {
-        var trs = lib.getChildren(this.getBody());
+        var trs = this.getRows();
+
         if (typeof selected === 'undefined') {
             selected = this.selectedIndex;
         }
@@ -1402,7 +1416,7 @@ define(function (require) {
                     );
                 }
                 else {
-                    if (selected.length === this.datasource.length) {
+                    if (!isRevert && selected.length === this.datasource.length) {
                         // 当所选的行数为当前页上所有的行数时，则转为全选状态。
                         this.set('selectedIndex', -1);
                         break;
@@ -1412,17 +1426,15 @@ define(function (require) {
                         if (isRevert) {
                             u.each(selected, function (rowIndex) {
                                 checkboxNodes[rowIndex].checked = false;
-                                lib.removeClasses(trs[
-                                    rowIndex + (this.summaryFields ? 1 : 0)
-                                    ],
-                                    this.helper.getPartClasses('row-selected'));
+                                lib.removeClasses(trs[rowIndex], this.helper.getPartClasses('row-selected'));
                             }, this);
                         }
                         else {
                             u.each(selected, function (rowIndex) {
                                 checkboxNodes[rowIndex].checked = true;
                                 lib.addClasses(trs[
-                                    rowIndex + (this.summaryFields ? 1 : 0)
+                                    // rowIndex + (this.summaryFields ? 1 : 0)
+                                    rowIndex
                                     ],
                                     this.helper.getPartClasses('row-selected'));
                             }, this);
@@ -1565,6 +1577,7 @@ define(function (require) {
                     this.fixTop = fixTop;
                     this.helper.addStateClasses('head-fixing');
                     if (this.fixAtDom) {
+                        lib.addClasses(this.fixAtDom, this.helper.getPartClasses('head-fixed-item'));
                         this.fixAtDom.style.position = 'fixed';
                         this.fixAtDom.style.top = '0';
                         // 减掉10px padding和2px border
@@ -1589,6 +1602,7 @@ define(function (require) {
                         this.getTable().style.marginTop = '';
                     }
                     if (this.fixAtDom) {
+                        lib.removeClasses(this.fixAtDom, this.helper.getPartClasses('head-fixed-item'));
                         this.fixAtDom.style.position = 'inherit';
                         this.fixAtDom.style.width = 'auto';
                     }
@@ -1891,6 +1905,9 @@ define(function (require) {
             inputControl = editor.getChild('inputControl');
             if (inputControl) {
                 inputControl.setValue(value);
+                // 这里fire了input事件是将重置value模拟成用户输入原始值的情况 ，
+                // 会走一遍验证。
+                inputControl.fire('input');
             }
         }
         // 定位editor到TD
@@ -2034,14 +2051,14 @@ define(function (require) {
             dataItem: data
         });
         if (lib.ie && lib.ie <= 9) {
-            var tbody = wrapTableHtml('tbody', '<tr>' + html + '</tr>');
+            var tbody = wrapTableHtml('tbody', '<tr data-row="' + row + '">' + html + '</tr>');
             var rowNode = tbody.rows[0];
             var inTableRow = this.getRow(row);
             rowNode.className = inTableRow.className;
             this.getBody().removeChild(inTableRow);
-            inTableRow = this.getRow(row);
+            inTableRow = this.getRow(row + 1);
             if (inTableRow) {
-                this.getBody().insertBefore(rowNode, this.getRow(row));
+                this.getBody().insertBefore(rowNode, inTableRow);
             }
             else {
                 this.getBody().appendChild(rowNode);
@@ -2096,8 +2113,10 @@ define(function (require) {
         }
         else {
             // 在阈值外，直接repaint table
-            this.repaint([{name: 'datasource'}], {
-                datasource: datasource
+            var selectedIndex = this.selectedIndex;
+            this.repaint([{name: 'datasource'}, {name: 'selectedIndex'}], {
+                datasource: datasource,
+                selectedIndex: selectedIndex
             });
         }
     };
