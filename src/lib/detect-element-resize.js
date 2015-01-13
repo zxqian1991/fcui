@@ -57,7 +57,6 @@ define(function() {
                     element.__resizeLast__.height = element.offsetHeight;
                     element.__resizeListeners__.forEach(function(fn){
                         e.currentTarget = currentTarget;
-                        console.log(e);
                         fn.call(element, e);
                     });
                 }
