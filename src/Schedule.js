@@ -454,7 +454,7 @@ define(function (require) {
                     start: start,
                     end: end,
                     text: length === 24
-                        ? '全天投放' : start + '.00-' + end + '.00',
+                        ? '全天投放' : start + ':00-' + end + ':00',
                     coverClass: getClass(me, 'covertimes-tip')
                 }
             );
@@ -785,7 +785,7 @@ define(function (require) {
                 time: '<strong>' + time
                     + ':00</strong>&nbsp;—&nbsp;<strong>'
                     + (time + 1) + ':00</strong>',
-                text: '点击/拖动鼠标选择',
+                text: me.selectMode === 'block' ? '点击/拖动鼠标选择' : '',
                 timeId: getId(me, 'timeitem-tip-head'),
                 textId: getId(me, 'timeitem-tip-body'),
                 timeClass: getClass(me, 'timeitem-tip-head'),
