@@ -142,7 +142,7 @@ define(function (require) {
      * @param {Event} e
      */
     Select.prototype.layerSubmit = function (e) {
-        rawValue = {a: 1};
+        rawValue = e.data;
         this.set('rawValue', rawValue);
         this.fire('change');
     };
