@@ -10,6 +10,7 @@ define(function (require) {
     var fc = require('fc-core');
     var fcui = require('./main');
     var helper = require('./controlHelper');
+    var InputControl = require('./InputControl');
     var lib = require('./lib');
     var Select = require('esui/Select');
     var Layer = require('./Layer');
@@ -37,19 +38,14 @@ define(function (require) {
     lib.inherits(CustomLayer, Layer);
 
     /**
-     * 自定义浮层原始html片段。
-     * @type {string}
-     */
-    var customLayerHTML = '';
-
-    /**
      * 自定义的layer渲染方法。
      * @override
      */
     CustomLayer.prototype.render = function (element) {
+        var customLayerHTML = this.control.customLayerHTML;
         if (customLayerHTML) {
             element.innerHTML = customLayerHTML;
-            var controls = fcui.init(element, {
+            var controls = this.layerControls = fcui.init(element, {
                 viewContext: this.control.viewContext
             });
             if (controls && controls.length > 0) {
@@ -65,7 +61,14 @@ define(function (require) {
      * @override
      */
     CustomLayer.prototype.syncState = function (element) {
-        
+        var layerControls = this.layerControls;
+        if (layerControls && layerControls.length > 0) {
+            _.each(layerControls, function (control) {
+                if (control.setValue) {
+                    control.setValue(this.control.get('rawValue'));
+                }
+            }, this);
+        }
     };
 
     CustomLayer.prototype.dock = {
@@ -101,10 +104,13 @@ define(function (require) {
      */
     Select.prototype.initStructure = function () {
         if (this.layerType === LAYER_TYPE.CUSTOM) {
+            if (this.layer) {
+                this.layer.dispose();
+            }
             this.layer = new CustomLayer(this);
             var layerContent = this.main.querySelector('.custom-layer-content').innerHTML.replace(/(^\s+)|(\s+$)/g, '');
             if (layerContent) {
-                customLayerHTML = '<div data-ui-type="' + layerContent + '"></div>';
+                this.customLayerHTML = layerContent;
             }
         }
         initStructure.apply(this, arguments);
@@ -131,20 +137,12 @@ define(function (require) {
     };
 
     /**
-     * Select的原始值。
-     * @type {Object}
-     */
-    var rawValue;
-
-    /**
      * 弹出层提交。
      *
      * @param {Event} e
      */
     Select.prototype.layerSubmit = function (e) {
-        rawValue = e.data;
-        this.set('rawValue', rawValue);
-        this.fire('change');
+        this.set('value', e.data);
     };
 
     /**
@@ -163,30 +161,82 @@ define(function (require) {
         if (this.layerType === LAYER_TYPE.DEFAULT) {
             return getRawValue.apply(this, arguments);
         }
-        return rawValue;
+        return this.rawValue;
+    };
+
+    /**
+     * 设置显示文字。
+     * @param {string} displayText 所要设置的显示文字，若该文字为null或空字符串，则将由getDisplayHTML来生成相应的显示文字，
+     */
+    Select.prototype.setDisplayText = function (displayText) {
+        var textHolder = this.helper.getPart('text');
+        var displayHTML = null;
+        if (displayText) {
+            displayHTML = this._getDisplayHTML({
+                text: displayText
+            });
+        }
+        else {
+            var selectedItem = this.selectedIndex === -1
+                ? null
+                : this.datasource[this.selectedIndex];
+            displayHTML = this.getDisplayHTML(selectedItem);
+        }
+        textHolder.innerHTML = displayHTML;
     };
 
     /**
      * 获取显示的label+option名字的html字符串。
-     * @override
-     * @return {string}
+     * @param {Object} data displayTemplate中的数据。
+     * @protected
      */
-    Select.prototype.getDisplayHTML = function (item) {
+    Select.prototype._getDisplayHTML = function (data) {
         var label = _.escape(this.label);
         var labelWrapData = {
             label: label,
             labelClass: helper.getPartClasses(this, 'label').join(' ')
         };
         var labelHtml = label ? lib.format(this.labelTemplate, labelWrapData) : '';
-        if (!item) {
+        if (!data) {
             return labelHtml + _.escape(this.emptyText || '');
         }
-
-        var data = {
-            text: _.escape(item.name || item.text),
-            value: _.escape(item.value)
-        };
         return labelHtml + lib.format(this.displayTemplate, data);
+    },
+
+    /**
+     * 根据所选择的选项，获取其显示的label+option名字的html字符串。
+     * @override
+     * @return {string}
+     */
+    Select.prototype.getDisplayHTML = function (item) {
+        var data = null;
+        if (item) {
+            data = {
+                text: _.escape(item.name || item.text),
+                value: _.escape(item.value)
+            };
+        }
+        return this._getDisplayHTML(data);
+    };
+
+    var setProperties = Select.prototype.setProperties;
+
+    /**
+     * 批量更新属性并重绘
+     *
+     * @param {Object} properties 需更新的属性
+     * @override
+     * @fires change
+     */
+    Select.prototype.setProperties = function (properties) {
+        if (this.layerType === LAYER_TYPE.CUSTOM) {
+            var changes = InputControl.prototype.setProperties.apply(this, arguments);
+            if (changes.hasOwnProperty('value') || changes.hasOwnProperty('rawValue')) {
+                this.fire('change');
+            }
+            return changes;
+        }
+        return setProperties.apply(this, arguments);
     };
 
     return Select;
