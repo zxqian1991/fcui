@@ -109,6 +109,7 @@ define(function (require) {
                 this.layer.dispose();
             }
             this.layer = new CustomLayer(this);
+            this.layer.getElement(true);
             var layerContent = this.main.querySelector('.custom-layer-content').innerHTML.replace(/(^\s+)|(\s+$)/g, '');
             if (layerContent) {
                 this.customLayerHTML = layerContent;
