@@ -51,6 +51,7 @@ define(function (require) {
             if (controls && controls.length > 0) {
                 controls[0].on('submit', _.bind(function (e) {
                     this.control.fire('layersubmit', fc.util.customData(e.data));
+                    this.hide();
                 }, this));
             }
         }
