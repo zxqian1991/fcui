@@ -45,14 +45,17 @@ define(function (require) {
         var customLayerHTML = this.control.customLayerHTML;
         if (customLayerHTML) {
             element.innerHTML = customLayerHTML;
-            var controls = this.layerControls = fcui.init(element, {
+            var layerControls = this.layerControls = fcui.init(element, {
                 viewContext: this.control.viewContext
             });
-            if (controls && controls.length > 0) {
-                controls[0].on('submit', _.bind(function (e) {
-                    this.control.fire('layersubmit', fc.util.customData(e.data));
-                    this.hide();
-                }, this));
+            if (layerControls && layerControls.length > 0) {
+                _.each(layerControls, function (layerControl) {
+                    layerControl.parentLayer = this;
+                    layerControl.on('submit', _.bind(function (e) {
+                        this.control.fire('layersubmit', fc.util.customData(e.data));
+                        this.hide();
+                    }, this));
+                }, this);
             }
         }
     };
@@ -70,6 +73,18 @@ define(function (require) {
                 }
             }, this);
         }
+    };
+
+    /**
+     * 销毁
+     * @override
+     */
+    CustomLayer.prototype.dispose = function () {
+        _.each(this.layerControls, function (layerControl) {
+            delete layerControl.parentLayer;
+        }, this);
+        delete this.layerControls;
+        Layer.prototype.dispose.apply(this, arguments);
     };
 
     CustomLayer.prototype.dock = {
@@ -112,7 +127,7 @@ define(function (require) {
             this.layer.getElement(true);
             var layerContent = this.main.querySelector('.custom-layer-content').innerHTML.replace(/(^\s+)|(\s+$)/g, '');
             if (layerContent) {
-                this.customLayerHTML = layerContent;
+                this.customLayerHTML = '<div data-ui-type="' + layerContent + '"></div>';
             }
         }
         initStructure.apply(this, arguments);
@@ -139,12 +154,37 @@ define(function (require) {
     };
 
     /**
+     * 原始设置值方法。
+     * @inner
+     * @type {function}
+     */
+    var setValue = Select.prototype.setValue;
+
+    /**
+     * 设置值方法。
+     *
+     * @protected
+     * @override
+     * @param {Object} value 设置的值。
+     */
+    Select.prototype.setValue = function (value) {
+        setValue.apply(this, arguments);
+        if (this.layerType === LAYER_TYPE.CUSTOM) {
+            this.layer.syncState(this.layer.getElement(true));
+        }
+    };
+
+    /**
      * 弹出层提交。
      *
      * @param {Event} e
      */
     Select.prototype.layerSubmit = function (e) {
         this.set('value', e.data);
+        var displayText = '';
+        if (displayText) {
+            this.setDisplayText(displayText);
+        }
     };
 
     /**
