@@ -45,9 +45,8 @@ define(function (require) {
         var customLayerHTML = this.control.customLayerHTML;
         if (customLayerHTML) {
             element.innerHTML = customLayerHTML;
-            var layerControls = this.layerControls = fcui.init(element, {
-                viewContext: this.control.viewContext
-            });
+            this.control.helper.initChildren(element);
+            var layerControls = this.layerControls = this.control.children;
             if (layerControls && layerControls.length > 0) {
                 _.each(layerControls, function (layerControl) {
                     layerControl.parentLayer = this;
@@ -127,7 +126,7 @@ define(function (require) {
             this.layer.getElement(true);
             var layerContent = this.main.querySelector('.custom-layer-content').innerHTML.replace(/(^\s+)|(\s+$)/g, '');
             if (layerContent) {
-                this.customLayerHTML = '<div data-ui-type="' + layerContent + '"></div>';
+                this.customLayerHTML = layerContent;
             }
         }
         initStructure.apply(this, arguments);
