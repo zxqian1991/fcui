@@ -424,8 +424,12 @@ define(function (require) {
         warningMsg.id = helper.getId(calendar, 'warning-message');
         warningMsg.innerHTML = WARNING_MSG.EXCEED_TIME_SPAN;
         warningMsg.className = 'skin-ui-fc-rangecalendar-warning-message';
-        var footClass = helper.getPartClasses(calendar, 'foot').join(' ');
-        var foot = document.getElementsByClassName(footClass)[0];
+        var layer = lib.g(helper.getId(calendar, 'layer'));
+        var layerChildren = lib.getChildren(layer);
+        var footClasses = helper.getPartClasses(calendar, 'foot');
+        var foot = u.find(layerChildren, function (child) {
+            return lib.hasClass(child, footClasses[0]);
+        });
         foot.appendChild(warningMsg);
     }
 
