@@ -203,10 +203,8 @@ define(
          * 放置层
          */
         Layer.prototype.position = function () {
-            if (this.dock) {
-                var element = this.getElement();
-                Layer.attachTo(element, this.control.main, this.dock);
-            }
+            var element = this.getElement();
+            Layer.attachTo(element, this.control.main, this.dock);
         };
 
         /**
